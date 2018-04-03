@@ -26,7 +26,7 @@ QNRTC-Android/QNRTC-iOS 是七牛推出的一款适用于 Android/iOS 平台的�
 # 3 DEMO 体验
 
 七牛云为了方便用户体验 QNRTC-Android/QNRTC-iOS SDK 的效果开发了『牛会议』APP，可以扫码下载体验。
-![qnrt](media/15222083601797/qnrtc.png)
+![qnrt](https://ohuuyffq2.qnssl.com/qnrtc.png)
 
 # 4 应用场景
 
@@ -78,7 +78,7 @@ QNRTC-Android/QNRTC-iOS 是七牛推出的一款适用于 Android/iOS 平台的�
 
 ## 5.1 七牛云实时音视频云提供哪些服务
 
-![rt](media/15222083601797/rtc.png)
+![rt](https://ohuuyffq2.qnssl.com/rtc.png)
 
 - 客户端 SDK：方便客户调用终端的音视频接口，快速的让自己的应用具备音视频互动的能力。
 - 服务端链路：保证音视频互动延时低，可用性高。
