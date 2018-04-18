@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/log_shown_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/log_btn"
+        android:layout_margin="16dp"
+        android:background="#0000"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
+
+    <LinearLayout
+        android:id="@+id/log_text"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:alpha="0.5"
+        android:layout_alignStart="@id/log_shown_button"
+        android:layout_below="@id/log_shown_button"
+        android:background="@color/editTextBackground"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/local_log_text"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:padding="8dp"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false"
+            android:textColor="@color/white" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@color/red" />
+        <TextView
+            android:id="@+id/remote_log_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/white"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false"
+            android:maxHeight="200dp"/>
+    </LinearLayout>
+
+    <TableLayout
+        android:id="@+id/bottom_button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:stretchColumns="0,2,4,6"
+        android:gravity="bottom">
+        <TableRow
+            android:layout_marginBottom="24dp">
+            <ImageView />
+            <ImageButton
+                android:id="@+id/microphone_button"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/microphone"
+                android:background="#0000" />
+            <ImageView />
+            <ImageButton
+                android:id="@+id/speaker_button"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/loudspeaker"
+                android:background="#0000" />
+            <ImageView />
+            <ImageButton
+                android:id="@+id/camera_button"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/video_open"
+                android:background="#0000" />
+            <ImageView />
+        </TableRow>
+        <TableRow>
+            <ImageView />
+            <ImageButton
+                android:id="@+id/beauty_button"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/face_beauty_close"
+                android:background="#0000" />
+            <ImageView />
+            <ImageButton
+                android:id="@+id/disconnect_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@mipmap/close_phone"
+                android:background="#0000" />
+            <ImageView />
+            <ImageButton
+                android:id="@+id/camera_switch_button"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/camera_switch_end"
+                android:background="#0000" />
+            <ImageView />
+        </TableRow>
+    </TableLayout>
+
+    <Chronometer
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:format="%s"
+        android:textColor="@color/white"
+        android:layout_marginBottom="24dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/bottom_button_layout" />
+
+</RelativeLayout>

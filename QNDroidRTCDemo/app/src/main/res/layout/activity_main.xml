@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/backgroundColor">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="100dp"
+        android:background="@drawable/background_niu" />
+
+    <ImageButton
+        android:id="@+id/setting_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/setting"
+        android:background="@color/backgroundColor"
+        android:onClick="onClickToSetting"
+        android:layout_margin="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:id="@+id/room_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/oval_edit_text_background"
+        android:layout_below="@id/setting_btn"
+        android:hint="@string/room_text_hint"
+        android:textColorHint="@color/textColor"
+        android:textColor="@color/textColor"
+        android:textSize="15sp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp" />
+
+    <TextView
+        android:id="@+id/tips_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/room_edit_text"
+        android:layout_alignStart="@id/room_edit_text"
+        android:layout_alignEnd="@id/room_edit_text"
+        android:text="@string/room_tips"
+        android:textColor="@color/textColor"
+        android:layout_marginTop="15dp"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp" />
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tips_text_view"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="15dp"
+        android:onClick="onClickConference"
+        android:background="@drawable/oval_btn_background"
+        android:gravity="center"
+        android:text="@string/join_room"
+        android:textColor="@color/textColor"
+        android:textSize="15sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="30dp"
+        android:gravity="center_vertical"
+        android:layout_centerHorizontal="true">
+        <View
+            android:id="@+id/dividing_line"
+            android:layout_width="1dp"
+            android:layout_height="28dp"
+            android:layout_centerInParent="true"
+            android:background="@color/white"
+            android:layout_margin="8dp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/dividing_line"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/ic_niu_logo"
+            android:layout_margin="8dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/dividing_line"
+            android:layout_centerVertical="true"
+            android:text="@string/niu_conference"
+            android:textColor="@color/white"
+            android:layout_margin="8dp" />
+    </RelativeLayout>
+
+</RelativeLayout>
