@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="conference_configuration">
+        <item>352 X 288、20 fps、600 kbps</item>
+        <item>640 X 480、20 fps、800 kbps</item>
+        <item>960 X 540、20 fps、1000 kbps</item>
+        <item>1280 X 720、20 fps、1200 kbps</item>
+    </string-array>
+    <string-array name="hw_black_list">
+        <item>SM-G9209</item>
+    </string-array>
+</resources>

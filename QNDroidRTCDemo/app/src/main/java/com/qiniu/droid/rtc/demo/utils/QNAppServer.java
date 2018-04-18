@@ -1,0 +1,112 @@
+package com.qiniu.droid.rtc.demo.utils;
+
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+
+import com.qiniu.droid.rtc.demo.model.UpdateInfo;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.security.KeyStore;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class QNAppServer {
+    private static final String TAG = "QNAppServer";
+    private static final String APP_SERVER_ADDR = "https://api-demo.qnsdk.com";
+    private static final String APP_ID = "d8lk7l4ed";
+
+    private static class QNAppServerHolder {
+        private static final QNAppServer instance = new QNAppServer();
+    }
+
+    private QNAppServer(){}
+
+    public static QNAppServer getInstance() {
+        return QNAppServerHolder.instance;
+    }
+
+    public String requestRoomToken(Context context, String userId, String roomName) {
+        /**
+         * 此处服务器 URL 仅用于 Demo 测试，随时可能修改/失效，请勿用于 App 线上环境！！
+         * 此处服务器 URL 仅用于 Demo 测试，随时可能修改/失效，请勿用于 App 线上环境！！
+         * 此处服务器 URL 仅用于 Demo 测试，随时可能修改/失效，请勿用于 App 线上环境！！
+         */
+        String url = APP_SERVER_ADDR + "/v1/rtc/token/admin/app/" + APP_ID + "/room/" + roomName + "/user/" + userId + "?bundleId=" + packageName(context);
+        try {
+            OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(new SSLSocketFactoryCompat(), getTrustManager()).build();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+            Response response = okHttpClient.newCall(request).execute();
+            return response.body().string();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public UpdateInfo getUpdateInfo() {
+        String url = APP_SERVER_ADDR + "/v1/upgrade/app?appId=com.qiniu.droid.rtc.demo";
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(new SSLSocketFactoryCompat(), getTrustManager()).build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            if (response.isSuccessful()) {
+                JSONObject jsonObject = new JSONObject(response.body().string());
+                UpdateInfo updateInfo = new UpdateInfo();
+                updateInfo.setAppID(jsonObject.getString(Config.APP_ID));
+                updateInfo.setVersion(jsonObject.getInt(Config.VERSION));
+                updateInfo.setDescription(jsonObject.getString(Config.DESCRIPTION));
+                updateInfo.setDownloadURL(jsonObject.getString(Config.DOWNLOAD_URL));
+                updateInfo.setCreateTime(jsonObject.getString(Config.CREATE_TIME));
+                return updateInfo;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static X509TrustManager getTrustManager() {
+        try {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init((KeyStore)null);
+            for (TrustManager tm : tmf.getTrustManagers()) {
+                if (tm instanceof X509TrustManager) {
+                    return (X509TrustManager) tm;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // This shall not happen
+        return null;
+    }
+
+    public static String packageName(Context context) {
+        PackageInfo info;
+        try {
+            info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return info.packageName;
+        } catch (PackageManager.NameNotFoundException e) {
+            // e.printStackTrace();
+        }
+        return "";
+    }
+}
