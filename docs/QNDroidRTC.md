@@ -1034,4 +1034,4 @@ public int audioPacketLostRate;
 
 ## 8.1 我可以体验下 demo 吗 ？
 
-[demo 体验](https://fir.im/b5ce?release_id=5ac3319c959d694f649cf0a2)
+[demo 体验](https://fir.im/b5ce)
