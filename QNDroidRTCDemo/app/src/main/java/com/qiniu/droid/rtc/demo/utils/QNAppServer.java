@@ -21,6 +21,28 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class QNAppServer {
+    /**
+     * 设置推流画面尺寸，仅用于 Demo 测试，用户可以在创建七牛 APP 时设置该参数
+     */
+    public static final int STREAMING_WIDTH = 480;
+    public static final int STREAMING_HEIGHT = 848;
+    public static final int MERGE_STREAM_WIDTH = 160;
+    public static final int MERGE_STREAM_HEIGHT = 240;
+    public static final String ADMIN_USER = "admin";
+
+    public static final int[][] MERGE_STREAM_POS = new int[][] {
+            // X     Y
+            {320,   608 },
+            {320,   304 },
+            {320,   0   },
+            {160,   608 },
+            {160,   304 },
+            {160,   0   },
+            {0,     608 },
+            {0,     304 },
+            {0,     0   },
+    };
+
     private static final String TAG = "QNAppServer";
     private static final String APP_SERVER_ADDR = "https://api-demo.qnsdk.com";
     private static final String APP_ID = "d8lk7l4ed";

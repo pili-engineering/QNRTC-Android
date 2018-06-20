@@ -1,8 +1,6 @@
 package com.qiniu.droid.rtc.demo.utils;
 
 public class Config {
-    public static final int CURRENT_VERSION_CODE = 2;
-
     public static final String ROOM_NAME_RULE = "^[a-zA-Z0-9_-]{3,64}$";
     public static final String USER_NAME_RULE = "^[a-zA-Z0-9_-]{3,50}$";
     public static final String DOWNLOAD_URL = "DownloadURL";

@@ -24,6 +24,7 @@ import com.qiniu.droid.rtc.demo.service.DownloadService;
 import com.qiniu.droid.rtc.demo.utils.Config;
 import com.qiniu.droid.rtc.demo.utils.QNAppServer;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
+import com.qiniu.droid.rtc.demo.utils.Utils;
 
 import java.util.regex.Pattern;
 
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 final UpdateInfo updateInfo = QNAppServer.getInstance().getUpdateInfo();
-                if (updateInfo != null && updateInfo.getVersion() > Config.CURRENT_VERSION_CODE) {
+                if (updateInfo != null && updateInfo.getVersion() > Utils.appVersion(getApplicationContext())) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

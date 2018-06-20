@@ -109,7 +109,7 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 - 提供云端存储空间及海量数据的处理能力，提供的高可用的技术和高稳定的平台
 
 # 6 开发文档
-请参考开发文档：[QNDroidRTC 开发文档](docs/QNDroidRTC.md)
+请参考开发文档：[QNDroidRTC 开发文档](https://developer.qiniu.com/rtn/sdk/4351/summary-of-the-android-sdk)
 
 # 7 反馈及意见
 
