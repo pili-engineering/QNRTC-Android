@@ -8,48 +8,48 @@
     android:onClick="onClickScreen"
     tools:ignore="MergeRootFrame">
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/fullscreen_video_view"
+    <com.qiniu.droid.rtc.demo.ui.LocalVideoView
+        android:id="@+id/local_video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/pip_video_view_a"
+    <com.qiniu.droid.rtc.demo.ui.RemoteVideoView
+        android:id="@+id/remote_video_view_a"
         android:layout_width="0dp"
         android:layout_height="0dp" />
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/pip_video_view_b"
+    <com.qiniu.droid.rtc.demo.ui.RemoteVideoView
+        android:id="@+id/remote_video_view_b"
         android:layout_width="0dp"
         android:layout_height="0dp" />
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/pip_video_view_c"
+    <com.qiniu.droid.rtc.demo.ui.RemoteVideoView
+        android:id="@+id/remote_video_view_c"
         android:layout_width="0dp"
         android:layout_height="0dp" />
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/pip_video_view_d"
+    <com.qiniu.droid.rtc.demo.ui.RemoteVideoView
+        android:id="@+id/remote_video_view_d"
         android:layout_width="0dp"
         android:layout_height="0dp" />
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/pip_video_view_e"
+    <com.qiniu.droid.rtc.demo.ui.RemoteVideoView
+        android:id="@+id/remote_video_view_e"
         android:layout_width="0dp"
         android:layout_height="0dp" />
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/pip_video_view_f"
+    <com.qiniu.droid.rtc.demo.ui.RemoteVideoView
+        android:id="@+id/remote_video_view_f"
         android:layout_width="0dp"
         android:layout_height="0dp" />
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/pip_video_view_g"
+    <com.qiniu.droid.rtc.demo.ui.RemoteVideoView
+        android:id="@+id/remote_video_view_g"
         android:layout_width="0dp"
         android:layout_height="0dp" />
 
-    <com.qiniu.droid.rtc.demo.ui.RTCVideoView
-        android:id="@+id/pip_video_view_h"
+    <com.qiniu.droid.rtc.demo.ui.RemoteVideoView
+        android:id="@+id/remote_video_view_h"
         android:layout_width="0dp"
         android:layout_height="0dp" />
 

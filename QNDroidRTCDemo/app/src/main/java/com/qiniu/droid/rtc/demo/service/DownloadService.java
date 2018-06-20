@@ -123,7 +123,7 @@ public class DownloadService extends IntentService {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // for Android 7.0 and newer version, we need to use FileProvider to pass the file path, otherwise it will throw FileUriExposedException
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".update.provider", apkFile);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setDataAndType(uri, "application/vnd.android.package-archive");

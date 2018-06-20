@@ -2,19 +2,20 @@ package com.qiniu.droid.rtc.demo.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.qiniu.droid.rtc.QNSurfaceView;
+import com.qiniu.droid.rtc.QNLocalSurfaceView;
+import com.qiniu.droid.rtc.QNRemoteSurfaceView;
 import com.qiniu.droid.rtc.demo.R;
 
 public class RTCVideoView extends FrameLayout implements View.OnLongClickListener {
 
-    private Context mContext;
-    private QNSurfaceView mQNSurfaceView;
+    protected Context mContext;
+    protected QNLocalSurfaceView mLocalSurfaceView;
+    protected QNRemoteSurfaceView mRemoteSurfaceView;
     private ImageView mMicrophoneStateView;
     private TextView mAudioView;
     private OnLongClickListener mOnLongClickListener;
@@ -32,7 +33,6 @@ public class RTCVideoView extends FrameLayout implements View.OnLongClickListene
     public RTCVideoView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        LayoutInflater.from(mContext).inflate(R.layout.rtc_video_view, this, true);
     }
 
     public void setUserId(String userId) {
@@ -43,28 +43,26 @@ public class RTCVideoView extends FrameLayout implements View.OnLongClickListene
         mMicrophoneStateView.setImageResource(isMute ? R.mipmap.microphone_disable : R.drawable.microphone_state_enable);
     }
 
-    public QNSurfaceView getSurfaceView() {
-        return mQNSurfaceView;
+    public QNLocalSurfaceView getLocalSurfaceView() {
+        return mLocalSurfaceView;
+    }
+
+    public QNRemoteSurfaceView getRemoteSurfaceView() {
+        return mRemoteSurfaceView;
     }
 
     public ImageView getMicrophoneStateView() {
         return mMicrophoneStateView;
     }
 
-    public void setRemoteWindowInvisible() {
-        mUserId = null;
-        mQNSurfaceView.setVisibility(INVISIBLE);
-        mMicrophoneStateView.setVisibility(INVISIBLE);
-        mAudioView.setVisibility(INVISIBLE);
-        setVisibility(INVISIBLE);
-    }
-
-    public void setVideoViewVisible() {
-        if (getVisibility() != VISIBLE) {
-            setVisibility(VISIBLE);
+    public void setVisible(boolean isVisible) {
+        if (!isVisible) {
+            mUserId = null;
+            mAudioView.setVisibility(INVISIBLE);
         }
-        mQNSurfaceView.setVisibility(VISIBLE);
-        mMicrophoneStateView.setVisibility(VISIBLE);
+        setVisibility(isVisible ? VISIBLE : INVISIBLE);
+        mMicrophoneStateView.setVisibility(isVisible ? VISIBLE : INVISIBLE);
+        setVideoViewVisible(isVisible);
     }
 
     public void setMicrophoneStateVisibility(int visibility) {
@@ -78,12 +76,12 @@ public class RTCVideoView extends FrameLayout implements View.OnLongClickListene
         mAudioView.setText(mUserId);
         mAudioView.setBackgroundColor(getTargetColor(pos));
         mAudioView.setVisibility(VISIBLE);
-        mQNSurfaceView.setVisibility(INVISIBLE);
+        setVideoViewVisible(false);
     }
 
     public void setAudioViewInvisible() {
         mAudioView.setVisibility(INVISIBLE);
-        mQNSurfaceView.setVisibility(VISIBLE);
+        setVideoViewVisible(true);
     }
 
     public void updateAudioView(int pos) {
@@ -98,11 +96,19 @@ public class RTCVideoView extends FrameLayout implements View.OnLongClickListene
         mOnLongClickListener = listener;
     }
 
+    private void setVideoViewVisible(boolean isVisible) {
+        if (mLocalSurfaceView != null) {
+            mLocalSurfaceView.setVisibility(isVisible ? VISIBLE : INVISIBLE);
+        }
+        if (mRemoteSurfaceView != null) {
+            mRemoteSurfaceView.setVisibility(isVisible ? VISIBLE : INVISIBLE);
+        }
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         setOnLongClickListener(this);
-        mQNSurfaceView = (QNSurfaceView) findViewById(R.id.qn_surface_view);
         mMicrophoneStateView = (ImageView) findViewById(R.id.microphone_state_view);
         mAudioView = (TextView) findViewById(R.id.qn_audio_view);
     }

@@ -27,4 +27,7 @@
     <string name="android_auto_update_dialog_btn_cancel">以后再说</string>
     <string name="android_auto_update_dialog_title">发现新版本</string>
     <string name="updating">正在更新</string>
+    <string name="positive_dialog_tips">确定</string>
+    <string name="negative_dialog_tips">取消</string>
+    <string name="kickout_tips">确定要踢出 %1$s 这个用户吗？</string>
 </resources>

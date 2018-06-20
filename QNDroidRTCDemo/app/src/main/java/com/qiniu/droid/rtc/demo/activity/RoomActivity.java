@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -25,17 +26,21 @@ import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCameraSwitchResultCallback;
 import com.qiniu.droid.rtc.QNRTCManager;
 import com.qiniu.droid.rtc.QNRTCSetting;
+import com.qiniu.droid.rtc.QNRemoteAudioCallback;
+import com.qiniu.droid.rtc.QNRemoteSurfaceView;
 import com.qiniu.droid.rtc.QNRoomEventListener;
 import com.qiniu.droid.rtc.QNRoomState;
 import com.qiniu.droid.rtc.QNStatisticsReport;
-import com.qiniu.droid.rtc.QNSurfaceView;
 import com.qiniu.droid.rtc.QNVideoFormat;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.fragment.ControlFragment;
+import com.qiniu.droid.rtc.demo.ui.LocalVideoView;
 import com.qiniu.droid.rtc.demo.ui.RTCVideoView;
 import com.qiniu.droid.rtc.demo.utils.Config;
+import com.qiniu.droid.rtc.demo.utils.QNAppServer;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -66,6 +71,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
     private List<RTCVideoView> mUsedWindowList;
     private List<RTCVideoView> mUnusedWindowList;
     private ConcurrentHashMap<String, RTCVideoView> mUserWindowMap;
+    private String[] mMergeStreamPosition;
 
     private RTCVideoView mRemoteWindowA;
     private RTCVideoView mRemoteWindowB;
@@ -96,7 +102,12 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
     private int mScreenWidth = 0;
     private int mScreenHeight = 0;
+    private int mVideoWidth = 0;
+    private int mVideoHeight = 0;
     private float mDensity = 0;
+    private boolean mIsAdmin = false;
+
+    private AlertDialog mKickoutDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -123,17 +134,17 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         mRoomToken = intent.getStringExtra(EXTRA_ROOM_TOKEN);
         mUserId = intent.getStringExtra(EXTRA_USER_ID);
 
-        mLocalWindow = (RTCVideoView) findViewById(R.id.fullscreen_video_view);
+        mLocalWindow = (LocalVideoView) findViewById(R.id.local_video_view);
         mLocalWindow.setUserId(mUserId);
 
-        mRemoteWindowA = (RTCVideoView) findViewById(R.id.pip_video_view_a);
-        mRemoteWindowB = (RTCVideoView) findViewById(R.id.pip_video_view_b);
-        mRemoteWindowC = (RTCVideoView) findViewById(R.id.pip_video_view_c);
-        mRemoteWindowD = (RTCVideoView) findViewById(R.id.pip_video_view_d);
-        mRemoteWindowE = (RTCVideoView) findViewById(R.id.pip_video_view_e);
-        mRemoteWindowF = (RTCVideoView) findViewById(R.id.pip_video_view_f);
-        mRemoteWindowG = (RTCVideoView) findViewById(R.id.pip_video_view_g);
-        mRemoteWindowH = (RTCVideoView) findViewById(R.id.pip_video_view_h);
+        mRemoteWindowA = (RTCVideoView) findViewById(R.id.remote_video_view_a);
+        mRemoteWindowB = (RTCVideoView) findViewById(R.id.remote_video_view_b);
+        mRemoteWindowC = (RTCVideoView) findViewById(R.id.remote_video_view_c);
+        mRemoteWindowD = (RTCVideoView) findViewById(R.id.remote_video_view_d);
+        mRemoteWindowE = (RTCVideoView) findViewById(R.id.remote_video_view_e);
+        mRemoteWindowF = (RTCVideoView) findViewById(R.id.remote_video_view_f);
+        mRemoteWindowG = (RTCVideoView) findViewById(R.id.remote_video_view_g);
+        mRemoteWindowH = (RTCVideoView) findViewById(R.id.remote_video_view_h);
 
         mUsedWindowList = Collections.synchronizedList(new LinkedList<RTCVideoView>());
         mUsedWindowList.add(mLocalWindow);
@@ -165,8 +176,8 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         }
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        int videoWidth = preferences.getInt(Config.WIDTH, QNRTCSetting.DEFAULT_WIDTH);
-        int videoHeight = preferences.getInt(Config.HEIGHT, QNRTCSetting.DEFAULT_HEIGHT);
+        mVideoWidth = preferences.getInt(Config.WIDTH, QNRTCSetting.DEFAULT_WIDTH);
+        mVideoHeight = preferences.getInt(Config.HEIGHT, QNRTCSetting.DEFAULT_HEIGHT);
         int videoBitrate = preferences.getInt(Config.BITRATE, 800 * 1000);
         boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.SW) == Config.HW;
 
@@ -183,8 +194,8 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
                 .setBitrateRange(videoBitrate, QNRTCSetting.DEFAULT_MAX_BITRATE)
                 .setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
                 .setHWCodecEnabled(isHwCodec)
-                .setVideoPreviewFormat(new QNVideoFormat(videoWidth, videoHeight, QNRTCSetting.DEFAULT_FPS))
-                .setVideoEncodeFormat(new QNVideoFormat(videoWidth, videoHeight, QNRTCSetting.DEFAULT_FPS));
+                .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS))
+                .setVideoEncodeFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS));
 
         mControlFragment.setArguments(intent.getExtras());
         FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -193,16 +204,15 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
         mRTCManager = new QNRTCManager();
         mRTCManager.setRoomEventListener(this);
-        mRTCManager.addRemoteWindow(mRemoteWindowA.getSurfaceView());
-        mRTCManager.addRemoteWindow(mRemoteWindowB.getSurfaceView());
-        mRTCManager.addRemoteWindow(mRemoteWindowC.getSurfaceView());
-        mRTCManager.addRemoteWindow(mRemoteWindowD.getSurfaceView());
-        mRTCManager.addRemoteWindow(mRemoteWindowE.getSurfaceView());
-        mRTCManager.addRemoteWindow(mRemoteWindowF.getSurfaceView());
-        mRTCManager.addRemoteWindow(mRemoteWindowG.getSurfaceView());
-        mRTCManager.addRemoteWindow(mRemoteWindowH.getSurfaceView());
-        mRTCManager.initialize(this, setting, mLocalWindow.getSurfaceView());
-        mRTCManager.setMirror(true);
+        mRTCManager.addRemoteWindow(mRemoteWindowA.getRemoteSurfaceView());
+        mRTCManager.addRemoteWindow(mRemoteWindowB.getRemoteSurfaceView());
+        mRTCManager.addRemoteWindow(mRemoteWindowC.getRemoteSurfaceView());
+        mRTCManager.addRemoteWindow(mRemoteWindowD.getRemoteSurfaceView());
+        mRTCManager.addRemoteWindow(mRemoteWindowE.getRemoteSurfaceView());
+        mRTCManager.addRemoteWindow(mRemoteWindowF.getRemoteSurfaceView());
+        mRTCManager.addRemoteWindow(mRemoteWindowG.getRemoteSurfaceView());
+        mRTCManager.addRemoteWindow(mRemoteWindowH.getRemoteSurfaceView());
+        mRTCManager.initialize(this, setting, mLocalWindow.getLocalSurfaceView());
     }
 
     public void onClickScreen(View v) {
@@ -249,6 +259,11 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         if (publishingUsers != null && !publishingUsers.isEmpty()) {
             for (String userId : publishingUsers) {
                 mRTCManager.subscribe(userId);
+                mRTCManager.addRemoteAudioCallback(userId, new QNRemoteAudioCallback() {
+                    @Override
+                    public void onRemoteAudioAvailable(String userId, ByteBuffer audioData, int size, int bitsPerSample, int sampleRate, int numberOfChannels) {
+                    }
+                });
             }
         }
     }
@@ -261,7 +276,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         mUsedWindowList.add(mLocalWindow);
 
         for (RTCVideoView rtcVideoView : mUserWindowMap.values()) {
-            rtcVideoView.setRemoteWindowInvisible();
+            rtcVideoView.setVisible(false);
         }
         mUserWindowMap.clear();
 
@@ -287,6 +302,9 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
             mLogToast.cancel();
         }
         if (mRTCManager != null) {
+            if (mIsAdmin) {
+                mRTCManager.stopMergeStream();
+            }
             mRTCManager.destroy();
             mRTCManager = null;
         }
@@ -347,18 +365,6 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
     private RTCVideoView getWindowByUserId(String userId) {
         return mUserWindowMap.containsKey(userId) ? mUserWindowMap.get(userId) : null;
-    }
-
-    private RTCVideoView getWindowBySurfaceView(QNSurfaceView surfaceView) {
-        RTCVideoView remoteWindow = null;
-        for (RTCVideoView rtcVideoView : mUnusedWindowList) {
-            if (rtcVideoView.getSurfaceView().getTag() != null
-                    && rtcVideoView.getSurfaceView().getTag().toString().equals(surfaceView.getTag().toString())) {
-                remoteWindow = rtcVideoView;
-                break;
-            }
-        }
-        return remoteWindow;
     }
 
     private void toggleToMultiUsersUI(final int userCount, List<RTCVideoView> windowList) {
@@ -455,6 +461,67 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         });
     }
 
+    private boolean isAdmin() {
+        return mUserId.toLowerCase().indexOf(QNAppServer.ADMIN_USER) != -1;
+    }
+
+    private synchronized void clearMergeStreamPos(String userId) {
+        int pos = -1;
+        if (mMergeStreamPosition != null && !TextUtils.isEmpty(userId)) {
+            for (int i = 0; i < mMergeStreamPosition.length; i++) {
+                if (userId.equals(mMergeStreamPosition[i])) {
+                    pos = i;
+                    break;
+                }
+            }
+        }
+        if (pos >= 0 && pos < mMergeStreamPosition.length) {
+            mMergeStreamPosition[pos] = null;
+        }
+    }
+
+    private int getMergeStreamIdlePos() {
+        int pos = -1;
+        for (int i = 0; i< mMergeStreamPosition.length; i++) {
+            if (TextUtils.isEmpty(mMergeStreamPosition[i])) {
+                pos = i;
+                break;
+            }
+        }
+        return pos;
+    }
+
+    private synchronized void setMergeRemoteStreamLayout(String userId) {
+        if (mIsAdmin) {
+            int pos = getMergeStreamIdlePos();
+            if (pos == -1) {
+                Log.e(TAG, "No idle position for merge streaming, so discard.");
+                return;
+            }
+            int x = QNAppServer.MERGE_STREAM_POS[pos][0];
+            int y = QNAppServer.MERGE_STREAM_POS[pos][1];
+            mRTCManager.setMergeStreamLayout(userId, x, y, 1, QNAppServer.MERGE_STREAM_WIDTH, QNAppServer.MERGE_STREAM_HEIGHT);
+            mMergeStreamPosition[pos] = userId;
+        }
+    }
+
+    private void showKickoutDialog(final String userId) {
+        if (mKickoutDialog == null) {
+            mKickoutDialog = new AlertDialog.Builder(this)
+                    .setNegativeButton(R.string.negative_dialog_tips, null)
+                    .create();
+        }
+        mKickoutDialog.setMessage(getString(R.string.kickout_tips, userId));
+        mKickoutDialog.setButton(DialogInterface.BUTTON_POSITIVE, getResources().getString(R.string.positive_dialog_tips),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mRTCManager.kickOutUser(userId);
+                    }
+                });
+        mKickoutDialog.show();
+    }
+
     @TargetApi(19)
     private static int getSystemUiVisibility() {
         int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -488,9 +555,6 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
             mRTCManager.switchCamera(new QNCameraSwitchResultCallback() {
                 @Override
                 public void onCameraSwitchDone(boolean isFrontCamera) {
-                    if (mRTCManager != null) {
-                        mRTCManager.setMirror(isFrontCamera);
-                    }
                 }
 
                 @Override
@@ -547,6 +611,10 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
     @Override
     public void onJoinedRoom() {
+        mIsAdmin = isAdmin();
+        if (mIsAdmin) {
+            mMergeStreamPosition = new String[9];
+        }
         onConnectedInternal();
         mRTCManager.publish();
         runOnUiThread(new Runnable() {
@@ -559,6 +627,9 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
     @Override
     public void onLocalPublished() {
+        if (mIsAdmin) {
+            mRTCManager.setMergeStreamLayout(mUserId, 0, 0, 0, QNAppServer.STREAMING_WIDTH, QNAppServer.STREAMING_HEIGHT);
+        }
         subscribeAllRemoteStreams();
         mRTCManager.setStatisticsInfoEnabled(mUserId, true, 3000);
     }
@@ -567,6 +638,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
     public void onSubscribed(String userId) {
         Log.i(TAG, "onSubscribed: userId: " + userId);
         updateRemoteLogText("onSubscribed : " + userId);
+        setMergeRemoteStreamLayout(userId);
         mRTCManager.setStatisticsInfoEnabled(userId, true, 3000);
     }
 
@@ -575,30 +647,35 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         Log.i(TAG, "onRemotePublished: userId: " + userId);
         updateRemoteLogText("onRemotePublished : " + userId + " hasAudio : " + hasAudio + " hasVideo : " + hasVideo);
         mRTCManager.subscribe(userId);
+        mRTCManager.addRemoteAudioCallback(userId, new QNRemoteAudioCallback() {
+            @Override
+            public void onRemoteAudioAvailable(String userId, ByteBuffer audioData, int size, int bitsPerSample, int sampleRate, int numberOfChannels) {
+            }
+        });
     }
 
     @Override
-    public QNSurfaceView onRemoteStreamAdded(final String userId, final boolean isAudioEnabled, final boolean isVideoEnabled,
-                                             final boolean isAudioMuted, final boolean isVideoMuted) {
+    public QNRemoteSurfaceView onRemoteStreamAdded(final String userId, final boolean isAudioEnabled, final boolean isVideoEnabled,
+                                                   final boolean isAudioMuted, final boolean isVideoMuted) {
         Log.i(TAG, "onRemoteStreamAdded: user = " + userId + ", hasAudio = " + isAudioEnabled + ", hasVideo = " + isVideoEnabled
                 + ", isAudioMuted = " + isAudioMuted + ", isVideoMuted = " + isVideoMuted);
         updateRemoteLogText("onRemoteStreamAdded : " + userId);
 
         final RTCVideoView remoteWindow = mUnusedWindowList.remove(0);
+        remoteWindow.setUserId(userId);
         mUserWindowMap.put(userId, remoteWindow);
         mUsedWindowList.add(remoteWindow);
-        remoteWindow.setUserId(userId);
+        final int userCount = mUsedWindowList.size();
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                remoteWindow.setVideoViewVisible();
+                remoteWindow.setVisible(true);
                 remoteWindow.updateMicrophoneStateView(isAudioMuted);
                 if (isVideoMuted || !isVideoEnabled) {
                     remoteWindow.setAudioViewVisible(mUsedWindowList.indexOf(remoteWindow));
                 }
 
-                int userCount = mUsedWindowList.size();
                 if (userCount <= 5) {
                     toggleToMultiUsersUI(userCount, mUsedWindowList);
                 } else {
@@ -613,19 +690,20 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
                 }
             }
         });
-        return remoteWindow.getSurfaceView();
+        return remoteWindow.getRemoteSurfaceView();
     }
 
     @Override
     public void onRemoteStreamRemoved(final String userId) {
         Log.i(TAG, "onRemoteStreamRemoved: " + userId);
         updateRemoteLogText("onRemoteStreamRemoved : " + userId);
+        clearMergeStreamPos(userId);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (mUserWindowMap.containsKey(userId)) {
                     RTCVideoView remoteVideoView = mUserWindowMap.remove(userId);
-                    remoteVideoView.setRemoteWindowInvisible();
+                    remoteVideoView.setVisible(false);
                     mUsedWindowList.remove(remoteVideoView);
                     mUnusedWindowList.add(remoteVideoView);
                 }
@@ -729,7 +807,11 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
     private RTCVideoView.OnLongClickListener mOnLongClickListener = new RTCVideoView.OnLongClickListener() {
         @Override
         public void onLongClick(String userId) {
-            mRTCManager.kickOutUser(userId);
+            if (!mIsAdmin) {
+                Log.i(TAG, "Only admin user can kick a player!");
+                return;
+            }
+            showKickoutDialog(userId);
         }
     };
 }
