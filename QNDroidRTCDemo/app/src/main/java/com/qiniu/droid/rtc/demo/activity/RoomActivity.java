@@ -261,7 +261,8 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
                 mRTCManager.subscribe(userId);
                 mRTCManager.addRemoteAudioCallback(userId, new QNRemoteAudioCallback() {
                     @Override
-                    public void onRemoteAudioAvailable(String userId, ByteBuffer audioData, int size, int bitsPerSample, int sampleRate, int numberOfChannels) {
+                    public void onData(String s, ByteBuffer byteBuffer, int i, int i1, int i2, int i3) {
+
                     }
                 });
             }
@@ -649,7 +650,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         mRTCManager.subscribe(userId);
         mRTCManager.addRemoteAudioCallback(userId, new QNRemoteAudioCallback() {
             @Override
-            public void onRemoteAudioAvailable(String userId, ByteBuffer audioData, int size, int bitsPerSample, int sampleRate, int numberOfChannels) {
+            public void onData(String userId, ByteBuffer audioData, int size, int bitsPerSample, int sampleRate, int numberOfChannels) {
             }
         });
     }
