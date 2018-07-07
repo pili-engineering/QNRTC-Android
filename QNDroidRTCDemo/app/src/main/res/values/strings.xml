@@ -30,4 +30,7 @@
     <string name="positive_dialog_tips">确定</string>
     <string name="negative_dialog_tips">取消</string>
     <string name="kickout_tips">确定要踢出 %1$s 这个用户吗？</string>
+    <string name="screen_capture">屏幕采集</string>
+    <string name="camera_capture">摄像头采集</string>
+    <string name="capture_tips">屏幕采集要求 Android 5.0+ 以及硬编</string>
 </resources>

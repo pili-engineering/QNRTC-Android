@@ -16,11 +16,13 @@ public class Config {
     public static final String WIDTH = "width";
     public static final String HEIGHT = "height";
     public static final String FPS = "fps";
-    public static final String BITRATE = "bitrate";
     public static final String CODEC_MODE = "encodeMode";
+    public static final String CAPTURE_MODE = "captureMode";
 
     public static final int HW = 0;
     public static final int SW = 1;
+    public static final int CAMERA_CAPTURE = 0;
+    public static final int SCREEN_CAPTURE = 1;
 
     public static final int [][] DEFAULT_RESOLUTION = {
             {352, 288},
@@ -34,12 +36,5 @@ public class Config {
             20,
             20,
             20
-    };
-
-    public static int [] DEFAULT_BITRATE = {
-            600 * 1000,
-            800 * 1000,
-            1000 * 1000,
-            1200 * 1000
     };
 }

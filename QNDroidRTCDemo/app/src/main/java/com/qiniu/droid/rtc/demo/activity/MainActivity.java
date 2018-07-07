@@ -17,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.bugsnag.android.Bugsnag;
+import com.qiniu.droid.rtc.QNScreenCaptureUtil;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.model.ProgressEvent;
 import com.qiniu.droid.rtc.demo.model.UpdateInfo;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
 
     private String mUserName;
+    private String mRoomName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,18 +69,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
+
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+        if (requestCode == USERNAME_REQUEST_CODE) {
             mUserName = data.getStringExtra(Config.USER_NAME);
             SharedPreferences.Editor editor = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE).edit();
             editor.putString(Config.USER_NAME, mUserName);
             editor.apply();
+            initView();
+            checkUpdate();
+        } else if (requestCode == QNScreenCaptureUtil.SCREEN_CAPTURE_PERMISSION_REQUEST_CODE &&
+                QNScreenCaptureUtil.onActivityResult(requestCode, resultCode, data)) {
+            startConference(mRoomName);
         }
-
-        initView();
-        checkUpdate();
     }
 
-    public void onEvent(ProgressEvent progressEvent){
+    public void onEvent(ProgressEvent progressEvent) {
         mProgressDialog.setProgress(progressEvent.getProgress());
         if (progressEvent.getProgress() == 100) {
             mProgressDialog.dismiss();
@@ -108,14 +116,30 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mUserName = preferences.getString(Config.USER_NAME, "");
+        boolean isScreenCaptureEnabled = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.SCREEN_CAPTURE;
+
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(Config.ROOM_NAME, roomName);
         editor.apply();
+        mRoomName = roomName;
 
+        if (isScreenCaptureEnabled) {
+            QNScreenCaptureUtil.requestScreenCapture(this);
+        } else {
+            startConference(roomName);
+        }
+    }
+
+    public void onClickToSetting(View v) {
+        Intent intent = new Intent(this, SettingActivity.class);
+        startActivity(intent);
+    }
+
+    private void startConference(final String roomName) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String token = QNAppServer.getInstance().requestRoomToken(v.getContext(), mUserName, roomName);
+                final String token = QNAppServer.getInstance().requestRoomToken(MainActivity.this, mUserName, roomName);
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -133,11 +157,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         }).start();
-    }
-
-    public void onClickToSetting(View v) {
-        Intent intent = new Intent(this, SettingActivity.class);
-        startActivity(intent);
     }
 
     private void initView() {
@@ -178,7 +197,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .setNegativeButton(R.string.android_auto_update_dialog_btn_cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {}
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
                 });
 
         AlertDialog dialog = builder.create();
