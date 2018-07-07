@@ -178,8 +178,12 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mVideoWidth = preferences.getInt(Config.WIDTH, QNRTCSetting.DEFAULT_WIDTH);
         mVideoHeight = preferences.getInt(Config.HEIGHT, QNRTCSetting.DEFAULT_HEIGHT);
-        int videoBitrate = preferences.getInt(Config.BITRATE, 800 * 1000);
         boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.SW) == Config.HW;
+        boolean isScreenCaptureEnabled = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.SCREEN_CAPTURE;
+
+        if (isScreenCaptureEnabled) {
+            mLocalWindow.setAudioViewVisible(0);
+        }
 
         // get the items in hw black list, and set isHwCodec false forcibly
         String[] hwBlackList = getResources().getStringArray(R.array.hw_black_list);
@@ -189,15 +193,19 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         }
 
         QNRTCSetting setting = new QNRTCSetting();
-        setting.setAudioBitrate(100 * 1000)
-                .setVideoBitrate(videoBitrate)
-                .setBitrateRange(videoBitrate, QNRTCSetting.DEFAULT_MAX_BITRATE)
-                .setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
-                .setHWCodecEnabled(isHwCodec)
-                .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS))
-                .setVideoEncodeFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS));
+        setting.setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
+               .setHWCodecEnabled(isHwCodec)
+               .setScreenCaptureEnabled(isScreenCaptureEnabled)
+               .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS))
+               .setVideoEncodeFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS));
+//             当设置的最低码率，远高于弱网下的常规传输码率值时，会严重影响连麦的画面流畅度
+//             故建议若非场景带宽需求限制，不设置连麦码率或者设置最低码率值不过高的效果较好
+//             .setAudioBitrate(100 * 1000)
+//             .setVideoBitrate(400 * 1000)
+//             .setBitrateRange(200 * 1000, 1000 * 1000)
 
         mControlFragment.setArguments(intent.getExtras());
+        mControlFragment.setScreenCaptureEnabled(isScreenCaptureEnabled);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.add(R.id.control_fragment_container, mControlFragment);
         ft.commitAllowingStateLoss();

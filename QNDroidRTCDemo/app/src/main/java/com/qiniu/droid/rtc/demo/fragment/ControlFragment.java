@@ -35,6 +35,7 @@ public class ControlFragment extends Fragment {
     private OnCallEvents mCallEvents;
     private boolean mIsVideoEnabled = true;
     private boolean mIsShowingLog = false;
+    private boolean mIsScreenCaptureEnabled = false;
 
     /**
      * Call control interface for container activity.
@@ -51,6 +52,10 @@ public class ControlFragment extends Fragment {
         boolean onToggleSpeaker();
 
         boolean onToggleBeauty();
+    }
+
+    public void setScreenCaptureEnabled(boolean isScreenCaptureEnabled) {
+        mIsScreenCaptureEnabled = isScreenCaptureEnabled;
     }
 
     @Override
@@ -79,20 +84,24 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        mCameraSwitchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mCallEvents.onCameraSwitch();
-            }
-        });
+        if (!mIsScreenCaptureEnabled) {
+            mCameraSwitchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mCallEvents.onCameraSwitch();
+                }
+            });
+        }
 
-        mToggleBeautyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean enabled = mCallEvents.onToggleBeauty();
-                mToggleBeautyButton.setImageResource(enabled ? R.mipmap.face_beauty_open : R.mipmap.face_beauty_close);
-            }
-        });
+        if (!mIsScreenCaptureEnabled) {
+            mToggleBeautyButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean enabled = mCallEvents.onToggleBeauty();
+                    mToggleBeautyButton.setImageResource(enabled ? R.mipmap.face_beauty_open : R.mipmap.face_beauty_close);
+                }
+            });
+        }
 
         mToggleMuteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,13 +111,17 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        mToggleVideoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean enabled = mCallEvents.onToggleVideo();
-                mToggleVideoButton.setImageResource(enabled ? R.mipmap.video_open : R.mipmap.video_close);
-            }
-        });
+        if (mIsScreenCaptureEnabled) {
+            mToggleVideoButton.setImageResource(R.mipmap.video_close);
+        } else {
+            mToggleVideoButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean enabled = mCallEvents.onToggleVideo();
+                    mToggleVideoButton.setImageResource(enabled ? R.mipmap.video_open : R.mipmap.video_close);
+                }
+            });
+        }
 
         mToggleSpeakerButton.setOnClickListener(new View.OnClickListener() {
             @Override
