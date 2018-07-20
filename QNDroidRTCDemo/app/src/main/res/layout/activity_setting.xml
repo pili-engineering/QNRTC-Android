@@ -159,11 +159,29 @@
         android:paddingStart="15dp"
         android:paddingEnd="15dp" />
 
+    <EditText
+        android:id="@+id/app_id_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/oval_edit_text_background"
+        android:layout_below="@id/tips_capture_view"
+        android:textColorHint="@color/textColor"
+        android:textColor="@color/textColor"
+        android:textSize="15sp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:hint="修改APP_ID"/>
+
     <Button
         android:id="@+id/save_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tips_capture_view"
+        android:layout_below="@id/app_id_edit_text"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:layout_marginTop="30dp"

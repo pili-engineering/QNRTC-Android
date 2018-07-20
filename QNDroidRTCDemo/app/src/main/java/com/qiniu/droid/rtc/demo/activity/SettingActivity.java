@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -22,6 +23,7 @@ import com.qiniu.droid.rtc.demo.BuildConfig;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.ui.SpinnerPopupWindow;
 import com.qiniu.droid.rtc.demo.utils.Config;
+import com.qiniu.droid.rtc.demo.utils.QNAppServer;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
 
 import java.text.SimpleDateFormat;
@@ -41,6 +43,7 @@ public class SettingActivity extends AppCompatActivity {
     private RadioGroup mCaptureModeRadioGroup;
     private RadioButton mScreenCapture;
     private RadioButton mCameraCapture;
+    private EditText mAppIdEditText;
 
     private int mSelectPos = 0;
     private String mUserName;
@@ -69,12 +72,18 @@ public class SettingActivity extends AppCompatActivity {
         mCaptureModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mScreenCapture = (RadioButton) findViewById(R.id.screen_capture_button);
         mCameraCapture = (RadioButton) findViewById(R.id.camera_capture_button);
+        mAppIdEditText = (EditText) findViewById(R.id.app_id_edit_text);
 
         mVersionCodeTextView.setText(String.format(getString(R.string.version_code), getVersionDescription(), getBuildTimeDescription()));
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mUserName = preferences.getString(Config.USER_NAME, "");
         mUserNameEditText.setHint("用户名称：" + mUserName);
+        String mAppId = preferences.getString(Config.APP_ID, QNAppServer.APP_ID);
+
+        if (!mAppId.equals(QNAppServer.APP_ID)) {
+            mAppIdEditText.setText(mAppId);
+        }
 
         String[] configurations = getResources().getStringArray(R.array.conference_configuration);
         mDefaultConfiguration.addAll(Arrays.asList(configurations));
@@ -123,6 +132,7 @@ public class SettingActivity extends AppCompatActivity {
 
     public void onClickSaveConfiguration(View v) {
         String userName = mUserNameEditText.getText().toString().trim();
+        String appId = mAppIdEditText.getText().toString().trim();
 
         SharedPreferences.Editor editor = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE).edit();
         if (!userName.equals("")) {
@@ -135,6 +145,8 @@ public class SettingActivity extends AppCompatActivity {
                 editor.putString(Config.USER_NAME, userName);
             }
         }
+
+        editor.putString(Config.APP_ID, TextUtils.isEmpty(appId) ? QNAppServer.APP_ID : appId);
 
         if (mCaptureMode == Config.SCREEN_CAPTURE) {
             mEncodeMode = Config.HW;
