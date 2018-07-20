@@ -1,9 +1,11 @@
 package com.qiniu.droid.rtc.demo.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.model.UpdateInfo;
 
 import org.json.JSONException;
@@ -45,7 +47,7 @@ public class QNAppServer {
 
     private static final String TAG = "QNAppServer";
     private static final String APP_SERVER_ADDR = "https://api-demo.qnsdk.com";
-    private static final String APP_ID = "d8lk7l4ed";
+    public static final String APP_ID = "d8lk7l4ed";
 
     private static class QNAppServerHolder {
         private static final QNAppServer instance = new QNAppServer();
@@ -63,7 +65,7 @@ public class QNAppServer {
          * 此处服务器 URL 仅用于 Demo 测试，随时可能修改/失效，请勿用于 App 线上环境！！
          * 此处服务器 URL 仅用于 Demo 测试，随时可能修改/失效，请勿用于 App 线上环境！！
          */
-        String url = APP_SERVER_ADDR + "/v1/rtc/token/admin/app/" + APP_ID + "/room/" + roomName + "/user/" + userId + "?bundleId=" + packageName(context);
+        String url = APP_SERVER_ADDR + "/v1/rtc/token/admin/app/" + getAppId(context) + "/room/" + roomName + "/user/" + userId + "?bundleId=" + packageName(context);
         try {
             OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(new SSLSocketFactoryCompat(), getTrustManager()).build();
             Request request = new Request.Builder()
@@ -130,5 +132,10 @@ public class QNAppServer {
             // e.printStackTrace();
         }
         return "";
+    }
+
+    private String getAppId(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name),Context.MODE_PRIVATE);
+        return sharedPreferences.getString(Config.APP_ID, APP_ID);
     }
 }
