@@ -14,6 +14,7 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -84,6 +85,10 @@ public class SettingActivity extends AppCompatActivity {
         if (!mAppId.equals(QNAppServer.APP_ID)) {
             mAppIdEditText.setText(mAppId);
         }
+
+        //test mode setting
+        LinearLayout testModeLayout = (LinearLayout) findViewById(R.id.test_mode_layout);
+        testModeLayout.setVisibility(isTestMode() ? View.VISIBLE : View.GONE);
 
         String[] configurations = getResources().getStringArray(R.array.conference_configuration);
         mDefaultConfiguration.addAll(Arrays.asList(configurations));
@@ -159,8 +164,38 @@ public class SettingActivity extends AppCompatActivity {
         editor.putInt(Config.HEIGHT, Config.DEFAULT_RESOLUTION[mSelectPos][1]);
         editor.putInt(Config.FPS, Config.DEFAULT_FPS[mSelectPos]);
 
+        if (isTestMode()) {
+            saveTestMode(editor);
+        }
         editor.apply();
         finish();
+    }
+
+    private void saveTestMode(SharedPreferences.Editor editor) {
+        int testModeWidth = 0;
+        int testModeHigh = 0;
+        int testModeFPS = 0;
+        int testModeBitrate = 0;
+
+        EditText testModeWidthEditText = (EditText) findViewById(R.id.test_mode_width);
+        EditText testModeHighEditText = (EditText) findViewById(R.id.test_mode_high);
+        EditText testModeFPSEditText = (EditText) findViewById(R.id.test_mode_fps);
+        EditText testModeBitrateEditText = (EditText) findViewById(R.id.test_mode_bitrate);
+
+        try {
+            testModeWidth = Integer.parseInt(testModeWidthEditText.getText().toString());
+            testModeHigh = Integer.parseInt(testModeHighEditText.getText().toString());
+            testModeFPS = Integer.parseInt(testModeFPSEditText.getText().toString());
+            testModeBitrate = Integer.parseInt(testModeBitrateEditText.getText().toString());
+        } catch (NumberFormatException e) {
+        }
+
+        if (testModeWidth > 0 && testModeHigh > 0 && testModeFPS > 0 && testModeBitrate > 0) {
+            editor.putInt(Config.WIDTH, testModeWidth);
+            editor.putInt(Config.HEIGHT, testModeHigh);
+            editor.putInt(Config.FPS, testModeFPS);
+            editor.putInt(Config.BITRATE, testModeBitrate);
+        }
     }
 
     private void showPopupWindow() {
@@ -182,6 +217,13 @@ public class SettingActivity extends AppCompatActivity {
 
     protected String getBuildTimeDescription() {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(BuildConfig.BUILD_TIMESTAMP);
+    }
+
+    private boolean isTestMode() {
+        if (mAppIdEditText.getText().toString().compareTo(QNAppServer.TEST_MODE_APP_ID) == 0) {
+            return true;
+        }
+        return false;
     }
 
     private SpinnerPopupWindow.OnSpinnerItemClickListener mOnSpinnerItemClickListener = new SpinnerPopupWindow.OnSpinnerItemClickListener() {

@@ -194,15 +194,17 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
         QNRTCSetting setting = new QNRTCSetting();
         setting.setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
-               .setHWCodecEnabled(isHwCodec)
-               .setScreenCaptureEnabled(isScreenCaptureEnabled)
-               .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS))
-               .setVideoEncodeFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS));
-//             当设置的最低码率，远高于弱网下的常规传输码率值时，会严重影响连麦的画面流畅度
-//             故建议若非场景带宽需求限制，不设置连麦码率或者设置最低码率值不过高的效果较好
-//             .setAudioBitrate(100 * 1000)
-//             .setVideoBitrate(400 * 1000)
-//             .setBitrateRange(200 * 1000, 1000 * 1000)
+                .setHWCodecEnabled(isHwCodec)
+                .setScreenCaptureEnabled(isScreenCaptureEnabled)
+                .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS))
+                .setVideoEncodeFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS));
+
+        int audioBitrate = 100 * 1000;
+        int videoBitrate = preferences.getInt(Config.BITRATE, 600 * 1000);
+        setting.setAudioBitrate(audioBitrate);
+        setting.setVideoBitrate(videoBitrate);
+        //当设置的最低码率，远高于弱网下的常规传输码率值时，会严重影响连麦的画面流畅度
+        setting.setBitrateRange(0, videoBitrate + audioBitrate);
 
         mControlFragment.setArguments(intent.getExtras());
         mControlFragment.setScreenCaptureEnabled(isScreenCaptureEnabled);
@@ -490,7 +492,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
     private int getMergeStreamIdlePos() {
         int pos = -1;
-        for (int i = 0; i< mMergeStreamPosition.length; i++) {
+        for (int i = 0; i < mMergeStreamPosition.length; i++) {
             if (TextUtils.isEmpty(mMergeStreamPosition[i])) {
                 pos = i;
                 break;
