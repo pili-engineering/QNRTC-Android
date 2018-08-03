@@ -48,6 +48,7 @@ public class QNAppServer {
     private static final String TAG = "QNAppServer";
     private static final String APP_SERVER_ADDR = "https://api-demo.qnsdk.com";
     public static final String APP_ID = "d8lk7l4ed";
+    public static final String TEST_MODE_APP_ID = "d8dre8w1p";
 
     private static class QNAppServerHolder {
         private static final QNAppServer instance = new QNAppServer();

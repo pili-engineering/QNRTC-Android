@@ -18,6 +18,7 @@ public class Config {
     public static final String FPS = "fps";
     public static final String CODEC_MODE = "encodeMode";
     public static final String CAPTURE_MODE = "captureMode";
+    public static final String BITRATE = "bitrate";
 
     public static final int HW = 0;
     public static final int SW = 1;
