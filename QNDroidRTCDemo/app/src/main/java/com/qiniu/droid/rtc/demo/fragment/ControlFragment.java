@@ -36,6 +36,7 @@ public class ControlFragment extends Fragment {
     private boolean mIsVideoEnabled = true;
     private boolean mIsShowingLog = false;
     private boolean mIsScreenCaptureEnabled = false;
+    private boolean mIsAudioOnly = false;
 
     /**
      * Call control interface for container activity.
@@ -56,6 +57,10 @@ public class ControlFragment extends Fragment {
 
     public void setScreenCaptureEnabled(boolean isScreenCaptureEnabled) {
         mIsScreenCaptureEnabled = isScreenCaptureEnabled;
+    }
+
+    public void setAudioOnly(boolean isAudioOnly) {
+        mIsAudioOnly = isAudioOnly;
     }
 
     @Override
@@ -84,7 +89,7 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        if (!mIsScreenCaptureEnabled) {
+        if (!mIsScreenCaptureEnabled && !mIsAudioOnly) {
             mCameraSwitchButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -93,7 +98,7 @@ public class ControlFragment extends Fragment {
             });
         }
 
-        if (!mIsScreenCaptureEnabled) {
+        if (!mIsScreenCaptureEnabled && !mIsAudioOnly) {
             mToggleBeautyButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -111,7 +116,7 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        if (mIsScreenCaptureEnabled) {
+        if (mIsScreenCaptureEnabled || mIsAudioOnly) {
             mToggleVideoButton.setImageResource(R.mipmap.video_close);
         } else {
             mToggleVideoButton.setOnClickListener(new View.OnClickListener() {
@@ -161,7 +166,7 @@ public class ControlFragment extends Fragment {
         if (mRemoteLogText == null) {
             mRemoteLogText = new StringBuffer();
         }
-        if (mLogView != null && mLogView.getVisibility() == View.VISIBLE) {
+        if (mLogView != null) {
             mRemoteTextView.setText(mRemoteLogText.append(logText + "\n"));
         }
     }

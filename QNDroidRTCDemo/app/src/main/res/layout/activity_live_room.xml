@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activity.LiveRoomActivity">
+
+    <com.qiniu.droid.rtc.QNLocalSurfaceView
+        android:id="@+id/local_surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <com.pili.pldroid.player.widget.PLVideoView
+        android:id="@+id/PLVideoView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="top"
+        android:layout_weight="6">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/log_shown_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="16dp"
+                android:background="#0000"
+                android:src="@mipmap/log_btn" />
+
+            <LinearLayout
+                android:id="@+id/log_text"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@id/log_shown_button"
+                android:layout_below="@id/log_shown_button"
+                android:alpha="0.5"
+                android:padding="8dp"
+                android:background="@color/editTextBackground"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/audio_bitrate_log_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white" />
+                <TextView
+                    android:id="@+id/audio_fps_log_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white" />
+                <TextView
+                    android:id="@+id/video_bitrate_log_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white" />
+                <TextView
+                    android:id="@+id/video_fps_log_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/red" />
+
+                <TextView
+                    android:id="@+id/remote_log_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fadeScrollbars="false"
+                    android:maxHeight="200dp"
+                    android:scrollbars="vertical"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </RelativeLayout>
+    </com.pili.pldroid.player.widget.PLVideoView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@android:color/black">
+        <Chronometer
+            android:id="@+id/timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="14dp"
+            android:format="%s"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/btn_config"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:onClick="onClickConfig"
+            android:src="@drawable/btn_config" />
+    </RelativeLayout>
+
+</LinearLayout>
