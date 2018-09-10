@@ -158,8 +158,15 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         mUnusedWindowList.add(mRemoteWindowG);
         mUnusedWindowList.add(mRemoteWindowH);
 
-        for (RTCVideoView rtcVideoView : mUnusedWindowList) {
+        // every remote window can switch with local window
+        for (final RTCVideoView rtcVideoView : mUnusedWindowList) {
             rtcVideoView.setOnLongClickListener(mOnLongClickListener);
+            rtcVideoView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mRTCManager.switchWindow(rtcVideoView.getRemoteSurfaceView());
+                }
+            });
         }
 
         mUserWindowMap = new ConcurrentHashMap<>();
@@ -180,8 +187,10 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         mVideoHeight = preferences.getInt(Config.HEIGHT, QNRTCSetting.DEFAULT_HEIGHT);
         boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.SW) == Config.HW;
         boolean isScreenCaptureEnabled = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.SCREEN_CAPTURE;
+        boolean isAudioOnly = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.ONLY_AUDIO_CAPTURE;
+        boolean isVideoEnable = !isAudioOnly;
 
-        if (isScreenCaptureEnabled) {
+        if (isScreenCaptureEnabled || isAudioOnly) {
             mLocalWindow.setAudioViewVisible(0);
         }
 
@@ -193,7 +202,8 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         }
 
         QNRTCSetting setting = new QNRTCSetting();
-        setting.setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
+        setting.setVideoEnabled(isVideoEnable)
+                .setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
                 .setHWCodecEnabled(isHwCodec)
                 .setScreenCaptureEnabled(isScreenCaptureEnabled)
                 .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS))
@@ -208,6 +218,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
         mControlFragment.setArguments(intent.getExtras());
         mControlFragment.setScreenCaptureEnabled(isScreenCaptureEnabled);
+        mControlFragment.setAudioOnly(isAudioOnly);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.add(R.id.control_fragment_container, mControlFragment);
         ft.commitAllowingStateLoss();
@@ -222,7 +233,8 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         mRTCManager.addRemoteWindow(mRemoteWindowF.getRemoteSurfaceView());
         mRTCManager.addRemoteWindow(mRemoteWindowG.getRemoteSurfaceView());
         mRTCManager.addRemoteWindow(mRemoteWindowH.getRemoteSurfaceView());
-        mRTCManager.initialize(this, setting, mLocalWindow.getLocalSurfaceView());
+        mRTCManager.initialize(this, setting);
+        mRTCManager.setLocalWindow(mLocalWindow.getLocalSurfaceView());
     }
 
     public void onClickScreen(View v) {
@@ -472,7 +484,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
     }
 
     private boolean isAdmin() {
-        return mUserId.toLowerCase().indexOf(QNAppServer.ADMIN_USER) != -1;
+        return mUserId.equals(QNAppServer.ADMIN_USER);
     }
 
     private synchronized void clearMergeStreamPos(String userId) {
@@ -684,6 +696,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
                 remoteWindow.updateMicrophoneStateView(isAudioMuted);
                 if (isVideoMuted || !isVideoEnabled) {
                     remoteWindow.setAudioViewVisible(mUsedWindowList.indexOf(remoteWindow));
+                    remoteWindow.setAudioOnly(!isVideoEnabled);
                 }
 
                 if (userCount <= 5) {
@@ -742,7 +755,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
 
     @Override
     public void onRemoteMute(final String userId, final boolean isAudioMuted, final boolean isVideoMuted) {
-        Log.i(TAG, "onRemoteMute: user = " + userId + ", audio = " + isAudioMuted + ", video = " + isVideoMuted);
+        Log.i(TAG, "onRemoteMute: user = " + userId + ", isAudioMuted = " + isAudioMuted + ", isVideoMuted = " + isVideoMuted);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -750,7 +763,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
                 if (remoteWindow != null) {
                     if (isVideoMuted && remoteWindow.getAudioViewVisibility() != View.VISIBLE) {
                         remoteWindow.setAudioViewVisible(mUsedWindowList.indexOf(remoteWindow));
-                    } else if (!isVideoMuted && remoteWindow.getAudioViewVisibility() != View.INVISIBLE) {
+                    } else if (!isVideoMuted && remoteWindow.getAudioViewVisibility() != View.INVISIBLE && !remoteWindow.isAudioOnly()) {
                         remoteWindow.setAudioViewInvisible();
                     }
                     remoteWindow.updateMicrophoneStateView(isAudioMuted);

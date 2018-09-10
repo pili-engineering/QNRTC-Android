@@ -12,14 +12,12 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.qiniu.droid.rtc.QNScreenCaptureUtil;
 import com.qiniu.droid.rtc.demo.BuildConfig;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.ui.SpinnerPopupWindow;
@@ -41,15 +39,11 @@ public class SettingActivity extends AppCompatActivity {
     private RadioGroup mCodecModeRadioGroup;
     private RadioButton mHwCodecMode;
     private RadioButton mSwCodecMode;
-    private RadioGroup mCaptureModeRadioGroup;
-    private RadioButton mScreenCapture;
-    private RadioButton mCameraCapture;
     private EditText mAppIdEditText;
 
     private int mSelectPos = 0;
     private String mUserName;
     private int mEncodeMode = 0;
-    private int mCaptureMode = 0;
     private List<String> mDefaultConfiguration = new ArrayList<>();
     private ArrayAdapter<String> mAdapter;
     private SpinnerPopupWindow mSpinnerPopupWindow;
@@ -69,10 +63,7 @@ public class SettingActivity extends AppCompatActivity {
         mCodecModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mHwCodecMode = (RadioButton) findViewById(R.id.hw_radio_button);
         mSwCodecMode = (RadioButton) findViewById(R.id.sw_radio_button);
-        mCaptureModeRadioGroup = (RadioGroup) findViewById(R.id.capture_mode_button);
-        mCaptureModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
-        mScreenCapture = (RadioButton) findViewById(R.id.screen_capture_button);
-        mCameraCapture = (RadioButton) findViewById(R.id.camera_capture_button);
+
         mAppIdEditText = (EditText) findViewById(R.id.app_id_edit_text);
 
         mVersionCodeTextView.setText(String.format(getString(R.string.version_code), getVersionDescription(), getBuildTimeDescription()));
@@ -101,24 +92,6 @@ public class SettingActivity extends AppCompatActivity {
             mHwCodecMode.setChecked(true);
         } else {
             mSwCodecMode.setChecked(true);
-        }
-        int captureMode = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE);
-        if (QNScreenCaptureUtil.isScreenCaptureSupported()) {
-            if (captureMode == Config.SCREEN_CAPTURE) {
-                mScreenCapture.setChecked(true);
-            } else {
-                mCameraCapture.setChecked(true);
-            }
-            mScreenCapture.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        mHwCodecMode.setChecked(true);
-                    }
-                }
-            });
-        } else {
-            mScreenCapture.setEnabled(false);
         }
 
         mSpinnerPopupWindow = new SpinnerPopupWindow(this);
@@ -153,12 +126,8 @@ public class SettingActivity extends AppCompatActivity {
 
         editor.putString(Config.APP_ID, TextUtils.isEmpty(appId) ? QNAppServer.APP_ID : appId);
 
-        if (mCaptureMode == Config.SCREEN_CAPTURE) {
-            mEncodeMode = Config.HW;
-        }
         editor.putInt(Config.CONFIG_POS, mSelectPos);
         editor.putInt(Config.CODEC_MODE, mEncodeMode);
-        editor.putInt(Config.CAPTURE_MODE, mCaptureMode);
 
         editor.putInt(Config.WIDTH, Config.DEFAULT_RESOLUTION[mSelectPos][0]);
         editor.putInt(Config.HEIGHT, Config.DEFAULT_RESOLUTION[mSelectPos][1]);
@@ -244,12 +213,6 @@ public class SettingActivity extends AppCompatActivity {
                     break;
                 case R.id.sw_radio_button:
                     mEncodeMode = Config.SW;
-                    break;
-                case R.id.camera_capture_button:
-                    mCaptureMode = Config.CAMERA_CAPTURE;
-                    break;
-                case R.id.screen_capture_button:
-                    mCaptureMode = Config.SCREEN_CAPTURE;
                     break;
             }
         }

@@ -8,7 +8,7 @@
     <string name="reconnecting_to_room">正在重连……</string>
     <string name="null_room_token_toast">room token 不能为空！！！</string>
     <string name="room_text_hint">房间名称</string>
-    <string name="join_room">加入房间</string>
+    <string name="join_room">会议房间</string>
     <string name="room_tips">如果没有该房间，则会自动创建，房间名仅支持 3 ~ 64 位字母、数字、_ 和 - 的组合</string>
     <string name="wrong_room_name_toast">非法房间名，仅支持 3 ~ 64 位字母、数字、_ 和 - 的组合 ！</string>
     <string name="null_room_name_toast">房间名不能为空！！！</string>
@@ -31,6 +31,9 @@
     <string name="negative_dialog_tips">取消</string>
     <string name="kickout_tips">确定要踢出 %1$s 这个用户吗？</string>
     <string name="screen_capture">屏幕采集</string>
-    <string name="camera_capture">摄像头采集</string>
+    <string name="camera_capture">视频通话</string>
+    <string name="audio_capture">音频通话</string>
     <string name="capture_tips">屏幕采集要求 Android 5.0+ 以及硬编</string>
+    <string name="join_live">直播房间</string>
+    <string name="live_tips">只有 admin 才有合流权限</string>
 </resources>

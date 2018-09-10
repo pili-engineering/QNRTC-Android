@@ -24,6 +24,7 @@ public class Config {
     public static final int SW = 1;
     public static final int CAMERA_CAPTURE = 0;
     public static final int SCREEN_CAPTURE = 1;
+    public static final int ONLY_AUDIO_CAPTURE = 2;
 
     public static final int [][] DEFAULT_RESOLUTION = {
             {352, 288},

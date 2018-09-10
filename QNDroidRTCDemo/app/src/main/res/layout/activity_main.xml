@@ -54,11 +54,55 @@
         android:paddingStart="15dp"
         android:paddingEnd="15dp" />
 
+    <RadioGroup
+        android:id="@+id/capture_mode_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tips_text_view"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="15dp"
+        android:orientation="horizontal"
+        android:paddingBottom="2dp"
+        android:paddingEnd="0dp"
+        android:paddingStart="0dp"
+        android:paddingTop="2dp">
+
+        <RadioButton
+            android:id="@+id/camera_capture_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:shadowColor="@color/blue"
+            android:text="@string/camera_capture"
+            android:textColor="@color/textColor" />
+
+        <RadioButton
+            android:id="@+id/audio_capture_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:shadowColor="@color/blue"
+            android:text="@string/audio_capture"
+            android:textColor="@color/textColor" />
+
+        <RadioButton
+            android:id="@+id/screen_capture_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:shadowColor="@color/blue"
+            android:text="@string/screen_capture"
+            android:textColor="@color/textColor" />
+
+    </RadioGroup>
+
     <Button
         android:id="@+id/save_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tips_text_view"
+        android:layout_below="@id/capture_mode_button"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:layout_marginTop="15dp"
@@ -68,6 +112,30 @@
         android:text="@string/join_room"
         android:textColor="@color/textColor"
         android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/live_room_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/save_button"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="15dp"
+        android:onClick="onClickLiveRoom"
+        android:background="@drawable/oval_btn_background"
+        android:gravity="center"
+        android:text="@string/join_live"
+        android:textColor="@color/textColor"
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/live_room_btn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:text="@string/live_tips"
+        android:textColor="@color/white" />
 
     <RelativeLayout
         android:layout_width="match_parent"
