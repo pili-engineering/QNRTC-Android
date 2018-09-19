@@ -7,8 +7,8 @@ android {
         applicationId "com.qiniu.droid.rtc.demo"
         minSdkVersion 18
         targetSdkVersion 25
-        versionCode 5
-        versionName "1.0.0"
+        versionCode 7
+        versionName "1.1.0"
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
     }
     buildTypes {
@@ -20,9 +20,11 @@ android {
 }
 
 dependencies {
-    compile files('libs/qndroid-rtc-1.0.0.jar')
+    compile files('libs/qndroid-rtc-1.1.0.jar')
     compile 'com.android.support:appcompat-v7:25+'
     compile 'com.squareup.okhttp3:okhttp:3.9.1'
     compile 'com.bugsnag:bugsnag-android-ndk:1.+'
     compile 'de.greenrobot:eventbus:2.4.0'
+    compile 'com.android.support:recyclerview-v7:25.4.0'
+    implementation files('libs/pldroid-player-2.1.4.jar')
 }

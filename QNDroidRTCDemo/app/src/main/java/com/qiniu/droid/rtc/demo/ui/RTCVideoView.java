@@ -20,6 +20,7 @@ public class RTCVideoView extends FrameLayout implements View.OnLongClickListene
     private TextView mAudioView;
     private OnLongClickListener mOnLongClickListener;
     private String mUserId;
+    private boolean mIsAudioOnly = false;
 
     public interface OnLongClickListener {
         void onLongClick(String userId);
@@ -94,6 +95,14 @@ public class RTCVideoView extends FrameLayout implements View.OnLongClickListene
 
     public void setOnLongClickListener(OnLongClickListener listener) {
         mOnLongClickListener = listener;
+    }
+
+    public void setAudioOnly(boolean isAudioOnly) {
+        mIsAudioOnly = isAudioOnly;
+    }
+
+    public boolean isAudioOnly() {
+        return mIsAudioOnly;
     }
 
     private void setVideoViewVisible(boolean isVisible) {

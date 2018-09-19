@@ -15,12 +15,15 @@ import android.text.Html;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import com.bugsnag.android.Bugsnag;
 import com.qiniu.droid.rtc.QNScreenCaptureUtil;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.model.ProgressEvent;
 import com.qiniu.droid.rtc.demo.model.UpdateInfo;
+import com.qiniu.droid.rtc.demo.model.UserList;
 import com.qiniu.droid.rtc.demo.service.DownloadService;
 import com.qiniu.droid.rtc.demo.utils.Config;
 import com.qiniu.droid.rtc.demo.utils.QNAppServer;
@@ -36,9 +39,15 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText mRoomEditText;
     private ProgressDialog mProgressDialog;
+    private RadioGroup mCaptureModeRadioGroup;
+    private RadioButton mScreenCapture;
+    private RadioButton mCameraCapture;
+    private RadioButton mOnlyAudioCapture;
 
     private String mUserName;
     private String mRoomName;
+    private boolean mIsScreenCaptureEnabled;
+    private int mCaptureMode = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,29 +113,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickConference(final View v) {
-        final String roomName = mRoomEditText.getText().toString().trim();
-        if (roomName.equals("")) {
-            ToastUtils.s(this, getString(R.string.null_room_name_toast));
-            return;
-        }
-        if (!MainActivity.isRoomNameOk(roomName)) {
-            ToastUtils.s(this, getString(R.string.wrong_room_name_toast));
-            return;
-        }
-
+        handleRoomInfo();
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mUserName = preferences.getString(Config.USER_NAME, "");
-        boolean isScreenCaptureEnabled = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.SCREEN_CAPTURE;
-
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(Config.ROOM_NAME, roomName);
-        editor.apply();
-        mRoomName = roomName;
-
-        if (isScreenCaptureEnabled) {
+        mIsScreenCaptureEnabled = (mCaptureMode == Config.SCREEN_CAPTURE);
+        if (mIsScreenCaptureEnabled) {
             QNScreenCaptureUtil.requestScreenCapture(this);
         } else {
-            startConference(roomName);
+            startConference(mRoomName);
         }
     }
 
@@ -148,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                             ToastUtils.s(MainActivity.this, getString(R.string.null_room_token_toast));
                             return;
                         }
-                        Intent intent = new Intent(MainActivity.this, RoomActivity.class);
+                        Intent intent = new Intent(MainActivity.this, mIsScreenCaptureEnabled ? ScreenCaptureActivity.class : RoomActivity.class);
                         intent.putExtra(RoomActivity.EXTRA_ROOM_ID, roomName.trim());
                         intent.putExtra(RoomActivity.EXTRA_ROOM_TOKEN, token);
                         intent.putExtra(RoomActivity.EXTRA_USER_ID, mUserName);
@@ -159,12 +153,88 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    public void onClickLiveRoom(View v) {
+        handleRoomInfo();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                UserList userList = QNAppServer.getInstance().getUserList(MainActivity.this, mRoomName);
+                boolean hasAdmin = false;
+                if (userList != null) {
+                    for (int i = 0; i < userList.getUsers().size(); i++) {
+                        if (userList.getUsers().get(i).getUserId().equals(QNAppServer.ADMIN_USER)) {
+                            hasAdmin = true;
+                        }
+                    }
+                    if (!hasAdmin && userList.getUsers().size() != 0) {
+                        mUserName = QNAppServer.ADMIN_USER;
+                    }
+                }
+                final String token = QNAppServer.getInstance().requestRoomToken(MainActivity.this, mUserName, mRoomName);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (token == null) {
+                            ToastUtils.s(MainActivity.this, getString(R.string.null_room_token_toast));
+                            return;
+                        }
+                        Intent intent = new Intent(MainActivity.this, LiveRoomActivity.class);
+                        intent.putExtra(LiveRoomActivity.EXTRA_ROOM_ID, mRoomName.trim());
+                        intent.putExtra(LiveRoomActivity.EXTRA_USER_ID, mUserName);
+                        intent.putExtra(LiveRoomActivity.EXTRA_ROOM_TOKEN, token);
+                        startActivity(intent);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void handleRoomInfo() {
+        String roomName = mRoomEditText.getText().toString().trim();
+        if (roomName.equals("")) {
+            ToastUtils.s(this, getString(R.string.null_room_name_toast));
+            return;
+        }
+        if (!MainActivity.isRoomNameOk(roomName)) {
+            ToastUtils.s(this, getString(R.string.wrong_room_name_toast));
+            return;
+        }
+
+        SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        mUserName = preferences.getString(Config.USER_NAME, "");
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(Config.ROOM_NAME, roomName);
+        editor.putInt(Config.CAPTURE_MODE, mCaptureMode);
+        if (mCaptureMode == Config.SCREEN_CAPTURE) {
+            editor.putInt(Config.CODEC_MODE, Config.HW);
+        }
+        editor.apply();
+        mRoomName = roomName;
+    }
+
     private void initView() {
         setContentView(R.layout.activity_main);
         mRoomEditText = (EditText) findViewById(R.id.room_edit_text);
+        mCaptureModeRadioGroup = (RadioGroup) findViewById(R.id.capture_mode_button);
+        mCaptureModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
+        mScreenCapture = (RadioButton) findViewById(R.id.screen_capture_button);
+        mCameraCapture = (RadioButton) findViewById(R.id.camera_capture_button);
+        mOnlyAudioCapture = (RadioButton) findViewById(R.id.audio_capture_button);
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         String roomName = preferences.getString(Config.ROOM_NAME, Config.PILI_ROOM);
+        int captureMode = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE);
+        if (QNScreenCaptureUtil.isScreenCaptureSupported()) {
+            if (captureMode == Config.SCREEN_CAPTURE) {
+                mScreenCapture.setChecked(true);
+            } else if (captureMode == Config.CAMERA_CAPTURE) {
+                mCameraCapture.setChecked(true);
+            } else {
+                mOnlyAudioCapture.setChecked(true);
+            }
+        } else {
+            mScreenCapture.setEnabled(false);
+        }
         mRoomEditText.setText(roomName);
     }
 
@@ -222,4 +292,21 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(Config.DOWNLOAD_URL, downloadUrl);
         startService(intent);
     }
+
+    private RadioGroup.OnCheckedChangeListener mOnCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+            switch (group.getCheckedRadioButtonId()) {
+                case R.id.camera_capture_button:
+                    mCaptureMode = Config.CAMERA_CAPTURE;
+                    break;
+                case R.id.screen_capture_button:
+                    mCaptureMode = Config.SCREEN_CAPTURE;
+                    break;
+                case R.id.audio_capture_button:
+                    mCaptureMode = Config.ONLY_AUDIO_CAPTURE;
+                    break;
+            }
+        }
+    };
 }
