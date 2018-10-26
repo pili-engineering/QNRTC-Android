@@ -7,12 +7,6 @@
     android:orientation="vertical"
     tools:context=".activity.LiveRoomActivity">
 
-    <com.qiniu.droid.rtc.QNLocalSurfaceView
-        android:id="@+id/local_surface_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
     <com.pili.pldroid.player.widget.PLVideoView
         android:id="@+id/PLVideoView"
         android:layout_width="match_parent"
