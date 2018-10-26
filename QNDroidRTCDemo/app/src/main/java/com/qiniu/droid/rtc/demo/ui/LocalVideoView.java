@@ -30,6 +30,10 @@ public class LocalVideoView extends RTCVideoView implements QNLocalVideoCallback
     }
 
     @Override
+    public void onPreviewFrame(byte[] data, int width, int height, int rotation, int fmt, long timestampNs) {
+    }
+
+    @Override
     public void onSurfaceCreated() {
 
     }

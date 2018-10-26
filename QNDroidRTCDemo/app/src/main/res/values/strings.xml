@@ -36,4 +36,5 @@
     <string name="capture_tips">屏幕采集要求 Android 5.0+ 以及硬编</string>
     <string name="join_live">直播房间</string>
     <string name="live_tips">只有 admin 才有合流权限</string>
+    <string name="live_publish_url">推流地址</string>
 </resources>

@@ -130,6 +130,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startConference(final String roomName) {
+        if (!handleRoomInfo()) {
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -154,7 +157,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickLiveRoom(View v) {
-        handleRoomInfo();
+        if (!handleRoomInfo()) {
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -189,15 +194,15 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void handleRoomInfo() {
+    private boolean handleRoomInfo() {
         String roomName = mRoomEditText.getText().toString().trim();
         if (roomName.equals("")) {
             ToastUtils.s(this, getString(R.string.null_room_name_toast));
-            return;
+            return false;
         }
         if (!MainActivity.isRoomNameOk(roomName)) {
             ToastUtils.s(this, getString(R.string.wrong_room_name_toast));
-            return;
+            return false;
         }
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
@@ -210,6 +215,7 @@ public class MainActivity extends AppCompatActivity {
         }
         editor.apply();
         mRoomName = roomName;
+        return true;
     }
 
     private void initView() {
@@ -236,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
             mScreenCapture.setEnabled(false);
         }
         mRoomEditText.setText(roomName);
+        mRoomEditText.setSelection(roomName.length());
     }
 
     private void checkUpdate() {

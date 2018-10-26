@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -47,6 +48,7 @@ import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.ui.CircleTextView;
 import com.qiniu.droid.rtc.demo.utils.QNAppServer;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
+import com.qiniu.droid.rtc.model.QNAudioDevice;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,13 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
     public static final String EXTRA_ROOM_TOKEN = "ROOM_TOKEN";
     public static final String EXTRA_USER_ID = "USER_ID";
     private static final String BASE_URL = "rtmp://pili-rtmp.qnsdk.com/sdk-live/";
+
+    private static final String[] MANDATORY_PERMISSIONS = {
+            "android.permission.MODIFY_AUDIO_SETTINGS",
+            "android.permission.RECORD_AUDIO",
+            "android.permission.INTERNET",
+            "android.permission.CAMERA"
+    };
 
     private PLVideoView mVideoView;
     private LinearLayout mLogView;
@@ -114,14 +123,23 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
         mUserList = new ArrayList<>();
         mMergeStreamPosition = new String[9];
 
+        //权限校验
+        for (String permission : MANDATORY_PERMISSIONS) {
+            if (checkCallingOrSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                logAndToast("Permission " + permission + " is not granted");
+                setResult(RESULT_CANCELED);
+                finish();
+                return;
+            }
+        }
+
         //初始化RTC
         QNRTCSetting setting = new QNRTCSetting();
         setting.setVideoEnabled(false);
         setting.setAudioEnabled(false);
         mRTCManager = new QNRTCManager();
         mRTCManager.setRoomEventListener(this);
-        QNLocalSurfaceView mLocalSurfaceView = (QNLocalSurfaceView) findViewById(R.id.local_surface_view);
-        mRTCManager.initialize(LiveRoomActivity.this, setting, mLocalSurfaceView);
+        mRTCManager.initialize(LiveRoomActivity.this, setting);
 
         //播放器相关
         mVideoView.setVideoPath(mRtmpUrl);
@@ -174,6 +192,12 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mVideoView.stopPlayback();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if (mPopWindow != null && mPopWindow.isShowing()) {
@@ -183,16 +207,9 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mVideoView.stopPlayback();
-        if (isAdmin(mUserName)) {
-            mRTCManager.stopMergeStream();
-        }
-        if (mLogToast != null) {
-            mLogToast.cancel();
-        }
-        mRTCManager.destroy();
+    public void onBackPressed() {
+        disconnect();
+        super.onBackPressed();
     }
 
     private void startCall() {
@@ -201,6 +218,19 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
         }
         logAndToast("正在连接");
         mRTCManager.joinRoom(mToken);
+    }
+
+    private void disconnect() {
+        if (mLogToast != null) {
+            mLogToast.cancel();
+        }
+        if (mRTCManager != null) {
+            if (isAdmin(mUserName)) {
+                mRTCManager.stopMergeStream();
+            }
+            mRTCManager.destroy();
+        }
+        mIsJoinedRoom = false;
     }
 
     private void logAndToast(final String msg) {
@@ -406,6 +436,7 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
             }
         });
         mIsJoinedRoom = false;
+        disconnect();
         finish();
     }
 
@@ -418,6 +449,16 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
     public void onUserKickedOut(String s) {
         Log.i(TAG, "onUserKickedOut");
         updateRemoteLogText("onUserKickedOut : " + s);
+    }
+
+    @Override
+    public void onAudioRouteChanged(QNAudioDevice routing) {
+        Log.i(TAG, "onAudioRouteChanged: " + routing.value());
+    }
+  
+    @Override
+    public void onCreateMergeJobSuccess(String mergeJobId) {
+        Log.i(TAG, "onCreateMergeJobSuccess: " + mergeJobId);
     }
 
     private class UserListAdapter extends RecyclerView.Adapter<ViewHolder> {
@@ -532,6 +573,7 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
                                     @Override
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
+                                        disconnect();
                                         finish();
                                     }
                                 })

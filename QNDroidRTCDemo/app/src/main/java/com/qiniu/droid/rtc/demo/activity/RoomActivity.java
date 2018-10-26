@@ -39,6 +39,7 @@ import com.qiniu.droid.rtc.demo.ui.RTCVideoView;
 import com.qiniu.droid.rtc.demo.utils.Config;
 import com.qiniu.droid.rtc.demo.utils.QNAppServer;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
+import com.qiniu.droid.rtc.model.QNAudioDevice;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -683,7 +684,13 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
                 + ", isAudioMuted = " + isAudioMuted + ", isVideoMuted = " + isVideoMuted);
         updateRemoteLogText("onRemoteStreamAdded : " + userId);
 
+        // 判断是否还有空闲的窗口用来绘制画面
+        if (mUnusedWindowList.size() == 0) {
+            Log.e(TAG, "There were more than 9 published users in the room, with no unUsedWindow to draw.");
+            return null;
+        }
         final RTCVideoView remoteWindow = mUnusedWindowList.remove(0);
+        remoteWindow.getRemoteSurfaceView().setZOrderMediaOverlay(true);
         remoteWindow.setUserId(userId);
         mUserWindowMap.put(userId, remoteWindow);
         mUsedWindowList.add(remoteWindow);
@@ -825,6 +832,16 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
     public void onUserKickedOut(String userId) {
         Log.i(TAG, "kicked out user: " + userId);
         updateRemoteLogText("onUserKickedOut : " + userId);
+    }
+
+    @Override
+    public void onAudioRouteChanged(QNAudioDevice routing) {
+        Log.i(TAG, "onAudioRouteChanged: " + routing.value());
+    }
+
+    @Override
+    public void onCreateMergeJobSuccess(String mergeJobId) {
+        Log.i(TAG, "onCreateMergeJobSuccess: " + mergeJobId);
     }
 
     private RTCVideoView.OnLongClickListener mOnLongClickListener = new RTCVideoView.OnLongClickListener() {
