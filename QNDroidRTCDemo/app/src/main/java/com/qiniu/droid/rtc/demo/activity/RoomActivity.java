@@ -186,6 +186,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mVideoWidth = preferences.getInt(Config.WIDTH, QNRTCSetting.DEFAULT_WIDTH);
         mVideoHeight = preferences.getInt(Config.HEIGHT, QNRTCSetting.DEFAULT_HEIGHT);
+        int fps = preferences.getInt(Config.FPS, QNRTCSetting.DEFAULT_FPS);
         boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.SW) == Config.HW;
         boolean isScreenCaptureEnabled = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.SCREEN_CAPTURE;
         boolean isAudioOnly = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.ONLY_AUDIO_CAPTURE;
@@ -207,11 +208,11 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
                 .setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
                 .setHWCodecEnabled(isHwCodec)
                 .setScreenCaptureEnabled(isScreenCaptureEnabled)
-                .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS))
-                .setVideoEncodeFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, QNRTCSetting.DEFAULT_FPS));
+                .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, fps))
+                .setVideoEncodeFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, fps));
 
         int audioBitrate = 100 * 1000;
-        int videoBitrate = preferences.getInt(Config.BITRATE, 600 * 1000);
+        int videoBitrate = preferences.getInt(Config.BITRATE, 800 * 1000);
         setting.setAudioBitrate(audioBitrate);
         setting.setVideoBitrate(videoBitrate);
         //当设置的最低码率，远高于弱网下的常规传输码率值时，会严重影响连麦的画面流畅度

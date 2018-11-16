@@ -132,6 +132,7 @@ public class SettingActivity extends AppCompatActivity {
         editor.putInt(Config.WIDTH, Config.DEFAULT_RESOLUTION[mSelectPos][0]);
         editor.putInt(Config.HEIGHT, Config.DEFAULT_RESOLUTION[mSelectPos][1]);
         editor.putInt(Config.FPS, Config.DEFAULT_FPS[mSelectPos]);
+        editor.putInt(Config.BITRATE, Config.DEFAULT_BITRATE[mSelectPos]);
 
         if (isTestMode()) {
             saveTestMode(editor);
