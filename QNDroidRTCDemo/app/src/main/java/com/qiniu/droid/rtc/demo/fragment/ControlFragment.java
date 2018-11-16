@@ -53,6 +53,7 @@ public class ControlFragment extends Fragment {
         boolean onToggleSpeaker();
 
         boolean onToggleBeauty();
+
     }
 
     public void setScreenCaptureEnabled(boolean isScreenCaptureEnabled) {
@@ -143,7 +144,6 @@ public class ControlFragment extends Fragment {
                 mIsShowingLog = !mIsShowingLog;
             }
         });
-
         return mControlView;
     }
 

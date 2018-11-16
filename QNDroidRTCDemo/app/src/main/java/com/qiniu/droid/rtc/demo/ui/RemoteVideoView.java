@@ -8,7 +8,7 @@ import com.qiniu.droid.rtc.QNRemoteSurfaceView;
 import com.qiniu.droid.rtc.QNRemoteVideoCallback;
 import com.qiniu.droid.rtc.demo.R;
 
-import org.webrtc.VideoRenderer;
+import org.webrtc.VideoFrame;
 
 public class RemoteVideoView extends RTCVideoView implements QNRemoteVideoCallback {
 
@@ -30,7 +30,7 @@ public class RemoteVideoView extends RTCVideoView implements QNRemoteVideoCallba
     }
 
     @Override
-    public void onRenderingFrame(VideoRenderer.I420Frame i420Frame) {
+    public void onRenderingFrame(VideoFrame frame) {
 
     }
 

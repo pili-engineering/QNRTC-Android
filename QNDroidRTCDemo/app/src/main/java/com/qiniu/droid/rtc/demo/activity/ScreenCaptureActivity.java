@@ -32,6 +32,7 @@ import com.qiniu.droid.rtc.demo.ui.RTCVideoView;
 import com.qiniu.droid.rtc.demo.ui.RemoteVideoView;
 import com.qiniu.droid.rtc.demo.utils.Config;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
+import com.qiniu.droid.rtc.model.QNAudioDevice;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -50,7 +51,8 @@ public class ScreenCaptureActivity extends Activity implements QNRoomEventListen
     private static final String[] MANDATORY_PERMISSIONS = {
             "android.permission.MODIFY_AUDIO_SETTINGS",
             "android.permission.RECORD_AUDIO",
-            "android.permission.INTERNET"
+            "android.permission.INTERNET",
+            "android.permission.CAMERA"
     };
 
     private List<RTCVideoView> mUsedWindowList;
@@ -379,6 +381,16 @@ public class ScreenCaptureActivity extends Activity implements QNRoomEventListen
     @Override
     public void onUserKickedOut(String userId) {
         Log.i(TAG, "kicked out user: " + userId);
+    }
+
+    @Override
+    public void onAudioRouteChanged(QNAudioDevice routing) {
+        Log.i(TAG, "onAudioRouteChanged: " + routing.value());
+    }
+
+    @Override
+    public void onCreateMergeJobSuccess(String mergeJobId) {
+        Log.i(TAG, "onCreateMergeJobSuccess: " + mergeJobId);
     }
 
     private TextureView.SurfaceTextureListener mPreviewSurfaceTextureListener = new TextureView.SurfaceTextureListener() {

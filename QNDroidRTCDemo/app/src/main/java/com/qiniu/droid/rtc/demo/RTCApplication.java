@@ -15,5 +15,6 @@ public class RTCApplication extends Application {
          * init must be called before any other func
          */
         QNRTCEnv.init(getApplicationContext());
+        QNRTCEnv.setLogFileEnabled(true);
     }
 }
