@@ -34,9 +34,16 @@ public class Config {
     };
 
     public static int [] DEFAULT_FPS = {
-            20,
-            20,
-            20,
+            15,
+            15,
+            15,
             20
+    };
+
+    public static int [] DEFAULT_BITRATE = {
+            400,
+            800,
+            800,
+            1800
     };
 }
