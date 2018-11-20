@@ -26,24 +26,24 @@ public class Config {
     public static final int SCREEN_CAPTURE = 1;
     public static final int ONLY_AUDIO_CAPTURE = 2;
 
-    public static final int [][] DEFAULT_RESOLUTION = {
+    public static final int[][] DEFAULT_RESOLUTION = {
             {352, 288},
             {640, 480},
-            {960, 540},
+            {960, 544},
             {1280, 720}
     };
 
-    public static int [] DEFAULT_FPS = {
+    public static int[] DEFAULT_FPS = {
             15,
             15,
             15,
             20
     };
 
-    public static int [] DEFAULT_BITRATE = {
-            400,
-            800,
-            800,
-            1800
+    public static int[] DEFAULT_BITRATE = {
+            300 * 1000,
+            400 * 1000,
+            700 * 1000,
+            1000 * 1000
     };
 }

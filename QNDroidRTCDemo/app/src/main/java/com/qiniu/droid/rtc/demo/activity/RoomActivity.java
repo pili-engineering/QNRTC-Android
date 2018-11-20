@@ -50,6 +50,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.qiniu.droid.rtc.QNErrorCode.ERROR_KICKED_OUT_OF_ROOM;
+import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_BITRATE;
+import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_FPS;
+import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_RESOLUTION;
 
 public class RoomActivity extends Activity implements QNRoomEventListener, ControlFragment.OnCallEvents {
 
@@ -184,9 +187,9 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         }
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        mVideoWidth = preferences.getInt(Config.WIDTH, QNRTCSetting.DEFAULT_WIDTH);
-        mVideoHeight = preferences.getInt(Config.HEIGHT, QNRTCSetting.DEFAULT_HEIGHT);
-        int fps = preferences.getInt(Config.FPS, QNRTCSetting.DEFAULT_FPS);
+        mVideoWidth = preferences.getInt(Config.WIDTH, DEFAULT_RESOLUTION[1][0]);
+        mVideoHeight = preferences.getInt(Config.HEIGHT, DEFAULT_RESOLUTION[1][1]);
+        int fps = preferences.getInt(Config.FPS, DEFAULT_FPS[1]);
         boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.SW) == Config.HW;
         boolean isScreenCaptureEnabled = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.SCREEN_CAPTURE;
         boolean isAudioOnly = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE) == Config.ONLY_AUDIO_CAPTURE;
@@ -211,12 +214,15 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
                 .setVideoPreviewFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, fps))
                 .setVideoEncodeFormat(new QNVideoFormat(mVideoWidth, mVideoHeight, fps));
 
-        int audioBitrate = 100 * 1000;
-        int videoBitrate = preferences.getInt(Config.BITRATE, 800 * 1000);
+        int audioBitrate = 64 * 1000;
+        int videoBitrate = preferences.getInt(Config.BITRATE, DEFAULT_BITRATE[1]);
+        //设置音频初始码率
         setting.setAudioBitrate(audioBitrate);
+        //设置视频初始码率
         setting.setVideoBitrate(videoBitrate);
         //当设置的最低码率，远高于弱网下的常规传输码率值时，会严重影响连麦的画面流畅度
-        setting.setBitrateRange(0, videoBitrate + audioBitrate);
+        //音频码率上限内部已有默认值，此处只传递视频码率上限即可
+        setting.setBitrateRange(0, videoBitrate);
 
         mControlFragment.setArguments(intent.getExtras());
         mControlFragment.setScreenCaptureEnabled(isScreenCaptureEnabled);
