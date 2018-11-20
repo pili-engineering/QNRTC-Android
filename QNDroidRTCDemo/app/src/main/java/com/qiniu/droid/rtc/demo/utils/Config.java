@@ -41,9 +41,9 @@ public class Config {
     };
 
     public static int [] DEFAULT_BITRATE = {
-            400,
-            800,
-            800,
-            1800
+            300 * 1000,
+            400 * 1000,
+            700 * 1000,
+            1000 * 1000
     };
 }
