@@ -647,6 +647,7 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         }
         onConnectedInternal();
         mRTCManager.publish();
+        subscribeAllRemoteStreams();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -660,7 +661,6 @@ public class RoomActivity extends Activity implements QNRoomEventListener, Contr
         if (mIsAdmin) {
             mRTCManager.setMergeStreamLayout(mUserId, 0, 0, 0, QNAppServer.STREAMING_WIDTH, QNAppServer.STREAMING_HEIGHT);
         }
-        subscribeAllRemoteStreams();
         mRTCManager.setStatisticsInfoEnabled(mUserId, true, 3000);
     }
 
