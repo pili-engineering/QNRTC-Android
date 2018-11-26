@@ -3,7 +3,7 @@
     <string-array name="conference_configuration">
         <item>352 X 288、15fps、300Kbps</item>
         <item>640 X 480、15fps、400Kbps</item>
-        <item>960 X 540、15fps、700Kbps</item>
+        <item>960 X 544、15fps、700Kbps</item>
         <item>1280 X 720、20fps、1000Kbps</item>
     </string-array>
     <string-array name="hw_black_list">
