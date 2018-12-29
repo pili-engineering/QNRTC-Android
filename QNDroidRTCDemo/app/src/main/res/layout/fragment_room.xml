@@ -25,9 +25,17 @@
         android:background="@color/editTextBackground"
         android:visibility="gone">
         <TextView
-            android:id="@+id/local_log_text"
+            android:id="@+id/local_log_text_video"
             android:layout_width="match_parent"
-            android:layout_height="140dp"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false"
+            android:textColor="@color/white" />
+        <TextView
+            android:id="@+id/local_log_text_audio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:padding="8dp"
             android:scrollbars="vertical"
             android:fadeScrollbars="false"

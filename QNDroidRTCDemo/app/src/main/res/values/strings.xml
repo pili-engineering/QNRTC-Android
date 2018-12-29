@@ -6,7 +6,7 @@
     <string name="connecting_to">正在连接: %1$s</string>
     <string name="connected_to_room">连接成功</string>
     <string name="reconnecting_to_room">正在重连……</string>
-    <string name="null_room_token_toast">room token 不能为空！！！</string>
+    <string name="null_room_token_toast">获取 room token 失败，请检查网络</string>
     <string name="room_text_hint">房间名称</string>
     <string name="join_room">会议房间</string>
     <string name="room_tips">如果没有该房间，则会自动创建，房间名仅支持 3 ~ 64 位字母、数字、_ 和 - 的组合</string>
@@ -17,8 +17,10 @@
     <string name="user_name_tips">昵称仅支持 3 ~ 50 位字母、数字、_ 和 - 的组合</string>
     <string name="wrong_user_name_toast">非法昵称，仅支持 3 ~ 50 位字母、数字、_ 和 - 的组合 ！</string>
     <string name="null_user_name_toast">昵称不能为空！！！</string>
-    <string name="hw">硬编</string>
-    <string name="sw">软编</string>
+    <string name="codec_hw">硬编</string>
+    <string name="codec_sw">软编</string>
+    <string name="maintain_resolution_yes">分辨率固定</string>
+    <string name="maintain_resolution_no">分辨率自适应</string>
     <string name="kicked_by_admin">您被管理员踢出房间！！！</string>
     <string name="version_code">版本号：%1$s, 编译时间：%2$s</string>
     <string name="log_text"> userId: %1$s\nfps: %2$d\nvideo bitrate: %3$d kbps\naudio bitrate: %4$d kbps\nvideo packet loss rate: %5$d%%\naudio packet loss rate: %6$d%%\nresolution: %7$d x %8$d </string>
@@ -33,6 +35,7 @@
     <string name="screen_capture">屏幕采集</string>
     <string name="camera_capture">视频通话</string>
     <string name="audio_capture">音频通话</string>
+    <string name="muti_track">视频通话 + 屏幕共享</string>
     <string name="capture_tips">屏幕采集要求 Android 5.0+ 以及硬编</string>
     <string name="join_live">直播房间</string>
     <string name="live_tips">只有 admin 才有合流权限</string>

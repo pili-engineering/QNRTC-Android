@@ -338,6 +338,10 @@ public class LiveRoomActivity extends Activity implements QNRoomEventListener {
     }
 
     @Override
+    public void onCameraCaptureReady() {
+    }
+
+    @Override
     public void onJoinedRoom() {
         mIsJoinedRoom = true;
         mUserList = mRTCManager.getPublishingUserList();

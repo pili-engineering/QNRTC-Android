@@ -28,7 +28,8 @@ public class ControlFragment extends Fragment {
     private ImageButton mToggleVideoButton;
     private ImageButton mLogShownButton;
     private LinearLayout mLogView;
-    private TextView mLocalTextView;
+    private TextView mLocalTextViewForVideo;
+    private TextView mLocalTextViewForAudio;
     private TextView mRemoteTextView;
     private StringBuffer mRemoteLogText;
     private Chronometer mTimer;
@@ -77,8 +78,10 @@ public class ControlFragment extends Fragment {
         mToggleVideoButton = (ImageButton) mControlView.findViewById(R.id.camera_button);
         mLogShownButton = (ImageButton) mControlView.findViewById(R.id.log_shown_button);
         mLogView = (LinearLayout) mControlView.findViewById(R.id.log_text);
-        mLocalTextView = (TextView) mControlView.findViewById(R.id.local_log_text);
-        mLocalTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
+        mLocalTextViewForVideo = (TextView) mControlView.findViewById(R.id.local_log_text_video);
+        mLocalTextViewForVideo.setMovementMethod(ScrollingMovementMethod.getInstance());
+        mLocalTextViewForAudio = (TextView) mControlView.findViewById(R.id.local_log_text_audio);
+        mLocalTextViewForAudio.setMovementMethod(ScrollingMovementMethod.getInstance());
         mRemoteTextView = (TextView) mControlView.findViewById(R.id.remote_log_text);
         mRemoteTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
         mTimer = (Chronometer) mControlView.findViewById(R.id.timer);
@@ -156,9 +159,15 @@ public class ControlFragment extends Fragment {
         mTimer.stop();
     }
 
-    public void updateLocalLogText(String logText) {
+    public void updateLocalVideoLogText(String logText) {
         if (mLogView.getVisibility() == View.VISIBLE) {
-            mLocalTextView.setText(logText);
+            mLocalTextViewForVideo.setText(logText);
+        }
+    }
+
+    public void updateLocalAudioLogText(String logText) {
+        if (mLogView.getVisibility() == View.VISIBLE) {
+            mLocalTextViewForAudio.setText(logText);
         }
     }
 

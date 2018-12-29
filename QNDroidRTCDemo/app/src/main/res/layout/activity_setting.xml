@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:shadowColor="@color/blue"
-            android:text="@string/sw"
+            android:text="@string/codec_sw"
             android:textColor="@color/textColor" />
 
         <RadioButton
@@ -112,7 +112,41 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/hw"
+            android:text="@string/codec_hw"
+            android:textColor="@color/textColor" />
+    </RadioGroup>
+
+    <RadioGroup
+        android:id="@+id/maintain_resolution_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/codec_mode_button"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/oval_edit_text_background"
+        android:orientation="horizontal"
+        android:paddingBottom="2dp"
+        android:paddingEnd="15dp"
+        android:paddingStart="15dp"
+        android:paddingTop="2dp"
+        android:visibility="gone">
+
+        <RadioButton
+            android:id="@+id/maintain_res_button_yes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:shadowColor="@color/blue"
+            android:text="@string/maintain_resolution_yes"
+            android:textColor="@color/textColor" />
+
+        <RadioButton
+            android:id="@+id/maintain_res_button_no"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/maintain_resolution_no"
             android:textColor="@color/textColor" />
     </RadioGroup>
 
@@ -122,7 +156,7 @@
         android:layout_height="wrap_content"
         android:layout_alignEnd="@id/user_name_edit_text"
         android:layout_alignStart="@id/user_name_edit_text"
-        android:layout_below="@id/codec_mode_button"
+        android:layout_below="@id/maintain_resolution_button"
         android:layout_marginTop="15dp"
         android:paddingEnd="15dp"
         android:paddingStart="15dp"

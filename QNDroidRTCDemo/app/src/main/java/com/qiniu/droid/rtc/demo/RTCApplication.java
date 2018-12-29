@@ -16,5 +16,11 @@ public class RTCApplication extends Application {
          */
         QNRTCEnv.init(getApplicationContext());
         QNRTCEnv.setLogFileEnabled(true);
+        /**
+         * 正式版本需要去掉！！！！
+         * 正式版本需要去掉！！！！
+         * 正式版本需要去掉！！！！
+         */
+        QNRTCEnv.setLogFileMaxCount(10);
     }
 }
