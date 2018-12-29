@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
+    tools:context=".activity.RoomActivity"
+    tools:ignore="MergeRootFrame">
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackViewFullScreen
+        android:id="@+id/track_window_full_screen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_a"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_b"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_c"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_d"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_e"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_f"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_g"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_h"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <com.qiniu.droid.rtc.demo.ui.UserTrackView
+        android:id="@+id/track_window_i"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <FrameLayout
+        android:id="@+id/control_fragment_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:paddingBottom="32dp" />
+
+</FrameLayout>

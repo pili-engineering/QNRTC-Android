@@ -1,16 +1,16 @@
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 25
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 28
 
     defaultConfig {
         applicationId "com.qiniu.droid.rtc.demo"
         minSdkVersion 18
-        targetSdkVersion 25
-        versionCode 9
-        versionName "1.2.0"
+        targetSdkVersion 28
+        versionCode 12
+        versionName "2.0.0"
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -18,18 +18,25 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    lintOptions {
+        disable 'GoogleAppIndexingWarning'
+        abortOnError false
     }
 }
 
 dependencies {
-    compile files('libs/qndroid-rtc-1.2.0.jar')
-    compile 'com.android.support:appcompat-v7:25+'
-    compile 'com.squareup.okhttp3:okhttp:3.9.1'
-    compile 'com.bugsnag:bugsnag-android-ndk:1.+'
-    compile 'de.greenrobot:eventbus:2.4.0'
-    compile 'com.android.support:recyclerview-v7:25.4.0'
-    implementation files('libs/pldroid-player-2.1.4.jar')
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+    implementation 'com.bugsnag:bugsnag-android-ndk:1.+'
+    implementation 'de.greenrobot:eventbus:2.4.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
+    // QNDroidRTCLibrary
+    if (buildWithQNDroidRTCLibrary) {
+        implementation project(':library')
+        implementation files('libs/pldroid-player-2.1.4.jar')
+    } else {
+        implementation fileTree(include: ['*.jar'], dir: 'libs')
+    }
 }

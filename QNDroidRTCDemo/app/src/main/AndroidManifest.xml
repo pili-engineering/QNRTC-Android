@@ -34,18 +34,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.RoomActivity"
-            android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+
         <activity
             android:name=".activity.UserConfigActivity"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".activity.SettingActivity"
             android:screenOrientation="portrait" />
@@ -64,14 +61,17 @@
                 android:resource="@xml/update_apk_paths" />
         </provider>
 
-        <activity android:name=".activity.ScreenCaptureActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
-            android:launchMode="singleTop"/>
-
-        <activity android:name=".activity.LiveRoomActivity"
+        <activity
+            android:name=".activity.LiveRoomActivity"
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.RoomActivity"
+            android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

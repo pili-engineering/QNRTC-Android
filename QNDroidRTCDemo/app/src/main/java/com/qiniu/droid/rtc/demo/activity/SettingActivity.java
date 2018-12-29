@@ -39,11 +39,15 @@ public class SettingActivity extends AppCompatActivity {
     private RadioGroup mCodecModeRadioGroup;
     private RadioButton mHwCodecMode;
     private RadioButton mSwCodecMode;
+    private RadioGroup mMaintainResRadioGroup;
+    private RadioButton mMaintainResolutionYes;
+    private RadioButton mMaintainResolutionNo;
     private EditText mAppIdEditText;
 
     private int mSelectPos = 0;
     private String mUserName;
     private int mEncodeMode = 0;
+    private boolean mMaintainResolution = false;
     private List<String> mDefaultConfiguration = new ArrayList<>();
     private ArrayAdapter<String> mAdapter;
     private SpinnerPopupWindow mSpinnerPopupWindow;
@@ -63,6 +67,11 @@ public class SettingActivity extends AppCompatActivity {
         mCodecModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mHwCodecMode = (RadioButton) findViewById(R.id.hw_radio_button);
         mSwCodecMode = (RadioButton) findViewById(R.id.sw_radio_button);
+
+        mMaintainResRadioGroup = (RadioGroup) findViewById(R.id.maintain_resolution_button);
+        mMaintainResRadioGroup.setOnCheckedChangeListener(mOnMaintainResCheckedChangeListener);
+        mMaintainResolutionYes = (RadioButton) findViewById(R.id.maintain_res_button_yes);
+        mMaintainResolutionNo = (RadioButton) findViewById(R.id.maintain_res_button_no);
 
         mAppIdEditText = (EditText) findViewById(R.id.app_id_edit_text);
 
@@ -87,11 +96,18 @@ public class SettingActivity extends AppCompatActivity {
         mSelectPos = preferences.getInt(Config.CONFIG_POS, 1);
         mConfigTextView.setText(mDefaultConfiguration.get(mSelectPos));
 
-        int codecMode = preferences.getInt(Config.CODEC_MODE, Config.SW);
+        int codecMode = preferences.getInt(Config.CODEC_MODE, Config.HW);
         if (codecMode == Config.HW) {
             mHwCodecMode.setChecked(true);
         } else {
             mSwCodecMode.setChecked(true);
+        }
+
+        mMaintainResolution = preferences.getBoolean(Config.MAINTAIN_RES, false);
+        if (mMaintainResolution) {
+            mMaintainResolutionYes.setChecked(true);
+        } else {
+            mMaintainResolutionNo.setChecked(true);
         }
 
         mSpinnerPopupWindow = new SpinnerPopupWindow(this);
@@ -128,6 +144,7 @@ public class SettingActivity extends AppCompatActivity {
 
         editor.putInt(Config.CONFIG_POS, mSelectPos);
         editor.putInt(Config.CODEC_MODE, mEncodeMode);
+        editor.putBoolean(Config.MAINTAIN_RES, mMaintainResolution);
 
         editor.putInt(Config.WIDTH, Config.DEFAULT_RESOLUTION[mSelectPos][0]);
         editor.putInt(Config.HEIGHT, Config.DEFAULT_RESOLUTION[mSelectPos][1]);
@@ -190,9 +207,9 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     private boolean isTestMode() {
-        if (mAppIdEditText.getText().toString().compareTo(QNAppServer.TEST_MODE_APP_ID) == 0) {
-            return true;
-        }
+//        if (mAppIdEditText.getText().toString().compareTo(QNAppServer.TEST_MODE_APP_ID) == 0) {
+//            return true;
+//        }
         return false;
     }
 
@@ -211,9 +228,25 @@ public class SettingActivity extends AppCompatActivity {
             switch (group.getCheckedRadioButtonId()) {
                 case R.id.hw_radio_button:
                     mEncodeMode = Config.HW;
+                    mMaintainResRadioGroup.setVisibility(View.GONE);
                     break;
                 case R.id.sw_radio_button:
                     mEncodeMode = Config.SW;
+                    mMaintainResRadioGroup.setVisibility(View.VISIBLE);
+                    break;
+            }
+        }
+    };
+
+    private RadioGroup.OnCheckedChangeListener mOnMaintainResCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+            switch (group.getCheckedRadioButtonId()) {
+                case R.id.maintain_res_button_yes:
+                    mMaintainResolution = true;
+                    break;
+                case R.id.maintain_res_button_no:
+                    mMaintainResolution = false;
                     break;
             }
         }

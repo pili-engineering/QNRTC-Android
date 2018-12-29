@@ -25,6 +25,7 @@ import com.qiniu.droid.rtc.demo.model.ProgressEvent;
 import com.qiniu.droid.rtc.demo.model.UpdateInfo;
 import com.qiniu.droid.rtc.demo.model.UserList;
 import com.qiniu.droid.rtc.demo.service.DownloadService;
+import com.qiniu.droid.rtc.demo.ui.RadioGroupFlow;
 import com.qiniu.droid.rtc.demo.utils.Config;
 import com.qiniu.droid.rtc.demo.utils.QNAppServer;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
@@ -39,10 +40,11 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText mRoomEditText;
     private ProgressDialog mProgressDialog;
-    private RadioGroup mCaptureModeRadioGroup;
+    private RadioGroupFlow mCaptureModeRadioGroup;
     private RadioButton mScreenCapture;
     private RadioButton mCameraCapture;
     private RadioButton mOnlyAudioCapture;
+    private RadioButton mMutiTrackCapture;
 
     private String mUserName;
     private String mRoomName;
@@ -116,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         handleRoomInfo();
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mUserName = preferences.getString(Config.USER_NAME, "");
-        mIsScreenCaptureEnabled = (mCaptureMode == Config.SCREEN_CAPTURE);
+        mIsScreenCaptureEnabled = (mCaptureMode == Config.SCREEN_CAPTURE || mCaptureMode == Config.MUTI_TRACK_CAPTURE);
         if (mIsScreenCaptureEnabled) {
             QNScreenCaptureUtil.requestScreenCapture(this);
         } else {
@@ -145,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
                             ToastUtils.s(MainActivity.this, getString(R.string.null_room_token_toast));
                             return;
                         }
-                        Intent intent = new Intent(MainActivity.this, mIsScreenCaptureEnabled ? ScreenCaptureActivity.class : RoomActivity.class);
+                        Intent intent = new Intent(MainActivity.this, RoomActivity.class);
                         intent.putExtra(RoomActivity.EXTRA_ROOM_ID, roomName.trim());
                         intent.putExtra(RoomActivity.EXTRA_ROOM_TOKEN, token);
                         intent.putExtra(RoomActivity.EXTRA_USER_ID, mUserName);
@@ -221,11 +223,12 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         setContentView(R.layout.activity_main);
         mRoomEditText = (EditText) findViewById(R.id.room_edit_text);
-        mCaptureModeRadioGroup = (RadioGroup) findViewById(R.id.capture_mode_button);
+        mCaptureModeRadioGroup = findViewById(R.id.capture_mode_button);
         mCaptureModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mScreenCapture = (RadioButton) findViewById(R.id.screen_capture_button);
         mCameraCapture = (RadioButton) findViewById(R.id.camera_capture_button);
         mOnlyAudioCapture = (RadioButton) findViewById(R.id.audio_capture_button);
+        mMutiTrackCapture = findViewById(R.id.muti_track_button);
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         String roomName = preferences.getString(Config.ROOM_NAME, Config.PILI_ROOM);
@@ -235,8 +238,10 @@ public class MainActivity extends AppCompatActivity {
                 mScreenCapture.setChecked(true);
             } else if (captureMode == Config.CAMERA_CAPTURE) {
                 mCameraCapture.setChecked(true);
-            } else {
+            } else if (captureMode == Config.ONLY_AUDIO_CAPTURE){
                 mOnlyAudioCapture.setChecked(true);
+            } else {
+                mMutiTrackCapture.setChecked(true);
             }
         } else {
             mScreenCapture.setEnabled(false);
@@ -312,6 +317,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.audio_capture_button:
                     mCaptureMode = Config.ONLY_AUDIO_CAPTURE;
+                    break;
+                case R.id.muti_track_button:
+                    mCaptureMode = Config.MUTI_TRACK_CAPTURE;
                     break;
             }
         }
