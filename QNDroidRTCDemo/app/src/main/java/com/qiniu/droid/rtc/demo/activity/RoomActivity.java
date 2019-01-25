@@ -295,6 +295,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
+                                finish();
                             }
                         })
                 .create()

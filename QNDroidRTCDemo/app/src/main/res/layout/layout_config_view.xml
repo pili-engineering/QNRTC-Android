@@ -1,49 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#353535">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#353535"
+    android:orientation="vertical">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/user_list_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="18dp"
         android:paddingLeft="18dp"
-        android:paddingRight="18dp"/>
+        android:paddingTop="18dp"
+        android:paddingRight="18dp" />
+
+    <Switch
+        android:id="@+id/first_video_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:checked="true"
+        android:switchPadding="10dp"
+        android:text="@string/video_camera"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="20dp">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:layout_marginRight="8dp"
                 android:text="X轴"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <EditText
-                android:id="@+id/x_edit_text"
+                android:id="@+id/first_x_edit_text"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
                 android:inputType="number"
-                android:paddingBottom="8dp"
                 android:paddingLeft="15dp"
-                android:paddingRight="15dp"
                 android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
                 android:textColor="@color/textColor"
                 android:textColorHint="@color/textColor"
                 android:textSize="13sp" />
@@ -54,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_marginStart="117dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal">
 
             <TextView
@@ -63,18 +75,19 @@
                 android:layout_marginRight="8dp"
                 android:text="Y轴"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <EditText
-                android:id="@+id/y_edit_text"
+                android:id="@+id/first_y_edit_text"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
                 android:inputType="number"
-                android:paddingBottom="8dp"
                 android:paddingLeft="15dp"
-                android:paddingRight="15dp"
                 android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
                 android:textColor="@color/textColor"
                 android:textColorHint="@color/textColor"
                 android:textSize="13sp" />
@@ -84,7 +97,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="220dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal">
 
             <TextView
@@ -93,18 +106,19 @@
                 android:layout_marginRight="8dp"
                 android:text="Z轴"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <EditText
-                android:id="@+id/z_edit_text"
+                android:id="@+id/first_z_edit_text"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
                 android:inputType="number"
-                android:paddingBottom="8dp"
                 android:paddingLeft="15dp"
-                android:paddingRight="15dp"
                 android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
                 android:textColor="@color/textColor"
                 android:textColorHint="@color/textColor"
                 android:textSize="13sp" />
@@ -115,7 +129,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginStart="9dp"
-            android:layout_marginTop="56dp"
+            android:layout_marginTop="51dp"
             android:orientation="horizontal">
 
             <TextView
@@ -124,18 +138,19 @@
                 android:layout_marginRight="8dp"
                 android:text="宽度"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <EditText
-                android:id="@+id/width_edit_text"
+                android:id="@+id/first_width_edit_text"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
                 android:inputType="number"
-                android:paddingBottom="8dp"
                 android:paddingLeft="15dp"
-                android:paddingRight="15dp"
                 android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
                 android:textColor="@color/textColor"
                 android:textColorHint="@color/textColor"
                 android:textSize="13sp" />
@@ -145,7 +160,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="113dp"
-            android:layout_marginTop="56dp"
+            android:layout_marginTop="51dp"
             android:orientation="horizontal">
 
             <TextView
@@ -154,60 +169,230 @@
                 android:layout_marginRight="8dp"
                 android:text="高度"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
             <EditText
-                android:id="@+id/height_edit_text"
+                android:id="@+id/first_height_edit_text"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
                 android:inputType="number"
-                android:paddingBottom="8dp"
                 android:paddingLeft="15dp"
-                android:paddingRight="15dp"
                 android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
+                android:textColor="@color/textColor"
+                android:textColorHint="@color/textColor"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <Switch
+        android:id="@+id/second_video_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:checked="true"
+        android:switchPadding="10dp"
+        android:text="@string/video_screen"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:text="X轴"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/second_x_edit_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
+                android:inputType="number"
+                android:paddingLeft="15dp"
+                android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
                 android:textColor="@color/textColor"
                 android:textColorHint="@color/textColor"
                 android:textSize="13sp" />
         </LinearLayout>
 
-        <Switch
-            android:id="@+id/video_switch"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="117dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:text="Y轴"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/second_y_edit_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
+                android:inputType="number"
+                android:paddingLeft="15dp"
+                android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
+                android:textColor="@color/textColor"
+                android:textColorHint="@color/textColor"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="220dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:text="Z轴"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/second_z_edit_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
+                android:inputType="number"
+                android:paddingLeft="15dp"
+                android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
+                android:textColor="@color/textColor"
+                android:textColorHint="@color/textColor"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginStart="9dp"
-            android:layout_marginTop="105dp"
-            android:checked="true"
-            android:text="视频 "
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:layout_marginTop="51dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:text="宽度"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/second_width_edit_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
+                android:inputType="number"
+                android:paddingLeft="15dp"
+                android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
+                android:textColor="@color/textColor"
+                android:textColorHint="@color/textColor"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="113dp"
+            android:layout_marginTop="51dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:text="高度"
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/second_height_edit_text"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/oval_edit_text_background"
+                android:gravity="center_horizontal"
+                android:inputType="number"
+                android:paddingLeft="15dp"
+                android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
+                android:textColor="@color/textColor"
+                android:textColorHint="@color/textColor"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
 
         <Switch
             android:id="@+id/audio_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginStart="110dp"
-            android:layout_marginTop="105dp"
+            android:layout_gravity="center_vertical"
             android:checked="true"
-            android:text="音频 "
+            android:switchPadding="10dp"
+            android:text="音频"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/btn_confirm"
             android:layout_width="70dp"
             android:layout_height="29dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignTop="@+id/video_switch"
+            android:layout_gravity="right|center_vertical"
             android:layout_marginEnd="41dp"
             android:background="@drawable/oval_btn_background"
             android:gravity="center"
             android:text="确定"
             android:textColor="@color/textColor"
             android:textSize="15sp" />
-
-    </RelativeLayout>
+    </FrameLayout>
 
 </LinearLayout>

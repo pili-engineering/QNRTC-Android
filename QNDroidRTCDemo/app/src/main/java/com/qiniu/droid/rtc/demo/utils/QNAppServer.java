@@ -32,22 +32,7 @@ public class QNAppServer {
      */
     public static final int STREAMING_WIDTH = 480;
     public static final int STREAMING_HEIGHT = 848;
-    public static final int MERGE_STREAM_WIDTH = 160;
-    public static final int MERGE_STREAM_HEIGHT = 240;
     public static final String ADMIN_USER = "admin";
-
-    public static final int[][] MERGE_STREAM_POS = new int[][] {
-            // X     Y
-            {320,   608 },
-            {320,   304 },
-            {320,   0   },
-            {160,   608 },
-            {160,   304 },
-            {160,   0   },
-            {0,     608 },
-            {0,     304 },
-            {0,     0   },
-    };
 
     private static final String TAG = "QNAppServer";
     private static final String APP_SERVER_ADDR = "https://api-demo.qnsdk.com";
