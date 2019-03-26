@@ -445,17 +445,22 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
 
     @Override
     public void onError(int errorCode, String description) {
-        if (errorCode == QNErrorCode.ERROR_TOKEN_ERROR
-                || errorCode == QNErrorCode.ERROR_TOKEN_EXPIRED
-                || errorCode == QNErrorCode.ERROR_AUTH_FAIL
-                || errorCode == QNErrorCode.ERROR_RECONNECT_TOKEN_ERROR
-                || errorCode == QNErrorCode.ERROR_SIGNAL_IO_EXCEPTION
-                || errorCode == QNErrorCode.ERROR_TOKEN_INVALID) {
+        if (errorCode == QNErrorCode.ERROR_TOKEN_INVALID
+                || errorCode == QNErrorCode.ERROR_TOKEN_ERROR
+                || errorCode == QNErrorCode.ERROR_TOKEN_EXPIRED) {
             reportError("roomToken 错误，请重新加入房间");
+        } else if (errorCode == QNErrorCode.ERROR_AUTH_FAIL
+                || errorCode == QNErrorCode.ERROR_RECONNECT_TOKEN_ERROR) {
+            // reset TrackWindowMgr
+            mTrackWindowMgr.reset();
+            // display local videoTrack
+            List<QNTrackInfo> localTrackListExcludeScreenTrack = new ArrayList<>(mLocalTrackList);
+            localTrackListExcludeScreenTrack.remove(mLocalScreenTrack);
+            mTrackWindowMgr.addTrackInfo(mUserId, localTrackListExcludeScreenTrack);
+            // rejoin Room
+            mEngine.joinRoom(mRoomToken);
         } else if (errorCode == QNErrorCode.ERROR_PUBLISH_FAIL) {
             reportError("发布失败，请重新加入房间发布");
-        } else if (errorCode == QNErrorCode.ERROR_ACCESSTOKEN_INVALID) {
-            reportError("服务端发生了一些问题，加入房间失败，请重试");
         } else {
             logAndToast("errorCode:" + errorCode + " description:" + description);
         }
