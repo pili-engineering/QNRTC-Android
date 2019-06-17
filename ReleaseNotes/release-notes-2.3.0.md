@@ -1,4 +1,4 @@
-# QNDroidRTC Release Notes for 2.2.0
+# QNDroidRTC Release Notes for 2.3.0
 
 ## 简介
 
