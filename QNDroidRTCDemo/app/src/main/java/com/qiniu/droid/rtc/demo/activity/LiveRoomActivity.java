@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.pili.pldroid.player.PLOnErrorListener;
 import com.pili.pldroid.player.PLOnInfoListener;
 import com.pili.pldroid.player.widget.PLVideoView;
+import com.qiniu.droid.rtc.QNCustomMessage;
 import com.qiniu.droid.rtc.QNRTCEngine;
 import com.qiniu.droid.rtc.QNRTCEngineEventListener;
 import com.qiniu.droid.rtc.QNRoomState;
@@ -337,6 +338,10 @@ public class LiveRoomActivity extends Activity implements QNRTCEngineEventListen
         if (mUserListAdapter != null) {
             mUserListAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onMessageReceived(QNCustomMessage message) {
     }
 
     @Override

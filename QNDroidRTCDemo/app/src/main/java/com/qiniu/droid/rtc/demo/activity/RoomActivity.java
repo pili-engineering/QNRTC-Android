@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCameraSwitchResultCallback;
+import com.qiniu.droid.rtc.QNCustomMessage;
 import com.qiniu.droid.rtc.QNErrorCode;
 import com.qiniu.droid.rtc.QNRTCEngine;
 import com.qiniu.droid.rtc.QNRTCEngineEventListener;
@@ -249,15 +250,16 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     @Override
     protected void onResume() {
         super.onResume();
+        mEngine.startCapture();
         if (!mIsJoinedRoom) {
             mEngine.joinRoom(mRoomToken);
         }
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+    protected void onPause() {
+        super.onPause();
+        mEngine.stopCapture();
     }
 
     @Override
@@ -464,6 +466,11 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         } else {
             logAndToast("errorCode:" + errorCode + " description:" + description);
         }
+    }
+
+    @Override
+    public void onMessageReceived(QNCustomMessage message) {
+
     }
 
     // Demo control
