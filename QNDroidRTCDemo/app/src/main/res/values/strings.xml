@@ -19,6 +19,8 @@
     <string name="null_user_name_toast">昵称不能为空！！！</string>
     <string name="codec_hw">硬编</string>
     <string name="codec_sw">软编</string>
+    <string name="low_sample_rate_string">16K</string>
+    <string name="high_sample_rate_string">48K</string>
     <string name="maintain_resolution_yes">分辨率固定</string>
     <string name="maintain_resolution_no">分辨率自适应</string>
     <string name="kicked_by_admin">您被管理员踢出房间！！！</string>

@@ -33,9 +33,12 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 - 支持截帧功能
 - 支持采集分辨率与编码分辨率分别采用不同朝向
 - 支持背景音乐混音功能
-- 音频支持双声道
+- 支持音频双声道
 - 支持音量大小回调
 - 支持自定义消息
+- 支持合流背景图片的设置
+- 支持音频低采样率的配置
+- 支持音频软件 AEC 的配置
 
 # 3 方案介绍
 
@@ -141,7 +144,7 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 ## 8.1 如何体验 Demo？
 
 您可以通过扫描下面的二维码，安装我们的 demo 应用『牛会议』，体验通话效果：<br>
-![](http://pk0jd2tt5.bkt.clouddn.com/Android-qnsdk-rtc-demo.png)
+![](http://docs.qnsdk.com/Android-qnsdk-rtc-demo.png)
 
 ## 8.2 实时通话功能是否收费？
 

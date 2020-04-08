@@ -12,10 +12,12 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.qiniu.droid.rtc.demo.BuildConfig;
@@ -39,15 +41,21 @@ public class SettingActivity extends AppCompatActivity {
     private RadioGroup mCodecModeRadioGroup;
     private RadioButton mHwCodecMode;
     private RadioButton mSwCodecMode;
+    private RadioGroup mAudioSampleRateRadioGroup;
+    private RadioButton mLowSampleRateBtn;
+    private RadioButton mHighSampleRateBtn;
     private RadioGroup mMaintainResRadioGroup;
     private RadioButton mMaintainResolutionYes;
     private RadioButton mMaintainResolutionNo;
     private EditText mAppIdEditText;
+    private Switch mAec3Switch;
 
     private int mSelectPos = 0;
     private String mUserName;
     private int mEncodeMode = 0;
+    private int mSampleRatePos = 0;
     private boolean mMaintainResolution = false;
+    private boolean mIsAec3Enabled = false;
     private List<String> mDefaultConfiguration = new ArrayList<>();
     private ArrayAdapter<String> mAdapter;
     private SpinnerPopupWindow mSpinnerPopupWindow;
@@ -67,6 +75,10 @@ public class SettingActivity extends AppCompatActivity {
         mCodecModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mHwCodecMode = (RadioButton) findViewById(R.id.hw_radio_button);
         mSwCodecMode = (RadioButton) findViewById(R.id.sw_radio_button);
+        mAudioSampleRateRadioGroup = findViewById(R.id.sample_rate_button);
+        mAudioSampleRateRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
+        mLowSampleRateBtn = findViewById(R.id.low_sample_rate_button);
+        mHighSampleRateBtn = findViewById(R.id.high_sample_rate_button);
 
         mMaintainResRadioGroup = (RadioGroup) findViewById(R.id.maintain_resolution_button);
         mMaintainResRadioGroup.setOnCheckedChangeListener(mOnMaintainResCheckedChangeListener);
@@ -74,6 +86,13 @@ public class SettingActivity extends AppCompatActivity {
         mMaintainResolutionNo = (RadioButton) findViewById(R.id.maintain_res_button_no);
 
         mAppIdEditText = (EditText) findViewById(R.id.app_id_edit_text);
+        mAec3Switch = findViewById(R.id.webrtc_aec3_enable_btn);
+        mAec3Switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mIsAec3Enabled = isChecked;
+            }
+        });
 
         mVersionCodeTextView.setText(String.format(getString(R.string.version_code), getVersionDescription(), getBuildTimeDescription()));
 
@@ -103,12 +122,22 @@ public class SettingActivity extends AppCompatActivity {
             mSwCodecMode.setChecked(true);
         }
 
+        int sampleRatePos = preferences.getInt(Config.SAMPLE_RATE, Config.HIGH_SAMPLE_RATE);
+        if (sampleRatePos == Config.LOW_SAMPLE_RATE) {
+            mLowSampleRateBtn.setChecked(true);
+        } else {
+            mHighSampleRateBtn.setChecked(true);
+        }
+
         mMaintainResolution = preferences.getBoolean(Config.MAINTAIN_RES, false);
         if (mMaintainResolution) {
             mMaintainResolutionYes.setChecked(true);
         } else {
             mMaintainResolutionNo.setChecked(true);
         }
+
+        mIsAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, false);
+        mAec3Switch.setChecked(mIsAec3Enabled);
 
         mSpinnerPopupWindow = new SpinnerPopupWindow(this);
         mSpinnerPopupWindow.setOnSpinnerItemClickListener(mOnSpinnerItemClickListener);
@@ -144,7 +173,9 @@ public class SettingActivity extends AppCompatActivity {
 
         editor.putInt(Config.CONFIG_POS, mSelectPos);
         editor.putInt(Config.CODEC_MODE, mEncodeMode);
+        editor.putInt(Config.SAMPLE_RATE, mSampleRatePos);
         editor.putBoolean(Config.MAINTAIN_RES, mMaintainResolution);
+        editor.putBoolean(Config.AEC3_ENABLE, mIsAec3Enabled);
 
         editor.putInt(Config.WIDTH, Config.DEFAULT_RESOLUTION[mSelectPos][0]);
         editor.putInt(Config.HEIGHT, Config.DEFAULT_RESOLUTION[mSelectPos][1]);
@@ -233,6 +264,12 @@ public class SettingActivity extends AppCompatActivity {
                 case R.id.sw_radio_button:
                     mEncodeMode = Config.SW;
                     mMaintainResRadioGroup.setVisibility(View.VISIBLE);
+                    break;
+                case R.id.low_sample_rate_button:
+                    mSampleRatePos = Config.LOW_SAMPLE_RATE;
+                    break;
+                case R.id.high_sample_rate_button:
+                    mSampleRatePos = Config.HIGH_SAMPLE_RATE;
                     break;
             }
         }

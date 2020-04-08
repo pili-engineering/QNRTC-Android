@@ -17,12 +17,16 @@ public class Config {
     public static final String HEIGHT = "height";
     public static final String FPS = "fps";
     public static final String CODEC_MODE = "encodeMode";
+    public static final String SAMPLE_RATE = "sampleRate";
     public static final String CAPTURE_MODE = "captureMode";
     public static final String BITRATE = "bitrate";
     public static final String MAINTAIN_RES = "maintainRes";
+    public static final String AEC3_ENABLE = "aec3Enable";
 
     public static final int HW = 0;
     public static final int SW = 1;
+    public static final int LOW_SAMPLE_RATE = 0;
+    public static final int HIGH_SAMPLE_RATE = 1;
     public static final int CAMERA_CAPTURE = 0;
     public static final int SCREEN_CAPTURE = 1;
     public static final int ONLY_AUDIO_CAPTURE = 2;
