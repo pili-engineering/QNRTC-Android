@@ -181,6 +181,8 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.HW) == Config.HW;
         int videoBitrate = preferences.getInt(Config.BITRATE, DEFAULT_BITRATE[1]);
         boolean isMaintainRes = preferences.getBoolean(Config.MAINTAIN_RES, false);
+        boolean isLowSampleRateEnabled = preferences.getInt(Config.SAMPLE_RATE, Config.HIGH_SAMPLE_RATE) == Config.LOW_SAMPLE_RATE;
+        boolean isAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, false);
         mCaptureMode = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE);
 
         // get the items in hw black list, and set isHwCodec false forcibly
@@ -196,6 +198,8 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 .setHWCodecEnabled(isHwCodec)
                 .setMaintainResolution(isMaintainRes)
                 .setVideoBitrate(videoBitrate)
+                .setLowAudioSampleRateEnabled(isLowSampleRateEnabled)
+                .setAEC3Enabled(isAec3Enabled)
                 .setVideoEncodeFormat(format)
                 .setVideoPreviewFormat(format);
         mEngine = QNRTCEngine.createEngine(getApplicationContext(), setting, this);

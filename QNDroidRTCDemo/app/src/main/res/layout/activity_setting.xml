@@ -150,13 +150,46 @@
             android:textColor="@color/textColor" />
     </RadioGroup>
 
+    <RadioGroup
+        android:id="@+id/sample_rate_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/maintain_resolution_button"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/oval_edit_text_background"
+        android:orientation="horizontal"
+        android:paddingBottom="2dp"
+        android:paddingEnd="15dp"
+        android:paddingStart="15dp"
+        android:paddingTop="2dp">
+
+        <RadioButton
+            android:id="@+id/low_sample_rate_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:shadowColor="@color/blue"
+            android:text="@string/low_sample_rate_string"
+            android:textColor="@color/textColor" />
+
+        <RadioButton
+            android:id="@+id/high_sample_rate_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/high_sample_rate_string"
+            android:textColor="@color/textColor" />
+    </RadioGroup>
+
     <TextView
         android:id="@+id/tips_capture_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@id/user_name_edit_text"
         android:layout_alignStart="@id/user_name_edit_text"
-        android:layout_below="@id/maintain_resolution_button"
+        android:layout_below="@id/sample_rate_button"
         android:layout_marginTop="15dp"
         android:paddingEnd="15dp"
         android:paddingStart="15dp"
@@ -181,11 +214,21 @@
         android:textColorHint="@color/textColor"
         android:textSize="15sp" />
 
+    <Switch
+        android:id="@+id/webrtc_aec3_enable_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/app_id_edit_text"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="45dp"
+        android:text="启用 AEC3"
+        android:textColor="@color/textColor"/>
+
     <LinearLayout
         android:id="@+id/test_mode_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/app_id_edit_text"
+        android:layout_below="@id/webrtc_aec3_enable_btn"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:layout_marginTop="16dp"
@@ -269,7 +312,7 @@
         android:layout_below="@id/test_mode_layout"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/oval_btn_background"
         android:gravity="center"
         android:onClick="onClickSaveConfiguration"

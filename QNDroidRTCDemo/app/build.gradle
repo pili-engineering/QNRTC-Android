@@ -6,8 +6,8 @@ android {
         applicationId "com.qiniu.droid.rtc.demo"
         minSdkVersion 18
         targetSdkVersion 28
-        versionCode 25
-        versionName "2.3.0"
+        versionCode 26
+        versionName "2.3.1"
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
     }
 
@@ -21,6 +21,11 @@ android {
     lintOptions {
         disable 'GoogleAppIndexingWarning'
         abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
