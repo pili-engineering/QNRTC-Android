@@ -23,7 +23,6 @@ import com.qiniu.droid.rtc.QNScreenCaptureUtil;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.model.ProgressEvent;
 import com.qiniu.droid.rtc.demo.model.UpdateInfo;
-import com.qiniu.droid.rtc.demo.model.UserList;
 import com.qiniu.droid.rtc.demo.service.DownloadService;
 import com.qiniu.droid.rtc.demo.ui.RadioGroupFlow;
 import com.qiniu.droid.rtc.demo.utils.Config;
@@ -138,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // 获取连麦所需的 RoomToken，需要您自行实现业务服务器的相关逻辑
+                // 详情请参考【服务端开发说明.RoomToken 签发服务】https://doc.qnsdk.com/rtn/docs/server_overview#1
                 final String token = QNAppServer.getInstance().requestRoomToken(MainActivity.this, mUserName, roomName);
 
                 runOnUiThread(new Runnable() {
@@ -162,38 +163,9 @@ public class MainActivity extends AppCompatActivity {
         if (!handleRoomInfo()) {
             return;
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                UserList userList = QNAppServer.getInstance().getUserList(MainActivity.this, mRoomName);
-                boolean hasAdmin = false;
-                if (userList != null) {
-                    for (int i = 0; i < userList.getUsers().size(); i++) {
-                        if (userList.getUsers().get(i).getUserId().equals(QNAppServer.ADMIN_USER)) {
-                            hasAdmin = true;
-                        }
-                    }
-                    if (!hasAdmin && userList.getUsers().size() != 0) {
-                        mUserName = QNAppServer.ADMIN_USER;
-                    }
-                }
-                final String token = QNAppServer.getInstance().requestRoomToken(MainActivity.this, mUserName, mRoomName);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (token == null) {
-                            ToastUtils.s(MainActivity.this, getString(R.string.null_room_token_toast));
-                            return;
-                        }
-                        Intent intent = new Intent(MainActivity.this, LiveRoomActivity.class);
-                        intent.putExtra(LiveRoomActivity.EXTRA_ROOM_ID, mRoomName.trim());
-                        intent.putExtra(LiveRoomActivity.EXTRA_USER_ID, mUserName);
-                        intent.putExtra(LiveRoomActivity.EXTRA_ROOM_TOKEN, token);
-                        startActivity(intent);
-                    }
-                });
-            }
-        }).start();
+        Intent intent = new Intent(MainActivity.this, LiveRoomActivity.class);
+        intent.putExtra(LiveRoomActivity.EXTRA_ROOM_ID, mRoomName.trim());
+        startActivity(intent);
     }
 
     private boolean handleRoomInfo() {

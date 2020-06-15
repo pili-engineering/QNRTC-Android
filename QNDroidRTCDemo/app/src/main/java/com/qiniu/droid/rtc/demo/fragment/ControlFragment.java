@@ -27,6 +27,7 @@ public class ControlFragment extends Fragment {
     private ImageButton mToggleSpeakerButton;
     private ImageButton mToggleVideoButton;
     private ImageButton mLogShownButton;
+    private ImageButton mStreamingConfigButton;
     private LinearLayout mLogView;
     private TextView mLocalTextViewForVideo;
     private TextView mLocalTextViewForAudio;
@@ -55,6 +56,7 @@ public class ControlFragment extends Fragment {
 
         boolean onToggleBeauty();
 
+        void onCallStreamingConfig();
     }
 
     public void setScreenCaptureEnabled(boolean isScreenCaptureEnabled) {
@@ -78,6 +80,7 @@ public class ControlFragment extends Fragment {
         mToggleVideoButton = (ImageButton) mControlView.findViewById(R.id.camera_button);
         mLogShownButton = (ImageButton) mControlView.findViewById(R.id.log_shown_button);
         mLogView = (LinearLayout) mControlView.findViewById(R.id.log_text);
+        mStreamingConfigButton = mControlView.findViewById(R.id.streaming_config_button);
         mLocalTextViewForVideo = (TextView) mControlView.findViewById(R.id.local_log_text_video);
         mLocalTextViewForVideo.setMovementMethod(ScrollingMovementMethod.getInstance());
         mLocalTextViewForAudio = (TextView) mControlView.findViewById(R.id.local_log_text_audio);
@@ -145,6 +148,13 @@ public class ControlFragment extends Fragment {
             public void onClick(View v) {
                 mLogView.setVisibility(mIsShowingLog ? View.INVISIBLE : View.VISIBLE);
                 mIsShowingLog = !mIsShowingLog;
+            }
+        });
+
+        mStreamingConfigButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallEvents.onCallStreamingConfig();
             }
         });
         return mControlView;
