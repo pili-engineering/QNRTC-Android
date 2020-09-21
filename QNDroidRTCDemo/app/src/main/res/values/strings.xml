@@ -24,7 +24,7 @@
     <string name="maintain_resolution_yes">分辨率固定</string>
     <string name="maintain_resolution_no">分辨率自适应</string>
     <string name="kicked_by_admin">您被管理员踢出房间！！！</string>
-    <string name="version_code">版本号：%1$s, 编译时间：%2$s</string>
+    <string name="version_code">版本号：%1$s, 编译时间：%2$s\nSDK: %3$s</string>
     <string name="log_text"> userId: %1$s\nfps: %2$d\nvideo bitrate: %3$d kbps\naudio bitrate: %4$d kbps\nvideo packet loss rate: %5$d%%\naudio packet loss rate: %6$d%%\nresolution: %7$d x %8$d </string>
     <string name="android_auto_update_download_progress">正在下载:%1$d%%</string>
     <string name="android_auto_update_dialog_btn_download">立即下载</string>
@@ -48,6 +48,13 @@
     <string name="video_camera">相机流设置</string>
     <string name="video_screen">屏幕流设置</string>
     <string name="publish_url_title">推流地址(必选)：</string>
-    <string name="publish_url">rtmp://pili-publish.qnsdk.com/sdk-live/%1$s</string>
+    <string name="publish_url">rtmp://pili-publish.qnsdk.com/sdk-live/%1$s?serialnum=%2$d</string>
     <string name="merge_job_tips">每个用户的合流配置都需单独确认才可生效，否则会被重置</string>
+
+    <string name="merge_job_btn_text">合流转推</string>
+    <string name="forward_job_btn_text">单流转推</string>
+    <string name="stop_forward_job_text">停止转推</string>
+
+    <string name="create_forward_job_warning">请使用自定义合流任务或者停止默认合流任务！</string>
+    <string name="create_merge_job_warning">请使用自定义合流任务或者停止单路转推！</string>
 </resources>

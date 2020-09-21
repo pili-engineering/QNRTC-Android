@@ -94,7 +94,7 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
-        mVersionCodeTextView.setText(String.format(getString(R.string.version_code), getVersionDescription(), getBuildTimeDescription()));
+        mVersionCodeTextView.setText(String.format(getString(R.string.version_code), getVersionDescription(), getBuildTimeDescription(), getSdkVersion()));
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mUserName = preferences.getString(Config.USER_NAME, "");
@@ -237,6 +237,10 @@ public class SettingActivity extends AppCompatActivity {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(BuildConfig.BUILD_TIMESTAMP);
     }
 
+    protected String getSdkVersion() {
+        return com.qiniu.droid.rtc.BuildConfig.VERSION_NAME + "-" + com.qiniu.droid.rtc.BuildConfig.GIT_HASH;
+    }
+
     private boolean isTestMode() {
 //        if (mAppIdEditText.getText().toString().compareTo(QNAppServer.TEST_MODE_APP_ID) == 0) {
 //            return true;
@@ -259,11 +263,9 @@ public class SettingActivity extends AppCompatActivity {
             switch (group.getCheckedRadioButtonId()) {
                 case R.id.hw_radio_button:
                     mEncodeMode = Config.HW;
-                    mMaintainResRadioGroup.setVisibility(View.GONE);
                     break;
                 case R.id.sw_radio_button:
                     mEncodeMode = Config.SW;
-                    mMaintainResRadioGroup.setVisibility(View.VISIBLE);
                     break;
                 case R.id.low_sample_rate_button:
                     mSampleRatePos = Config.LOW_SAMPLE_RATE;

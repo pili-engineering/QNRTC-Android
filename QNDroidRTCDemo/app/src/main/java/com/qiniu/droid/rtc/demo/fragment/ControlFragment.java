@@ -27,8 +27,9 @@ public class ControlFragment extends Fragment {
     private ImageButton mToggleSpeakerButton;
     private ImageButton mToggleVideoButton;
     private ImageButton mLogShownButton;
-    private ImageButton mStreamingConfigButton;
     private LinearLayout mLogView;
+    private TextView mStreamingConfigButton;
+    private TextView mForwardJobButton;
     private TextView mLocalTextViewForVideo;
     private TextView mLocalTextViewForAudio;
     private TextView mRemoteTextView;
@@ -57,6 +58,8 @@ public class ControlFragment extends Fragment {
         boolean onToggleBeauty();
 
         void onCallStreamingConfig();
+
+        void onToggleForwardJob();
     }
 
     public void setScreenCaptureEnabled(boolean isScreenCaptureEnabled) {
@@ -81,6 +84,7 @@ public class ControlFragment extends Fragment {
         mLogShownButton = (ImageButton) mControlView.findViewById(R.id.log_shown_button);
         mLogView = (LinearLayout) mControlView.findViewById(R.id.log_text);
         mStreamingConfigButton = mControlView.findViewById(R.id.streaming_config_button);
+        mForwardJobButton = mControlView.findViewById(R.id.forward_job_button);
         mLocalTextViewForVideo = (TextView) mControlView.findViewById(R.id.local_log_text_video);
         mLocalTextViewForVideo.setMovementMethod(ScrollingMovementMethod.getInstance());
         mLocalTextViewForAudio = (TextView) mControlView.findViewById(R.id.local_log_text_audio);
@@ -157,6 +161,13 @@ public class ControlFragment extends Fragment {
                 mCallEvents.onCallStreamingConfig();
             }
         });
+
+        mForwardJobButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallEvents.onToggleForwardJob();
+            }
+        });
         return mControlView;
     }
 
@@ -187,6 +198,12 @@ public class ControlFragment extends Fragment {
         }
         if (mLogView != null) {
             mRemoteTextView.setText(mRemoteLogText.append(logText + "\n"));
+        }
+    }
+
+    public void updateForwardJobText(String forwardJobText) {
+        if (mForwardJobButton != null) {
+            mForwardJobButton.setText(forwardJobText);
         }
     }
 

@@ -312,5 +312,6 @@ public class TrackWindowMgr {
         for (String userId : users) {
             removeTrackWindow(userId);
         }
+        mTrackWindowP2PMode = null;
     }
 }
