@@ -34,6 +34,8 @@ import com.qiniu.droid.rtc.QNErrorCode;
 import com.qiniu.droid.rtc.QNRTCEngine;
 import com.qiniu.droid.rtc.QNRTCEngineEventListener;
 import com.qiniu.droid.rtc.QNRTCSetting;
+import com.qiniu.droid.rtc.QNLocalAudioPacketCallback;
+import com.qiniu.droid.rtc.QNRemoteAudioPacketCallback;
 import com.qiniu.droid.rtc.QNRoomState;
 import com.qiniu.droid.rtc.QNSourceType;
 import com.qiniu.droid.rtc.QNStatisticsReport;
@@ -59,6 +61,7 @@ import com.qiniu.droid.rtc.model.QNForwardJob;
 import com.qiniu.droid.rtc.model.QNMergeJob;
 import com.qiniu.droid.rtc.model.QNMergeTrackOption;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -103,6 +106,8 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     private boolean mIsError = false;
     private boolean mIsAdmin = false;
     private boolean mIsJoinedRoom = false;
+    private boolean mAddExtraAudioData = false;
+    private boolean mEnableAudioEncrypt = false;
     private ControlFragment mControlFragment;
     private List<QNTrackInfo> mLocalTrackList;
 
@@ -328,8 +333,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 .setLowAudioSampleRateEnabled(isLowSampleRateEnabled)
                 .setAEC3Enabled(isAec3Enabled)
                 .setVideoEncodeFormat(format)
-                .setVideoPreviewFormat(format)
-                .setDnsManager(Utils.getDefaultDnsManager(getApplicationContext()));
+                .setVideoPreviewFormat(format);
         mEngine = QNRTCEngine.createEngine(getApplicationContext(), setting, this);
     }
 
@@ -343,6 +347,43 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 .setSourceType(QNSourceType.AUDIO)
                 .setMaster(true)
                 .create();
+        mEngine.setLocalAudioPacketCallback(mLocalAudioTrack, new QNLocalAudioPacketCallback() {
+            @Override
+            public int onPutExtraData(ByteBuffer extraData, int extraDataMaxSize) {
+                // 可以向 extraData 填充自定义数据并在对端通过 QNRemoteAudioPacketCallback 解析
+                if (mAddExtraAudioData) {
+                    extraData.rewind();
+                    extraData.put((byte) 0x11);
+                    extraData.flip();
+                    return extraData.remaining();
+                }
+                return 0;
+            }
+
+            @Override
+            public int onSetMaxEncryptSize(int frameSize) {
+                // 当需要根据自己的算法加密音频数据时，需要在该方法告知 SDK 加密后的最大数据大小
+                if (mEnableAudioEncrypt) {
+                    return frameSize + 10;
+                }
+                return 0;
+            }
+
+            @Override
+            public int onEncrypt(ByteBuffer frame, int frameSize, ByteBuffer encryptedFrame) {
+                // 自主加密接口，将加密后的数据放置到 encryptedFrame 中，并返回加密后大小
+                if (mEnableAudioEncrypt) {
+                    encryptedFrame.rewind();
+                    frame.rewind();
+                    encryptedFrame.put((byte) 0x18);
+                    encryptedFrame.put((byte) 0x19);
+                    encryptedFrame.put(frame);
+                    encryptedFrame.flip();
+                    return encryptedFrame.remaining();
+                }
+                return 0;
+            }
+        });
         mLocalTrackList.add(mLocalAudioTrack);
 
         QNVideoFormat screenEncodeFormat = new QNVideoFormat(mScreenWidth/2, mScreenHeight/2, 15);
@@ -669,6 +710,16 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         }
     }
 
+    @Override
+    public void onRemoteUserReconnecting(String remoteUserId) {
+        logAndToast("远端用户: " + remoteUserId + " 重连中");
+    }
+
+    @Override
+    public void onRemoteUserReconnected(String remoteUserId) {
+        logAndToast("远端用户: " + remoteUserId + " 重连成功");
+    }
+
     /**
      * 远端用户离开房间时会回调此方法
      *
@@ -706,6 +757,45 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     @Override
     public void onRemotePublished(String remoteUserId, List<QNTrackInfo> trackInfoList) {
         updateRemoteLogText("onRemotePublished:remoteUserId = " + remoteUserId);
+        for (QNTrackInfo info : trackInfoList) {
+            if (info.isAudio()) {
+                mEngine.setRemoteAudioPacketCallback(info, new QNRemoteAudioPacketCallback() {
+                    @Override
+                    public void onGetExtraData(ByteBuffer extraData, int extraDataSize) {
+                        // 如果对端有发送自定义数据，则数据会在 extraData
+                        if (extraDataSize > 0) {
+                            extraData.rewind();
+                            Log.i(TAG, "extra size " + extraDataSize + " data " + extraData.get());
+                        }
+                    }
+
+                    @Override
+                    public int onSetMaxDecryptSize(int encryptedFrameSize) {
+                        // 当需要根据自己的算法解密音频数据时，需要在该方法告知 SDK 解密后的最大数据大小
+                        if (mEnableAudioEncrypt) {
+                            return encryptedFrameSize;
+                        } else {
+                            return 0;
+                        }
+                    }
+
+                    @Override
+                    public int onDecrypt(ByteBuffer encryptedFrame, int encryptedSize, ByteBuffer frame) {
+                        // 自主解密接口，将解密后的数据放置到 frame 中，并返回解密后大小
+                        if (mEnableAudioEncrypt) {
+                            encryptedFrame.rewind();
+                            frame.rewind();
+                            if (encryptedFrame.get(0) == 0x18 && encryptedFrame.get(1) == 0x19) {
+                                encryptedFrame.position(2);
+                                frame.put(encryptedFrame);
+                                return encryptedSize - 2;
+                            }
+                        }
+                        return 0;
+                    }
+                });
+            }
+        }
         mRoomUsersMergeOption.onTracksPublished(remoteUserId, trackInfoList);
         // 如果希望在远端发布音视频的时候，自动配置合流，则可以在此处重新调用 setMergeStreamLayouts 进行配置
         if (mIsAdmin) {
