@@ -42,9 +42,9 @@ import com.qiniu.droid.rtc.QNTrackKind;
 import com.qiniu.droid.rtc.QNVideoFormat;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.fragment.ControlFragment;
-import com.qiniu.droid.rtc.demo.model.UserTrack;
-import com.qiniu.droid.rtc.demo.model.RTCUser;
-import com.qiniu.droid.rtc.demo.model.RoomUserList;
+import com.qiniu.droid.rtc.demo.model.RTCRoomUsersMergeOption;
+import com.qiniu.droid.rtc.demo.model.RTCTrackMergeOption;
+import com.qiniu.droid.rtc.demo.model.RTCUserMergeOptions;
 import com.qiniu.droid.rtc.demo.ui.CircleTextView;
 import com.qiniu.droid.rtc.demo.ui.MergeLayoutConfigView;
 import com.qiniu.droid.rtc.demo.ui.UserTrackView;
@@ -53,7 +53,9 @@ import com.qiniu.droid.rtc.demo.utils.QNAppServer;
 import com.qiniu.droid.rtc.demo.utils.SplitUtils;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
 import com.qiniu.droid.rtc.demo.utils.TrackWindowMgr;
+import com.qiniu.droid.rtc.demo.utils.Utils;
 import com.qiniu.droid.rtc.model.QNAudioDevice;
+import com.qiniu.droid.rtc.model.QNForwardJob;
 import com.qiniu.droid.rtc.model.QNMergeJob;
 import com.qiniu.droid.rtc.model.QNMergeTrackOption;
 
@@ -117,7 +119,8 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     /**
      * 合流相关
      *
-     * 注意：一个房间仅需要一个用户可以配置合流布局即可，该用户可以基于 SDK 提供的远端用户相关回调对远端用户的动态进行监听，
+     * 注意：
+     * 一个房间仅需要一个用户可以配置合流布局即可，该用户可以基于 SDK 提供的远端用户相关回调对远端用户的动态进行监听，
      * 进而进行合流布局的实时更改。
      *
      * demo 中默认 userId 为 "admin" 的用户可以控制合流布局的配置
@@ -125,9 +128,9 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     private MergeLayoutConfigView mMergeLayoutConfigView;
     private PopupWindow mPopWindow;
     private UserListAdapter mUserListAdapter;
-    private RoomUserList mRoomUserList;
-    private RTCUser mChooseUser;
-    private volatile boolean mIsStreaming;
+    private RTCRoomUsersMergeOption mRoomUsersMergeOption;
+    private RTCUserMergeOptions mChooseUser;
+    private volatile boolean mIsMergeJobStreaming;
     /**
      * 如果 QNMergeJob 为 null，则表示使用默认合流任务
      *
@@ -136,6 +139,34 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
      * 注意：创建自定义合流任务需要在加入房间之后才可执行
      */
     private QNMergeJob mCurrentMergeJob;
+
+    /**
+     * 单路转推相关
+     *
+     * 注意：
+     * 1. 单路转推仅支持配置一路音频和一路视频
+     * 2. 单路转推场景需要在初始化的时候保证配置了 "固定分辨率"{@link QNRTCSetting#setMaintainResolution} 选项的开启，否则会出问题！！！
+     *
+     * demo 中默认 userId 为 "admin" 的用户可以开启单路转推功能
+     */
+    private QNForwardJob mForwardJob;
+    private volatile boolean mIsForwardJobStreaming;
+
+    /**
+     * 如果您的场景包括合流转推和单路转推的切换，那么务必维护一个 serialNum 的参数，代表流的优先级，
+     * 使其不断自增来实现 rtmp 流的无缝切换，否则可能会出现抢流的现象
+     *
+     * QNMergeJob 以及 QNForwardJob 中 publishUrl 的格式为：rtmp://domain/app/stream?serialnum=xxx
+     *
+     * 切换流程推荐为：
+     * 1. 单路转推 -> 创建合流任务（以创建成功的回调为准） -> 停止单路转推
+     * 2. 合流转推 -> 创建单路转推任务（以创建成功的回调为准） -> 停止合流转推
+     *
+     * 注意：
+     * 1. 两种合流任务，推流地址应该保持一致，只有 serialnum 存在差异
+     * 2. 在两种推流任务切换的场景下，合流任务务必使用自定义合流任务，并指定推流地址的 serialnum
+     */
+    private int mSerialNum = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,12 +241,61 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         // 初始化合流相关配置
         initMergeLayoutConfig();
 
+        // 多人显示窗口管理类
         mTrackWindowMgr = new TrackWindowMgr(mUserId, mScreenWidth, mScreenHeight, outMetrics.density
                 , mEngine, mTrackWindowFullScreen, mTrackWindowsList);
 
         List<QNTrackInfo> localTrackListExcludeScreenTrack = new ArrayList<>(mLocalTrackList);
         localTrackListExcludeScreenTrack.remove(mLocalScreenTrack);
         mTrackWindowMgr.addTrackInfo(mUserId, localTrackListExcludeScreenTrack);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 开始视频采集
+        mEngine.startCapture();
+        if (!mIsJoinedRoom) {
+            // 加入房间
+            mEngine.joinRoom(mRoomToken);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // 停止视频采集
+        mEngine.stopCapture();
+        if (mPopWindow != null && mPopWindow.isShowing()) {
+            mPopWindow.dismiss();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mEngine != null) {
+            if (mIsAdmin && mIsMergeJobStreaming) {
+                // 如果当前正在合流，则停止
+                mEngine.stopMergeStream(mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
+                mIsMergeJobStreaming = false;
+            }
+            if (mIsAdmin && mIsForwardJobStreaming) {
+                mEngine.stopForwardJob(mForwardJob.getForwardJobId());
+                mIsForwardJobStreaming = false;
+            }
+            // 释放相关资源
+            mEngine.destroy();
+            mEngine = null;
+        }
+        if (mTrackWindowFullScreen != null) {
+            mTrackWindowFullScreen.dispose();
+        }
+        for (UserTrackView item : mTrackWindowsList) {
+            item.dispose();
+        }
+        mTrackWindowsList.clear();
+        mPopWindow = null;
     }
 
     /**
@@ -248,7 +328,8 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 .setLowAudioSampleRateEnabled(isLowSampleRateEnabled)
                 .setAEC3Enabled(isAec3Enabled)
                 .setVideoEncodeFormat(format)
-                .setVideoPreviewFormat(format);
+                .setVideoPreviewFormat(format)
+                .setDnsManager(Utils.getDefaultDnsManager(getApplicationContext()));
         mEngine = QNRTCEngine.createEngine(getApplicationContext(), setting, this);
     }
 
@@ -305,11 +386,14 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         }
     }
 
+    /**
+     * 合流转推、单路转推相关处理
+     */
     private void initMergeLayoutConfig() {
         mMergeLayoutConfigView = new MergeLayoutConfigView(this);
         mMergeLayoutConfigView.setRoomId(mRoomId);
         mUserListAdapter = new UserListAdapter();
-        mRoomUserList = new RoomUserList();
+        mRoomUsersMergeOption = new RTCRoomUsersMergeOption();
         mMergeLayoutConfigView.getUserListView().setAdapter(mUserListAdapter);
         mMergeLayoutConfigView.setOnClickedListener(new MergeLayoutConfigView.OnClickedListener() {
             @Override
@@ -319,15 +403,24 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 }
                 if (!mMergeLayoutConfigView.isStreamingEnabled()) {
                     // 处理停止合流逻辑
-                    if (mIsStreaming) {
+                    if (mIsMergeJobStreaming) {
                         // 如果正在推流，则停止之前的合流任务
                         // 传入 null，则处理默认的合流任务
                         mEngine.stopMergeStream(mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
-                        mIsStreaming = false;
+                        mIsMergeJobStreaming = false;
                         ToastUtils.s(RoomActivity.this, "停止合流！！！");
                     } else {
                         ToastUtils.s(RoomActivity.this, "未开启合流，配置未生效！！！");
                     }
+                    if (mPopWindow != null) {
+                        mPopWindow.dismiss();
+                    }
+                    return;
+                }
+                // 如果当前正在进行单路转推任务，那么切换到合流任务的时候，务必使用自定义合流任务，否则可能会出现抢流的现象
+                if (mIsForwardJobStreaming && !mMergeLayoutConfigView.isCustomMergeJob()) {
+                    Utils.showAlertDialog(RoomActivity.this, getString(R.string.create_merge_job_warning));
+                    mMergeLayoutConfigView.updateStreamingStatus(false);
                     if (mPopWindow != null) {
                         mPopWindow.dismiss();
                     }
@@ -338,83 +431,21 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                     QNMergeJob mergeJob = mMergeLayoutConfigView.getCustomMergeJob();
                     if (mergeJob != null) {
                         // 如果正在推流，则停止之前的合流任务
-                        if (mIsStreaming) {
+                        if (mIsMergeJobStreaming) {
                             mEngine.stopMergeStream(mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
                         }
                         mCurrentMergeJob = mergeJob;
                         // 创建自定义合流任务
                         mEngine.createMergeJob(mCurrentMergeJob);
                     }
-                }
-                List<UserTrack> userTracks = mMergeLayoutConfigView.updateMergeOptions();
-                List<QNMergeTrackOption> addedTrackOptions = new ArrayList<>();
-                List<QNMergeTrackOption> removedTrackOptions = new ArrayList<>();
-                for (UserTrack item : userTracks) {
-                    if (item.isTrackInclude()) {
-                        addedTrackOptions.add(item.getQNMergeTrackOption());
-                    } else {
-                        removedTrackOptions.add(item.getQNMergeTrackOption());
-                    }
-                }
-                if (!addedTrackOptions.isEmpty()) {
-                    // 配置对应 tracks 的合流配置信息
-                    mEngine.setMergeStreamLayouts(addedTrackOptions, mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
-                }
-                if (!removedTrackOptions.isEmpty()) {
-                    // 移除对应 tracks 的合流配置，移除后相应 track 的数据将不会参与合流
-                    mEngine.removeMergeStreamLayouts(removedTrackOptions, mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
+                } else {
+                    setMergeStreamLayouts();
                 }
                 if (mPopWindow != null) {
                     mPopWindow.dismiss();
                 }
-                mIsStreaming = true;
-                ToastUtils.s(RoomActivity.this, "已发送合流配置，请等待合流画面生效");
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // 开始视频采集
-        mEngine.startCapture();
-        if (!mIsJoinedRoom) {
-            // 加入房间
-            mEngine.joinRoom(mRoomToken);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // 停止视频采集
-        mEngine.stopCapture();
-        if (mPopWindow != null && mPopWindow.isShowing()) {
-            mPopWindow.dismiss();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mEngine != null) {
-            if (mIsAdmin && mIsStreaming) {
-                // 如果当前正在合流，则停止
-                mEngine.stopMergeStream(mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
-                mIsStreaming = false;
-            }
-            // 释放相关资源
-            mEngine.destroy();
-            mEngine = null;
-        }
-        if (mTrackWindowFullScreen != null) {
-            mTrackWindowFullScreen.dispose();
-        }
-        for (UserTrackView item : mTrackWindowsList) {
-            item.dispose();
-        }
-        mTrackWindowsList.clear();
-        mPopWindow = null;
     }
 
     private void logAndToast(final String msg) {
@@ -478,7 +509,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         List<QNMergeTrackOption> configuredMergeTracksOptions = new ArrayList<>();
 
         // video tracks merge layout options.
-        List<UserTrack> remoteVideoTrackInfoList = mRoomUserList.getRTCVideoTracks();
+        List<RTCTrackMergeOption> remoteVideoTrackInfoList = mRoomUsersMergeOption.getRTCVideoMergeOptions();
         if (!remoteVideoTrackInfoList.isEmpty()) {
             List<QNMergeTrackOption> mergeTrackOptions = SplitUtils.split(remoteVideoTrackInfoList.size(),
                     mCurrentMergeJob == null ? QNAppServer.STREAMING_WIDTH : mCurrentMergeJob.getWidth(),
@@ -489,45 +520,83 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
             }
 
             for (int i = 0; i < mergeTrackOptions.size(); i++) {
-                UserTrack userTrack = remoteVideoTrackInfoList.get(i);
+                RTCTrackMergeOption trackMergeOption = remoteVideoTrackInfoList.get(i);
 
-                if (!userTrack.isTrackInclude()) {
+                if (!trackMergeOption.isTrackInclude()) {
                     continue;
                 }
                 QNMergeTrackOption item = mergeTrackOptions.get(i);
-                userTrack.updateQNMergeTrackOption(item);
-                configuredMergeTracksOptions.add(userTrack.getQNMergeTrackOption());
+                trackMergeOption.updateQNMergeTrackOption(item);
+                configuredMergeTracksOptions.add(trackMergeOption.getQNMergeTrackOption());
             }
         }
 
         // audio tracks merge layout options
-        List<UserTrack> remoteAudioTrackInfoList = mRoomUserList.getRTCAudioTracks();
+        List<RTCTrackMergeOption> remoteAudioTrackInfoList = mRoomUsersMergeOption.getRTCAudioTracks();
         if (!remoteAudioTrackInfoList.isEmpty()) {
-            for (UserTrack userTrack : remoteAudioTrackInfoList) {
-                if (!userTrack.isTrackInclude()) {
+            for (RTCTrackMergeOption trackMergeOption : remoteAudioTrackInfoList) {
+                if (!trackMergeOption.isTrackInclude()) {
                     continue;
                 }
-                configuredMergeTracksOptions.add(userTrack.getQNMergeTrackOption());
+                configuredMergeTracksOptions.add(trackMergeOption.getQNMergeTrackOption());
             }
         }
 
-        if (mIsStreaming) {
+        if (mIsMergeJobStreaming) {
             mEngine.setMergeStreamLayouts(configuredMergeTracksOptions, mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
         }
     }
 
     private void userJoinedForStreaming(String userId, String userData) {
-        mRoomUserList.onUserJoined(userId, userData);
+        mRoomUsersMergeOption.onUserJoined(userId, userData);
         if (mUserListAdapter != null) {
             mUserListAdapter.notifyDataSetChanged();
         }
     }
 
     private void userLeftForStreaming(String userId) {
-        mRoomUserList.onUserLeft(userId);
+        mRoomUsersMergeOption.onUserLeft(userId);
         if (mUserListAdapter != null) {
             mUserListAdapter.notifyDataSetChanged();
         }
+    }
+
+    private int updateSerialNum() {
+        mMergeLayoutConfigView.updateSerialNum(++mSerialNum);
+        return mSerialNum;
+    }
+
+    /**
+     * 配置合流的布局信息
+     *
+     * 如果使用的默认合流任务，则无需手动 createMergeJob，setMergeStreamLayouts 中 jobId 参数传 null 即可
+     */
+    private void setMergeStreamLayouts() {
+        // 配置合流布局信息
+        List<RTCTrackMergeOption> userTracks = mMergeLayoutConfigView.updateMergeOptions();
+        List<QNMergeTrackOption> addedTrackOptions = new ArrayList<>();
+        List<QNMergeTrackOption> removedTrackOptions = new ArrayList<>();
+        for (RTCTrackMergeOption item : userTracks) {
+            if (item.isTrackInclude()) {
+                addedTrackOptions.add(item.getQNMergeTrackOption());
+            } else {
+                removedTrackOptions.add(item.getQNMergeTrackOption());
+            }
+        }
+        if (!addedTrackOptions.isEmpty()) {
+            // 配置对应 tracks 的合流配置信息
+            mEngine.setMergeStreamLayouts(addedTrackOptions, mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
+        }
+        if (!removedTrackOptions.isEmpty()) {
+            // 移除对应 tracks 的合流配置，移除后相应 track 的数据将不会参与合流
+            mEngine.removeMergeStreamLayouts(removedTrackOptions, mCurrentMergeJob == null ? null : mCurrentMergeJob.getMergeJobId());
+        }
+        mIsMergeJobStreaming = true;
+        ToastUtils.s(RoomActivity.this, "已发送合流配置，请等待合流画面生效");
+    }
+
+    private void showAlertDialog(String text) {
+
     }
 
     @TargetApi(19)
@@ -548,13 +617,14 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     public void onRoomStateChanged(QNRoomState state) {
         Log.i(TAG, "onRoomStateChanged:" + state.name());
         switch (state) {
+            case IDLE:
+                if (mIsAdmin) {
+                    userLeftForStreaming(mUserId);
+                }
+                break;
             case RECONNECTING:
                 logAndToast(getString(R.string.reconnecting_to_room));
                 mControlFragment.stopTimer();
-                if (mIsAdmin) {
-                    mRoomUserList.onTracksUnPublished(mUserId, mLocalTrackList);
-                    userLeftForStreaming(mUserId);
-                }
                 break;
             case CONNECTED:
                 if (mIsAdmin) {
@@ -569,9 +639,6 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
             case RECONNECTED:
                 logAndToast(getString(R.string.connected_to_room));
                 mControlFragment.startTimer();
-                if (mIsAdmin) {
-                    userJoinedForStreaming(mUserId, "");
-                }
                 break;
             case CONNECTING:
                 logAndToast(getString(R.string.connecting_to, mRoomId));
@@ -625,7 +692,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         updateRemoteLogText("onLocalPublished");
         mEngine.enableStatistics();
         if (mIsAdmin) {
-            mRoomUserList.onTracksPublished(mUserId, mLocalTrackList);
+            mRoomUsersMergeOption.onTracksPublished(mUserId, mLocalTrackList);
             resetMergeStream();
         }
     }
@@ -639,7 +706,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     @Override
     public void onRemotePublished(String remoteUserId, List<QNTrackInfo> trackInfoList) {
         updateRemoteLogText("onRemotePublished:remoteUserId = " + remoteUserId);
-        mRoomUserList.onTracksPublished(remoteUserId, trackInfoList);
+        mRoomUsersMergeOption.onTracksPublished(remoteUserId, trackInfoList);
         // 如果希望在远端发布音视频的时候，自动配置合流，则可以在此处重新调用 setMergeStreamLayouts 进行配置
         if (mIsAdmin) {
             resetMergeStream();
@@ -658,7 +725,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         if (mTrackWindowMgr != null) {
             mTrackWindowMgr.removeTrackInfo(remoteUserId, trackInfoList);
         }
-        mRoomUserList.onTracksUnPublished(remoteUserId, trackInfoList);
+        mRoomUsersMergeOption.onTracksUnPublished(remoteUserId, trackInfoList);
         if (mIsAdmin) {
             resetMergeStream();
         }
@@ -690,6 +757,16 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         if (mTrackWindowMgr != null) {
             mTrackWindowMgr.addTrackInfo(remoteUserId, trackInfoList);
         }
+    }
+
+    /**
+     * 订阅远端用户 Track 的 QNTrackSubConfiguration 变化时会回调此方法
+     *
+     * @param remoteUserId 远端用户 userId
+     * @param trackInfoList 订阅的远端用户 tracks 列表
+     */
+    @Override
+    public void onSubscribedProfileChanged(String remoteUserId, List<QNTrackInfo> trackInfoList) {
     }
 
     /**
@@ -767,7 +844,36 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
      */
     @Override
     public void onCreateMergeJobSuccess(String mergeJobId) {
+        updateSerialNum();
         ToastUtils.s(RoomActivity.this, "合流任务 " + mergeJobId + " 创建成功！");
+        setMergeStreamLayouts();
+
+        // 取消单路转推
+        if (mIsForwardJobStreaming) {
+            mEngine.stopForwardJob(mForwardJob.getForwardJobId());
+            mIsForwardJobStreaming = false;
+            mControlFragment.updateForwardJobText(getString(R.string.forward_job_btn_text));
+        }
+    }
+
+    /**
+     * 当单路流转推任务创建成功的时候会回调此方法
+     *
+     * @param forwardJobId 转推任务 ID
+     */
+    @Override
+    public void onCreateForwardJobSuccess(String forwardJobId) {
+        updateSerialNum();
+        mControlFragment.updateForwardJobText(getString(R.string.stop_forward_job_text));
+        ToastUtils.s(RoomActivity.this, "单路转推任务 " + forwardJobId + " 创建成功！");
+        mIsForwardJobStreaming = true;
+
+        // 取消合流转推
+        if (mIsMergeJobStreaming && mCurrentMergeJob != null) {
+            mEngine.stopMergeStream(mCurrentMergeJob.getMergeJobId());
+            mIsMergeJobStreaming = false;
+            mMergeLayoutConfigView.updateStreamingStatus(false);
+        }
     }
 
     /**
@@ -959,14 +1065,14 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     @Override
     public void onCallStreamingConfig() {
         if (!mIsAdmin) {
-            ToastUtils.s(RoomActivity.this, "只有 \"admin\" 用户可以开启推流！！！");
+            ToastUtils.s(RoomActivity.this, "只有 \"admin\" 用户可以开启合流转推！！！");
             return;
         }
         //配置页
-        if (mRoomUserList.size() == 0) {
+        if (mRoomUsersMergeOption.size() == 0) {
             return;
         }
-        mChooseUser = mRoomUserList.getRoomUserByPosition(0);
+        mChooseUser = mRoomUsersMergeOption.getRoomUserByPosition(0);
         mMergeLayoutConfigView.updateConfigInfo(mChooseUser);
         mMergeLayoutConfigView.updateMergeJobConfigInfo();
         mUserListAdapter.notifyDataSetChanged();
@@ -976,6 +1082,42 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
             mPopWindow.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.popupWindowBackground)));
         }
         mPopWindow.showAtLocation(getWindow().getDecorView().getRootView(), Gravity.BOTTOM, 0, 0);
+    }
+
+    @Override
+    public void onToggleForwardJob() {
+        if (!mIsAdmin) {
+            ToastUtils.s(RoomActivity.this, "只有 \"admin\" 用户可以开启单流转推！！！");
+            return;
+        }
+        if (!mIsForwardJobStreaming) {
+            // 如果当前正在进行默认合流任务的转推，则不允许切换成单路转推，需要停止默认合流任务或者使用自定义合流任务
+            if (mIsMergeJobStreaming && mCurrentMergeJob == null) {
+                Utils.showAlertDialog(this, getString(R.string.create_forward_job_warning));
+                return;
+            }
+            if (mForwardJob == null) {
+                mForwardJob = new QNForwardJob();
+                mForwardJob.setForwardJobId(mRoomId);
+                mForwardJob.setAudioTrack(mLocalAudioTrack);
+                switch (mCaptureMode) {
+                    case Config.CAMERA_CAPTURE:
+                    case Config.MUTI_TRACK_CAPTURE:
+                        mForwardJob.setVideoTrack(mLocalVideoTrack);
+                        break;
+                    case Config.SCREEN_CAPTURE:
+                        mForwardJob.setVideoTrack(mLocalScreenTrack);
+                        break;
+                }
+            }
+            mForwardJob.setPublishUrl(String.format(getResources().getString(R.string.publish_url), mRoomId, mSerialNum));
+            mEngine.createForwardJob(mForwardJob);
+        } else {
+            mEngine.stopForwardJob(mForwardJob.getForwardJobId());
+            mIsForwardJobStreaming = false;
+            mControlFragment.updateForwardJobText(getString(R.string.forward_job_btn_text));
+            ToastUtils.s(RoomActivity.this, "已停止 id=" + mForwardJob.getForwardJobId() + " 的单流转推！！！");
+        }
     }
 
     /**
@@ -996,8 +1138,8 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            RTCUser rtcUser = mRoomUserList.getRoomUserByPosition(position);
-            String userId = rtcUser.getUserId();
+            RTCUserMergeOptions RTCUserMergeOptions = mRoomUsersMergeOption.getRoomUserByPosition(position);
+            String userId = RTCUserMergeOptions.getUserId();
             holder.username.setText(userId);
             holder.username.setCircleColor(mColor[position % 4]);
             if (mChooseUser != null && mChooseUser.getUserId().equals(userId)) {
@@ -1008,7 +1150,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mChooseUser = mRoomUserList.getRoomUserByPosition(holder.getAdapterPosition());
+                    mChooseUser = mRoomUsersMergeOption.getRoomUserByPosition(holder.getAdapterPosition());
                     mMergeLayoutConfigView.updateConfigInfo(mChooseUser);
                     notifyDataSetChanged();
                 }
@@ -1017,7 +1159,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
 
         @Override
         public int getItemCount() {
-            return mRoomUserList.size();
+            return mRoomUsersMergeOption.size();
         }
     }
 
