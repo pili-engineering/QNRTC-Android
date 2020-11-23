@@ -18,6 +18,6 @@ public class RTCApplication extends Application {
         QNRTCEnv.init(getApplicationContext());
         QNRTCEnv.setLogFileEnabled(true);
         // 设置自定义 DNS manager，不设置则使用 SDK 默认 DNS 服务
-        QNRTCEnv.setDnsManager(Utils.getDefaultDnsManager(getApplicationContext()));
+        new Thread(() -> QNRTCEnv.setDnsManager(Utils.getDefaultDnsManager(getApplicationContext()))).start();
     }
 }

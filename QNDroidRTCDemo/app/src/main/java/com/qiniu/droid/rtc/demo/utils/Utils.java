@@ -37,6 +37,14 @@ public final class Utils {
                 .show();
     }
 
+    /**
+     * 创建自定义 dns manager
+     *
+     * 注意：该方法需要在子线程中调用，否则可能会抛异常
+     *
+     * @param context 上下文
+     * @return dns manager
+     */
     public static DnsManager getDefaultDnsManager(Context context) {
         IResolver r0 = null;
         try {

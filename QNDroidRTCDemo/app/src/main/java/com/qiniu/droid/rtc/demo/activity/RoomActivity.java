@@ -29,12 +29,13 @@ import android.widget.Toast;
 
 import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCameraSwitchResultCallback;
+import com.qiniu.droid.rtc.QNCaptureVideoCallback;
 import com.qiniu.droid.rtc.QNCustomMessage;
 import com.qiniu.droid.rtc.QNErrorCode;
+import com.qiniu.droid.rtc.QNLocalAudioPacketCallback;
 import com.qiniu.droid.rtc.QNRTCEngine;
 import com.qiniu.droid.rtc.QNRTCEngineEventListener;
 import com.qiniu.droid.rtc.QNRTCSetting;
-import com.qiniu.droid.rtc.QNLocalAudioPacketCallback;
 import com.qiniu.droid.rtc.QNRemoteAudioPacketCallback;
 import com.qiniu.droid.rtc.QNRoomState;
 import com.qiniu.droid.rtc.QNSourceType;
@@ -61,12 +62,16 @@ import com.qiniu.droid.rtc.model.QNForwardJob;
 import com.qiniu.droid.rtc.model.QNMergeJob;
 import com.qiniu.droid.rtc.model.QNMergeTrackOption;
 
+import org.webrtc.VideoFrame;
+
+import java.util.concurrent.Semaphore;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_BITRATE;
 import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_FPS;
@@ -173,6 +178,8 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
      */
     private int mSerialNum = 0;
 
+    private Semaphore mCaptureStoppedSem = new Semaphore(1);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -259,10 +266,22 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     protected void onResume() {
         super.onResume();
         // 开始视频采集
-        mEngine.startCapture();
+        startCaptureAfterAcquire();
         if (!mIsJoinedRoom) {
             // 加入房间
             mEngine.joinRoom(mRoomToken);
+        }
+    }
+
+    private void startCaptureAfterAcquire() {
+        boolean acquired = false;
+        try {
+            acquired = mCaptureStoppedSem.tryAcquire(2000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (acquired) {
+            mEngine.startCapture();
         }
     }
 
@@ -335,6 +354,28 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 .setVideoEncodeFormat(format)
                 .setVideoPreviewFormat(format);
         mEngine = QNRTCEngine.createEngine(getApplicationContext(), setting, this);
+        mEngine.setCaptureVideoCallBack(new QNCaptureVideoCallback() {
+            @Override
+            public void onCaptureStarted() {
+
+            }
+
+            @Override
+            public void onRenderingFrame(VideoFrame.TextureBuffer texBuf, long timestampNs) {
+
+            }
+
+            @Override
+            public void onPreviewFrame(byte[] data, int width, int height, int rotation, int fmt, long timestampNs) {
+
+            }
+
+            @Override
+            public void onCaptureStopped() {
+                mCaptureStoppedSem.drainPermits();
+                mCaptureStoppedSem.release();
+            }
+        });
     }
 
     /**
