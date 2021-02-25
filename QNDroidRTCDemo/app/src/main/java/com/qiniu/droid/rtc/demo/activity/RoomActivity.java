@@ -62,6 +62,7 @@ import com.qiniu.droid.rtc.model.QNForwardJob;
 import com.qiniu.droid.rtc.model.QNMergeJob;
 import com.qiniu.droid.rtc.model.QNMergeTrackOption;
 
+import org.webrtc.Size;
 import org.webrtc.VideoFrame;
 
 import java.util.concurrent.Semaphore;
@@ -342,7 +343,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         mCaptureMode = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE);
 
         // 1. VideoPreviewFormat 和 VideoEncodeFormat 建议保持一致
-        // 2. 如果远端连麦出现回声的现象，可以通过配置 setLowAudioSampleRateEnabled(true) 或者 setAEC3Enabled(true) 后再做进一步测试，并将设备信息反馈给七牛技术支持
+        // 2. 如果远端连麦出现回声的现象，可以通过配置 setLowAudioSampleRateEnabled(true) 和 setAEC3Enabled(true) 后再做进一步测试，并将设备信息反馈给七牛技术支持
         QNVideoFormat format = new QNVideoFormat(videoWidth, videoHeight, fps);
         QNRTCSetting setting = new QNRTCSetting();
         setting.setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
@@ -355,6 +356,30 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 .setVideoPreviewFormat(format);
         mEngine = QNRTCEngine.createEngine(getApplicationContext(), setting, this);
         mEngine.setCaptureVideoCallBack(new QNCaptureVideoCallback() {
+
+            @Override
+            public int[] onCaptureOpened(List<Size> sizes, List<Integer> fpsAscending) {
+                // 根据设备能力选择匹配的采集参数
+                int wantSize = -1; // 选择的分辨率下标, -1 表示不做选择, 使用 QNRTCSetting 的设置
+                int wantFps = -1;  // 选择的帧率下标, -1 表示不做选择, 使用 QNRTCSetting 的设置
+                /**
+                 * 以下代码仅示例：
+                 * 当硬件可用分辨率和当前设置宽高一致时，直接选择该分辨率；当没有完全一致的宽高时，选择使用高度匹配的一个分辨率;
+                 * 您也可以根据自己业务需要，选择宽高最接近的一个分辨率或其他匹配方式。
+                 *
+                 * 如果没有需要，也可以返回 -1 由 SDK 根据设置来匹配接近的分辨率。
+                 */
+                for (int i = 0; i < sizes.size(); i++) {
+                   if (sizes.get(i).height == videoHeight) {
+                       wantSize = i;
+                       if (sizes.get(i).width == videoWidth) {
+                            break;
+                       }
+                   }
+                }
+                return new int[] {wantSize, wantFps};
+            }
+
             @Override
             public void onCaptureStarted() {
 
