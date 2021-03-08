@@ -86,6 +86,8 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     public static final String EXTRA_ROOM_TOKEN = "ROOM_TOKEN";
     public static final String EXTRA_ROOM_ID = "ROOM_ID";
 
+    private static final int JOB_STOP_DELAY_TIME = 5000;
+
     private static final String[] MANDATORY_PERMISSIONS = {
             "android.permission.MODIFY_AUDIO_SETTINGS",
             "android.permission.RECORD_AUDIO",
@@ -1006,7 +1008,13 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
 
         // 取消单路转推
         if (mIsForwardJobStreaming) {
-            mEngine.stopForwardJob(mForwardJob.getForwardJobId());
+            // 注意：
+            // 1. A 房间中创建的转推任务，只能在 A 房间中进行销毁，无法在其他房间中销毁
+            // 2. JOB_STOP_DELAY_TIME 代表转推任务延迟关闭的时间，如果您的场景涉及到房间的切换以及不同转推任务
+            // 的切换，为了保证切换场景下播放的连续性，建议您务必添加延迟关闭时间；
+            // 3. 如果您的业务场景不涉及到跨房间的转推任务切换，可以不用设置延迟关闭时间，直接调用
+            // mEngine.stopForwardJob(mForwardJob.getForwardJobId()) 即可，SDK 默认会立即停止转推任务
+            mEngine.stopForwardJob(mForwardJob.getForwardJobId(), JOB_STOP_DELAY_TIME);
             mIsForwardJobStreaming = false;
             mControlFragment.updateForwardJobText(getString(R.string.forward_job_btn_text));
         }
@@ -1026,7 +1034,13 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
 
         // 取消合流转推
         if (mIsMergeJobStreaming && mCurrentMergeJob != null) {
-            mEngine.stopMergeStream(mCurrentMergeJob.getMergeJobId());
+            // 注意：
+            // 1. A 房间中创建的转推任务，只能在 A 房间中进行销毁，无法在其他房间中销毁
+            // 2. JOB_STOP_DELAY_TIME 代表转推任务延迟关闭的时间，如果您的场景涉及到房间的切换以及不同转推任务
+            // 的切换，为了保证切换场景下播放的连续性，建议您务必添加延迟关闭时间；
+            // 3. 如果您的业务场景不涉及到跨房间的转推任务切换，可以不用设置延迟关闭时间，直接调用
+            // mEngine.stopForwardJob(mForwardJob.getForwardJobId()) 即可，SDK 默认会立即停止转推任务
+            mEngine.stopMergeStream(mCurrentMergeJob.getMergeJobId(), JOB_STOP_DELAY_TIME);
             mIsMergeJobStreaming = false;
             mMergeLayoutConfigView.updateStreamingStatus(false);
         }
