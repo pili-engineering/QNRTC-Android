@@ -6,7 +6,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -68,6 +67,7 @@ public class MergeLayoutConfigView extends FrameLayout {
     private RadioGroup mStretchModeRadioGroup;
     private QNStretchMode mStretchMode;
     private QNMergeJob mCurrentMergeJob;
+    private boolean mCurrentMergeJobValid;
 
     private String mRoomId;
     private boolean mIsStreamingEnabled;
@@ -160,15 +160,11 @@ public class MergeLayoutConfigView extends FrameLayout {
     }
 
     /**
-     * 获取选中用户更新后的合流配置信息
-     *
-     * @return 选中用户的合流配置信息
+     * 同步 UI 选择的合流参数到合流配置类
      */
-    public List<RTCTrackMergeOption> updateMergeOptions() {
-        List<RTCTrackMergeOption> result = new ArrayList<>();
+    public void updateMergeOptions() {
         if (mUserAudioTrack != null) {
             mUserAudioTrack.setTrackInclude(mAudioSwitch.isChecked());
-            result.add(mUserAudioTrack);
         }
         if (mUserFirstVideoTrack != null) {
             mUserFirstVideoTrack.setTrackInclude(mFirstVideoSwitch.isChecked());
@@ -187,7 +183,6 @@ public class MergeLayoutConfigView extends FrameLayout {
             } catch (Exception e) {
                 ToastUtils.s(getContext(), "请输入所有值");//处理空值
             }
-            result.add(mUserFirstVideoTrack);
         }
         if (mUserSecondVideoTrack != null) {
             mUserSecondVideoTrack.setTrackInclude(mSecondVideoSwitch.isChecked());
@@ -206,9 +201,7 @@ public class MergeLayoutConfigView extends FrameLayout {
             } catch (Exception e) {
                 ToastUtils.s(getContext(), "请输入所有值");//处理空值
             }
-            result.add(mUserSecondVideoTrack);
         }
-        return result;
     }
 
     /**
@@ -233,6 +226,7 @@ public class MergeLayoutConfigView extends FrameLayout {
         mCurrentMergeJob.setMaxBitrate(Integer.parseInt(mStreamMaxBitrateText.getText().toString().trim()) * 1000);
         mCurrentMergeJob.setFps(Integer.parseInt(mStreamFpsText.getText().toString().trim()));
         mCurrentMergeJob.setStretchMode(mStretchMode);
+        mCurrentMergeJobValid = true;
         return mCurrentMergeJob;
     }
 
@@ -269,6 +263,22 @@ public class MergeLayoutConfigView extends FrameLayout {
                 }
             }
         }
+    }
+
+    /**
+     * 更新当前合流任务是否可用
+     * @param valid 是否可用
+     */
+    public void updateMergeJobValid(boolean valid) {
+        mCurrentMergeJobValid = valid;
+    }
+
+    /**
+     * 当前合流任务是否可用
+     * @return valid 是否可用
+     */
+    public boolean isMergeJobValid() {
+        return mCurrentMergeJobValid;
     }
 
     public void updateSerialNum(int serialNum) {
@@ -454,8 +464,9 @@ public class MergeLayoutConfigView extends FrameLayout {
         if (mCurrentMergeJob == null) {
             return true;
         }
-        return !mCustomJobIdText.getText().toString().trim().equals(mCurrentMergeJob.getMergeJobId())
-                || !mPublishUrlText.getText().toString().trim().equals(mCurrentMergeJob.getPublishUrl())
+        return  !mCurrentMergeJobValid
+                || !mCustomJobIdText.getText().toString().trim().equals(mCurrentMergeJob.getMergeJobId())
+                || !isPublishUrlIdentity()
                 || Integer.parseInt(mStreamWidthText.getText().toString().trim()) != mCurrentMergeJob.getWidth()
                 || Integer.parseInt(mStreamHeightText.getText().toString().trim()) != mCurrentMergeJob.getHeight()
                 || Integer.parseInt(mStreamBitrateText.getText().toString().trim()) != mCurrentMergeJob.getBitrate() / 1000
@@ -463,5 +474,11 @@ public class MergeLayoutConfigView extends FrameLayout {
                 || Integer.parseInt(mStreamMaxBitrateText.getText().toString().trim()) != mCurrentMergeJob.getMaxBitrate() / 1000
                 || Integer.parseInt(mStreamFpsText.getText().toString().trim()) != mCurrentMergeJob.getFps()
                 || mStretchMode != mCurrentMergeJob.getStretchMode();
+    }
+
+    private boolean isPublishUrlIdentity() {
+        String url1 = mPublishUrlText.getText().toString().trim();
+        String url2 = mCurrentMergeJob.getPublishUrl();
+        return url1.substring(0, url1.indexOf("?serialnum")).equals(url2.substring(0, url2.indexOf("?serialnum")));
     }
 }

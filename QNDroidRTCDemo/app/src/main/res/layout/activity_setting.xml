@@ -226,6 +226,7 @@
                 android:id="@+id/webrtc_aec3_enable_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:switchPadding="10dp"
                 android:layout_below="@id/app_id_edit_text"
                 android:layout_marginTop="16dp"
                 android:layout_marginLeft="45dp"
@@ -313,11 +314,27 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/report_log"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/test_mode_layout"
+                android:layout_marginTop="24dp"
+                android:layout_marginLeft="30dp"
+                android:padding="10dp"
+                android:gravity="center"
+                android:onClick="onClickUploadLog"
+                android:drawableLeft="@drawable/ic_upload"
+                android:drawablePadding="10dp"
+                android:text="上传日志"
+                android:textColor="@color/textColor"
+                android:textSize="15sp" />
+
             <Button
                 android:id="@+id/save_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/test_mode_layout"
+                android:layout_below="@id/report_log"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
                 android:layout_marginTop="24dp"

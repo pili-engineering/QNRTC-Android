@@ -56,6 +56,12 @@ public class RTCRoomUsersMergeOption {
         }
     }
 
+    public void onUserLeft() {
+        mRTCVideoMergeOptions.clear();
+        mRTCUsers.clear();
+        mRTCUserMap.clear();
+    }
+
     public void onTracksPublished(String userId, List<QNTrackInfo> trackInfoList) {
         RTCUserMergeOptions userMergeOptions = getRoomUserByUserId(userId);
         if (userMergeOptions == null) {

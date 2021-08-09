@@ -4,9 +4,11 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -14,6 +16,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -48,6 +51,7 @@ import com.qiniu.droid.rtc.demo.fragment.ControlFragment;
 import com.qiniu.droid.rtc.demo.model.RTCRoomUsersMergeOption;
 import com.qiniu.droid.rtc.demo.model.RTCTrackMergeOption;
 import com.qiniu.droid.rtc.demo.model.RTCUserMergeOptions;
+import com.qiniu.droid.rtc.demo.service.ForegroundService;
 import com.qiniu.droid.rtc.demo.ui.CircleTextView;
 import com.qiniu.droid.rtc.demo.ui.MergeLayoutConfigView;
 import com.qiniu.droid.rtc.demo.ui.UserTrackView;
@@ -65,13 +69,13 @@ import com.qiniu.droid.rtc.model.QNMergeTrackOption;
 import org.webrtc.Size;
 import org.webrtc.VideoFrame;
 
-import java.util.concurrent.Semaphore;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_BITRATE;
@@ -269,7 +273,9 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     protected void onResume() {
         super.onResume();
         // 开始视频采集
-        startCaptureAfterAcquire();
+        if (mCaptureMode == Config.CAMERA_CAPTURE || mCaptureMode == Config.MUTI_TRACK_CAPTURE) {
+            startCaptureAfterAcquire();
+        }
         if (!mIsJoinedRoom) {
             // 加入房间
             mEngine.joinRoom(mRoomToken);
@@ -292,7 +298,9 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     protected void onPause() {
         super.onPause();
         // 停止视频采集
-        mEngine.stopCapture();
+        if (mCaptureMode == Config.CAMERA_CAPTURE || mCaptureMode == Config.MUTI_TRACK_CAPTURE) {
+            mEngine.stopCapture();
+        }
         if (mPopWindow != null && mPopWindow.isShowing()) {
             mPopWindow.dismiss();
         }
@@ -340,12 +348,18 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
          * 如果打开分辨率保持开关，则只会调整帧率来适应网络波动。
          */
         boolean isMaintainRes = preferences.getBoolean(Config.MAINTAIN_RES, false);
+
+        /**
+         * 如果您的使用场景需要双讲，建议按照默认设置，保持 QNRTCSetting#setLowAudioSampleRateEnabled
+         * 和 QNRTCSetting#setAEC3Enabled 为 true 以防止出现对讲回声
+         */
         boolean isLowSampleRateEnabled = preferences.getInt(Config.SAMPLE_RATE, Config.HIGH_SAMPLE_RATE) == Config.LOW_SAMPLE_RATE;
-        boolean isAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, false);
+        boolean isAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, true);
         mCaptureMode = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE);
 
-        // 1. VideoPreviewFormat 和 VideoEncodeFormat 建议保持一致
-        // 2. 如果远端连麦出现回声的现象，可以通过配置 setLowAudioSampleRateEnabled(true) 和 setAEC3Enabled(true) 后再做进一步测试，并将设备信息反馈给七牛技术支持
+        /**
+         * VideoPreviewFormat 和 VideoEncodeFormat 建议保持一致
+         */
         QNVideoFormat format = new QNVideoFormat(videoWidth, videoHeight, fps);
         QNRTCSetting setting = new QNRTCSetting();
         setting.setCameraID(QNRTCSetting.CAMERA_FACING_ID.FRONT)
@@ -454,7 +468,6 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         });
         mLocalTrackList.add(mLocalAudioTrack);
 
-        QNVideoFormat screenEncodeFormat = new QNVideoFormat(mScreenWidth/2, mScreenHeight/2, 15);
         switch (mCaptureMode) {
             case Config.CAMERA_CAPTURE:
                 // 创建 Camera 采集的视频 Track
@@ -469,29 +482,60 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 break;
             case Config.SCREEN_CAPTURE:
                 // 创建屏幕录制的视频 Track
-                mLocalScreenTrack = mEngine.createTrackInfoBuilder()
-                        .setVideoPreviewFormat(screenEncodeFormat)
-                        .setBitrate(BITRATE_FOR_SCREEN_VIDEO)
-                        .setSourceType(QNSourceType.VIDEO_SCREEN)
-                        .setMaster(true)
-                        .setTag(UserTrackView.TAG_SCREEN).create();
+                createScreenTrack();
                 mLocalTrackList.add(mLocalScreenTrack);
                 mControlFragment.setAudioOnly(true);
                 break;
             case Config.MUTI_TRACK_CAPTURE:
                 // 视频通话 + 屏幕共享两路 track
-                mLocalScreenTrack = mEngine.createTrackInfoBuilder()
-                        .setSourceType(QNSourceType.VIDEO_SCREEN)
-                        .setVideoPreviewFormat(screenEncodeFormat)
-                        .setBitrate(BITRATE_FOR_SCREEN_VIDEO)
-                        .setMaster(true)
-                        .setTag(UserTrackView.TAG_SCREEN).create();
+                createScreenTrack();
                 mLocalVideoTrack = mEngine.createTrackInfoBuilder()
                         .setSourceType(QNSourceType.VIDEO_CAMERA)
                         .setTag(UserTrackView.TAG_CAMERA).create();
                 mLocalTrackList.add(mLocalScreenTrack);
                 mLocalTrackList.add(mLocalVideoTrack);
                 break;
+        }
+    }
+
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            QNVideoFormat screenEncodeFormat = new QNVideoFormat(mScreenWidth / 2, mScreenHeight / 2, 15);
+            mLocalScreenTrack = mEngine.createTrackInfoBuilder()
+                .setSourceType(QNSourceType.VIDEO_SCREEN)
+                .setVideoPreviewFormat(screenEncodeFormat)
+                .setBitrate(BITRATE_FOR_SCREEN_VIDEO)
+                .setMaster(true)
+                .setTag(UserTrackView.TAG_SCREEN).create();
+            mLocalTrackList.add(mLocalScreenTrack);
+            if (mEngine.getRoomState().equals(QNRoomState.CONNECTED) || mEngine.getRoomState().equals(QNRoomState.RECONNECTED)) {
+                mEngine.publishTracks(Collections.singletonList(mLocalScreenTrack));
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
+    // 处理 Build.VERSION_CODES.Q 及以上的兼容问题
+    private void createScreenTrack() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Intent intent = new Intent(this, ForegroundService.class);
+            startForegroundService(intent);
+            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            Log.i(TAG, "start service for Q");
+        } else {
+            QNVideoFormat screenEncodeFormat = new QNVideoFormat(mScreenWidth / 2, mScreenHeight / 2, 15);
+            mLocalScreenTrack = mEngine.createTrackInfoBuilder()
+                .setSourceType(QNSourceType.VIDEO_SCREEN)
+                .setVideoPreviewFormat(screenEncodeFormat)
+                .setBitrate(BITRATE_FOR_SCREEN_VIDEO)
+                .setMaster(true)
+                .setTag(UserTrackView.TAG_SCREEN).create();
         }
     }
 
@@ -507,6 +551,9 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         mMergeLayoutConfigView.setOnClickedListener(new MergeLayoutConfigView.OnClickedListener() {
             @Override
             public void onConfirmClicked() {
+                // 保存当前用户选择的配置信息
+                mMergeLayoutConfigView.updateMergeOptions();
+
                 if (mEngine == null) {
                     return;
                 }
@@ -546,8 +593,12 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                         mCurrentMergeJob = mergeJob;
                         // 创建自定义合流任务
                         mEngine.createMergeJob(mCurrentMergeJob);
+                    } else {
+                        // 更新合流布局到自定义合流任务
+                        setMergeStreamLayouts();
                     }
                 } else {
+                    // 更新合流布局到默认合流任务
                     setMergeStreamLayouts();
                 }
                 if (mPopWindow != null) {
@@ -613,23 +664,26 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         mControlFragment.updateRemoteLogText(logText);
     }
 
+    /**
+     * 当新的本地、远端 Track 变化时，重新排列合流画面配置
+     */
     private void resetMergeStream() {
         Log.d(TAG, "resetMergeStream()");
         List<QNMergeTrackOption> configuredMergeTracksOptions = new ArrayList<>();
 
         // video tracks merge layout options.
-        List<RTCTrackMergeOption> remoteVideoTrackInfoList = mRoomUsersMergeOption.getRTCVideoMergeOptions();
-        if (!remoteVideoTrackInfoList.isEmpty()) {
-            List<QNMergeTrackOption> mergeTrackOptions = SplitUtils.split(remoteVideoTrackInfoList.size(),
+        List<RTCTrackMergeOption> roomVideoTrackInfoList = mRoomUsersMergeOption.getRTCVideoMergeOptions();
+        if (!roomVideoTrackInfoList.isEmpty()) {
+            List<QNMergeTrackOption> mergeTrackOptions = SplitUtils.split(roomVideoTrackInfoList.size(),
                     mCurrentMergeJob == null ? QNAppServer.STREAMING_WIDTH : mCurrentMergeJob.getWidth(),
                     mCurrentMergeJob == null ? QNAppServer.STREAMING_HEIGHT : mCurrentMergeJob.getHeight());
-            if (mergeTrackOptions.size() != remoteVideoTrackInfoList.size()) {
+            if (mergeTrackOptions.size() != roomVideoTrackInfoList.size()) {
                 Log.e(TAG, "split option error.");
                 return;
             }
 
             for (int i = 0; i < mergeTrackOptions.size(); i++) {
-                RTCTrackMergeOption trackMergeOption = remoteVideoTrackInfoList.get(i);
+                RTCTrackMergeOption trackMergeOption = roomVideoTrackInfoList.get(i);
 
                 if (!trackMergeOption.isTrackInclude()) {
                     continue;
@@ -641,9 +695,9 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         }
 
         // audio tracks merge layout options
-        List<RTCTrackMergeOption> remoteAudioTrackInfoList = mRoomUsersMergeOption.getRTCAudioTracks();
-        if (!remoteAudioTrackInfoList.isEmpty()) {
-            for (RTCTrackMergeOption trackMergeOption : remoteAudioTrackInfoList) {
+        List<RTCTrackMergeOption> roomAudioTrackInfoList = mRoomUsersMergeOption.getRTCAudioTracks();
+        if (!roomAudioTrackInfoList.isEmpty()) {
+            for (RTCTrackMergeOption trackMergeOption : roomAudioTrackInfoList) {
                 if (!trackMergeOption.isTrackInclude()) {
                     continue;
                 }
@@ -663,8 +717,12 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         }
     }
 
-    private void userLeftForStreaming(String userId) {
-        mRoomUsersMergeOption.onUserLeft(userId);
+    private void userLeftForStreaming(String userId, boolean localLeft) {
+        if (localLeft) {
+            mRoomUsersMergeOption.onUserLeft();
+        } else {
+            mRoomUsersMergeOption.onUserLeft(userId);
+        }
         if (mUserListAdapter != null) {
             mUserListAdapter.notifyDataSetChanged();
         }
@@ -676,13 +734,22 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     }
 
     /**
-     * 配置合流的布局信息
+     * 配置各个用户当前选中的 Track 信息到合流布局
      *
      * 如果使用的默认合流任务，则无需手动 createMergeJob，setMergeStreamLayouts 中 jobId 参数传 null 即可
      */
     private void setMergeStreamLayouts() {
-        // 配置合流布局信息
-        List<RTCTrackMergeOption> userTracks = mMergeLayoutConfigView.updateMergeOptions();
+        List<RTCTrackMergeOption> userTracks = new ArrayList<>();
+        for (int user = 0; user < mRoomUsersMergeOption.size(); user++) {
+            RTCUserMergeOptions userMergeOptions = mRoomUsersMergeOption.getRoomUserByPosition(user);
+            if (userMergeOptions.getAudioTrack() != null) {
+                userTracks.add(userMergeOptions.getAudioTrack());
+            }
+            if (userMergeOptions.getVideoTracks().size() > 0) {
+                userTracks.addAll(userMergeOptions.getVideoTracks());
+            }
+        }
+
         List<QNMergeTrackOption> addedTrackOptions = new ArrayList<>();
         List<QNMergeTrackOption> removedTrackOptions = new ArrayList<>();
         for (RTCTrackMergeOption item : userTracks) {
@@ -728,7 +795,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
         switch (state) {
             case IDLE:
                 if (mIsAdmin) {
-                    userLeftForStreaming(mUserId);
+                    userLeftForStreaming(mUserId, true);
                 }
                 break;
             case RECONNECTING:
@@ -744,6 +811,16 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 logAndToast(getString(R.string.connected_to_room));
                 mIsJoinedRoom = true;
                 mControlFragment.startTimer();
+
+                // 重连失败后再次加入房间后，恢复无效的合流任务
+                if (mIsMergeJobStreaming && mMergeLayoutConfigView.isCustomMergeJob() && !mMergeLayoutConfigView.isMergeJobValid()) {
+                    QNMergeJob mergeJob = mMergeLayoutConfigView.getCustomMergeJob();
+                    if (mergeJob != null) {
+                        mCurrentMergeJob = mergeJob;
+                        // 创建自定义合流任务
+                        mEngine.createMergeJob(mCurrentMergeJob);
+                   }
+                }
                 break;
             case RECONNECTED:
                 logAndToast(getString(R.string.connected_to_room));
@@ -797,7 +874,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     public void onRemoteUserLeft(final String remoteUserId) {
         updateRemoteLogText("onRemoteUserLeft:remoteUserId = " + remoteUserId);
         if (mIsAdmin) {
-            userLeftForStreaming(remoteUserId);
+            userLeftForStreaming(remoteUserId, false);
         }
     }
 
@@ -1043,6 +1120,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
             mEngine.stopMergeStream(mCurrentMergeJob.getMergeJobId(), JOB_STOP_DELAY_TIME);
             mIsMergeJobStreaming = false;
             mMergeLayoutConfigView.updateStreamingStatus(false);
+            mMergeLayoutConfigView.updateMergeJobValid(false);
         }
     }
 
@@ -1076,6 +1154,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
          * 3 ）请确认您的网络状况是否正常
 
          * 3. QNErrorCode.ERROR_RECONNECT_TOKEN_ERROR 内部重连后出错，一般出现在网络非常不稳定时出现，建议提示用户并尝试重新加入房间；
+         *    另外，当前用户之前创建的合流任务、单路转推任务将会被服务销毁，重新加入房间后应该重新创建合流，单路转推任务 ！！！
          * 4. QNErrorCode.ERROR_INVALID_PARAMETER 服务交互参数错误，请在开发时注意合流、踢人动作等参数的设置。
          * 5. QNErrorCode.ERROR_DEVICE_CAMERA 系统摄像头错误, 建议提醒用户检查
          */
@@ -1122,6 +1201,10 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 mTrackWindowMgr.addTrackInfo(mUserId, localTrackListExcludeScreenTrack);
                 if (errorCode == QNErrorCode.ERROR_RECONNECT_TOKEN_ERROR) {
                     logAndToast("ERROR_RECONNECT_TOKEN_ERROR 即将重连，请注意网络质量！");
+                    // 当重连超时后，用户创建的合流任务默认被销毁；需要重新创建合流任务
+                    if (mIsMergeJobStreaming && mMergeLayoutConfigView.isCustomMergeJob()) {
+                        mMergeLayoutConfigView.updateMergeJobValid(false);
+                    }
                 }
                 if (errorCode == QNErrorCode.ERROR_AUTH_FAIL) {
                     logAndToast("ERROR_AUTH_FAIL 即将重连");
@@ -1291,7 +1374,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
     }
 
     /**
-     * 合流配置相关
+     * 用户合流配置相关
      */
     private class UserListAdapter extends RecyclerView.Adapter<ViewHolder> {
         int[] mColor = {
