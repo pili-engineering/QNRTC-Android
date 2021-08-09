@@ -16,7 +16,7 @@ public class RTCApplication extends Application {
          * init must be called before any other func
          */
         QNRTCEnv.init(getApplicationContext());
-        QNRTCEnv.setLogFileEnabled(true);
+        QNRTCEnv.setLogFileEnabled(true, "牛会议");
         // 设置自定义 DNS manager，不设置则使用 SDK 默认 DNS 服务
         new Thread(() -> QNRTCEnv.setDnsManager(Utils.getDefaultDnsManager(getApplicationContext()))).start();
     }

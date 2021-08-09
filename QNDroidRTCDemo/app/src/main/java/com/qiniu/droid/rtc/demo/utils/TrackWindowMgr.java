@@ -1,5 +1,6 @@
 package com.qiniu.droid.rtc.demo.utils;
 
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -7,8 +8,6 @@ import android.widget.FrameLayout;
 import com.qiniu.droid.rtc.QNRTCEngine;
 import com.qiniu.droid.rtc.QNTrackInfo;
 import com.qiniu.droid.rtc.demo.ui.UserTrackView;
-
-import org.webrtc.Logging;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +53,7 @@ public class TrackWindowMgr {
             @Override
             public void onClick(View v) {
                 if (mUserWindowMap.size() <= 1) {
-                    Logging.d(TAG, "skip for single user.");
+                    Log.d(TAG, "skip for single user.");
                 } else if (mUserWindowMap.size() == 2) {
                     // swap
                     switchToFullScreenWindow(mUserWindowMap.getOrderedValues(mTrackFullScreenWin).get(0));
@@ -81,7 +80,7 @@ public class TrackWindowMgr {
                 @Override
                 public void onClick(View v) {
                     if (mUserWindowMap.size() <= 1) {
-                        Logging.d(TAG, "skip for single user.");
+                        Log.d(TAG, "skip for single user.");
                     } else if (mUserWindowMap.size() == 2) {
                         // swap
                         switchToFullScreenWindow(view);
@@ -97,7 +96,7 @@ public class TrackWindowMgr {
 
     public void addTrackInfo(String userId, List<QNTrackInfo> trackInfoList) {
         if (mTrackCandidateWins.size() == 0) {
-            Logging.e(TAG, "There were more than 9 published users in the room, with no unUsedWindow to draw.");
+            Log.e(TAG, "There were more than 9 published users in the room, with no unUsedWindow to draw.");
             return;
         }
         UserTrackView userTrackView = mUserWindowMap.get(userId);
@@ -182,21 +181,21 @@ public class TrackWindowMgr {
 
         UserTrackView.swap(mEngine, mTrackFullScreenWin, userTrackView);
         if (mTrackFullScreenWin.isTaken()) {
-            Logging.d(TAG, "put " + mTrackFullScreenWin.getUserId() + " to " + mTrackFullScreenWin.getResourceName());
+            Log.d(TAG, "put " + mTrackFullScreenWin.getUserId() + " to " + mTrackFullScreenWin.getResourceName());
             mTrackFullScreenWin.setVisibility(View.VISIBLE);
             mUserWindowMap.put(mTrackFullScreenWin.getUserId(), mTrackFullScreenWin, mTrackFullScreenWin.getUserId().equals(mCurrentUserId));
         } else {
-            Logging.d(TAG, "recycle " + mTrackFullScreenWin.getResourceName());
+            Log.d(TAG, "recycle " + mTrackFullScreenWin.getResourceName());
             mTrackFullScreenWin.reset();
             mTrackFullScreenWin.setVisibility(View.GONE);
         }
 
         if (userTrackView.isTaken()) {
-            Logging.d(TAG, "put " + userTrackView.getUserId() + " to " + userTrackView.getResourceName());
+            Log.d(TAG, "put " + userTrackView.getUserId() + " to " + userTrackView.getResourceName());
             userTrackView.setVisibility(View.VISIBLE);
             mUserWindowMap.put(userTrackView.getUserId(), userTrackView, userTrackView.getUserId().equals(mCurrentUserId));
         } else {
-            Logging.d(TAG, "recycle " + userTrackView.getResourceName());
+            Log.d(TAG, "recycle " + userTrackView.getResourceName());
             userTrackView.reset();
             userTrackView.setVisibility(View.GONE);
             // recycle
@@ -220,12 +219,12 @@ public class TrackWindowMgr {
             return;
         }
         if (trackWindowP2PMode) {
-            Logging.d(TAG, "switch to p2p mode");
+            Log.d(TAG, "switch to p2p mode");
             // relayout. switch to p2p mode. put first user to full screen.
             // ( 0 user -> 1 user || 3 users -> 2 users)
             switchToFullScreenWindow(mUserWindowMap.getOrderedValues().get(0));
         } else {
-            Logging.d(TAG, "switch to multi user mode");
+            Log.d(TAG, "switch to multi user mode");
             // relayout. switch to multi user mode.
             // (2 users -> 3 users)
             if (mTrackFullScreenWin.isTaken()) {

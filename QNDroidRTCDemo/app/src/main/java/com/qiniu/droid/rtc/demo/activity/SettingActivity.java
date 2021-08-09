@@ -20,6 +20,7 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.qiniu.droid.rtc.QNFileLogHelper;
 import com.qiniu.droid.rtc.demo.BuildConfig;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.ui.SpinnerPopupWindow;
@@ -38,6 +39,7 @@ public class SettingActivity extends AppCompatActivity {
     private EditText mUserNameEditText;
     private TextView mConfigTextView;
     private TextView mVersionCodeTextView;
+    private TextView mUploadTextView;
     private RadioGroup mCodecModeRadioGroup;
     private RadioButton mHwCodecMode;
     private RadioButton mSwCodecMode;
@@ -57,8 +59,10 @@ public class SettingActivity extends AppCompatActivity {
     private boolean mMaintainResolution = false;
     private boolean mIsAec3Enabled = false;
     private List<String> mDefaultConfiguration = new ArrayList<>();
-    private ArrayAdapter<String> mAdapter;
-    private SpinnerPopupWindow mSpinnerPopupWindow;
+    private ArrayAdapter<String> mConfigAdapter;
+    private SpinnerPopupWindow mConfigPopupWindow;
+    private List<String> mLogFileNames;
+    private SpinnerPopupWindow mLogFilePopupWindow;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,6 +75,7 @@ public class SettingActivity extends AppCompatActivity {
         mUserNameEditText = (EditText) findViewById(R.id.user_name_edit_text);
         mConfigTextView = (TextView) findViewById(R.id.config_text_view);
         mVersionCodeTextView = (TextView) findViewById(R.id.version_code);
+        mUploadTextView = (TextView) findViewById(R.id.report_log);
         mCodecModeRadioGroup = (RadioGroup) findViewById(R.id.codec_mode_button);
         mCodecModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
         mHwCodecMode = (RadioButton) findViewById(R.id.hw_radio_button);
@@ -122,7 +127,7 @@ public class SettingActivity extends AppCompatActivity {
             mSwCodecMode.setChecked(true);
         }
 
-        int sampleRatePos = preferences.getInt(Config.SAMPLE_RATE, Config.HIGH_SAMPLE_RATE);
+        int sampleRatePos = preferences.getInt(Config.SAMPLE_RATE, Config.LOW_SAMPLE_RATE);
         if (sampleRatePos == Config.LOW_SAMPLE_RATE) {
             mLowSampleRateBtn.setChecked(true);
         } else {
@@ -136,13 +141,13 @@ public class SettingActivity extends AppCompatActivity {
             mMaintainResolutionNo.setChecked(true);
         }
 
-        mIsAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, false);
+        mIsAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, true);
         mAec3Switch.setChecked(mIsAec3Enabled);
 
-        mSpinnerPopupWindow = new SpinnerPopupWindow(this);
-        mSpinnerPopupWindow.setOnSpinnerItemClickListener(mOnSpinnerItemClickListener);
+        mConfigPopupWindow = new SpinnerPopupWindow(this);
+        mConfigPopupWindow.setOnSpinnerItemClickListener(mOnSpinnerItemClickListener);
 
-        mAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, mDefaultConfiguration);
+        mConfigAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, mDefaultConfiguration);
     }
 
     public void onClickBack(View v) {
@@ -150,7 +155,11 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     public void onClickConfigParams(View v) {
-        showPopupWindow();
+        showConfigPopupWindow();
+    }
+
+    public void onClickUploadLog(View v) {
+        showLogFilePopupWindow();
     }
 
     public void onClickSaveConfiguration(View v) {
@@ -216,10 +225,43 @@ public class SettingActivity extends AppCompatActivity {
         }
     }
 
-    private void showPopupWindow() {
-        mSpinnerPopupWindow.setAdapter(mAdapter);
-        mSpinnerPopupWindow.setWidth(mConfigTextView.getWidth());
-        mSpinnerPopupWindow.showAsDropDown(mConfigTextView);
+    private void showConfigPopupWindow() {
+        mConfigPopupWindow.setAdapter(mConfigAdapter);
+        mConfigPopupWindow.setWidth(mConfigTextView.getWidth());
+        mConfigPopupWindow.showAsDropDown(mConfigTextView);
+    }
+
+    private void showLogFilePopupWindow() {
+        if (mLogFilePopupWindow == null) {
+            mLogFilePopupWindow = new SpinnerPopupWindow(this);
+            mLogFilePopupWindow.setOnSpinnerItemClickListener(new SpinnerPopupWindow.OnSpinnerItemClickListener() {
+                @Override
+                public void onItemClick(int pos) {
+                    QNFileLogHelper.getInstance().reportLogFile(mLogFileNames.get(pos), new QNFileLogHelper.LogReportCallback() {
+                        @Override
+                        public void onReportSuccess(String name) {
+                            ToastUtils.s(SettingActivity.this, "上传成功：" + name);
+                        }
+
+                        @Override
+                        public void onReportError(String name, String errorMsg) {
+                            ToastUtils.s(SettingActivity.this, "上传失败：" + name + "；" + errorMsg);
+                        }
+                    });
+                    mLogFilePopupWindow.dismiss();
+                }
+            });
+        }
+        mLogFileNames = QNFileLogHelper.getInstance().getLogFiles();
+        if (mLogFileNames == null || mLogFileNames.size() == 0) {
+            ToastUtils.s(SettingActivity.this, "当前无可上报日志");
+            return;
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, mLogFileNames);
+        mLogFilePopupWindow.setAdapter(adapter);
+        mLogFilePopupWindow.setWidth(mAppIdEditText.getWidth());
+        mLogFilePopupWindow.showAsDropDown(mUploadTextView);
     }
 
     private String getVersionDescription() {
@@ -253,7 +295,7 @@ public class SettingActivity extends AppCompatActivity {
         public void onItemClick(int pos) {
             mSelectPos = pos;
             mConfigTextView.setText(mDefaultConfiguration.get(mSelectPos));
-            mSpinnerPopupWindow.dismiss();
+            mConfigPopupWindow.dismiss();
         }
     };
 
