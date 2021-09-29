@@ -2,29 +2,20 @@ package com.qiniu.droid.rtc.demo.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.model.UpdateInfo;
-import com.qiniu.droid.rtc.demo.model.UserList;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static com.qiniu.droid.rtc.demo.utils.Utils.packageName;
 
 public class QNAppServer {
     /**
@@ -34,7 +25,6 @@ public class QNAppServer {
     public static final int STREAMING_HEIGHT = 848;
     public static final String ADMIN_USER = "admin";
 
-    private static final String TAG = "QNAppServer";
     private static final String APP_SERVER_ADDR = "https://api-demo.qnsdk.com";
     public static final String APP_ID = "d8lk7l4ed";
     public static final String TEST_MODE_APP_ID = "d8dre8w1p";
@@ -43,7 +33,8 @@ public class QNAppServer {
         private static final QNAppServer instance = new QNAppServer();
     }
 
-    private QNAppServer(){}
+    private QNAppServer() {
+    }
 
     public static QNAppServer getInstance() {
         return QNAppServerHolder.instance;
@@ -57,40 +48,10 @@ public class QNAppServer {
          */
         String url = APP_SERVER_ADDR + "/v1/rtc/token/admin/app/" + getAppId(context) + "/room/" + roomName + "/user/" + userId + "?bundleId=" + packageName(context);
         try {
-            OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(new SSLSocketFactoryCompat(), getTrustManager()).build();
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
+            OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+            Request request = new Request.Builder().url(url).build();
             Response response = okHttpClient.newCall(request).execute();
             return response.body().string();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public UserList getUserList(Context context, String roomName) {
-        String url = APP_SERVER_ADDR + "/v1/rtc/users/app/" + getAppId(context) + "/room/" + roomName;
-        try {
-            OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(new SSLSocketFactoryCompat(), getTrustManager()).build();
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            Response response = okHttpClient.newCall(request).execute();
-            if (response.isSuccessful()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                JSONArray jsonArray = jsonObject.getJSONArray("users");
-                UserList userList = new UserList();
-                List<UserList.UsersBean> usersBeanList = new ArrayList<>();
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject user = jsonArray.getJSONObject(i);
-                    UserList.UsersBean usersBean = new UserList.UsersBean();
-                    usersBean.setUserId(user.getString("userId"));
-                    usersBeanList.add(usersBean);
-                }
-                userList.setUsers(usersBeanList);
-                return userList;
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -100,11 +61,8 @@ public class QNAppServer {
     public UpdateInfo getUpdateInfo() {
         String url = APP_SERVER_ADDR + "/v1/upgrade/app?appId=com.qiniu.droid.rtc.demo";
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(new SSLSocketFactoryCompat(), getTrustManager()).build();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+        Request request = new Request.Builder().url(url).build();
         try {
             Response response = okHttpClient.newCall(request).execute();
             if (response.isSuccessful()) {
@@ -125,35 +83,8 @@ public class QNAppServer {
         return null;
     }
 
-    private static X509TrustManager getTrustManager() {
-        try {
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init((KeyStore)null);
-            for (TrustManager tm : tmf.getTrustManagers()) {
-                if (tm instanceof X509TrustManager) {
-                    return (X509TrustManager) tm;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // This shall not happen
-        return null;
-    }
-
-    public static String packageName(Context context) {
-        PackageInfo info;
-        try {
-            info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            return info.packageName;
-        } catch (PackageManager.NameNotFoundException e) {
-            // e.printStackTrace();
-        }
-        return "";
-    }
-
-    private String getAppId(Context context){
-        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name),Context.MODE_PRIVATE);
+    private String getAppId(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE);
         return sharedPreferences.getString(Config.APP_ID, APP_ID);
     }
 }

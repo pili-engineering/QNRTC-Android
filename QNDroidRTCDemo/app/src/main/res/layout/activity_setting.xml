@@ -12,10 +12,10 @@
         android:layout_marginBottom="100dp"
         android:background="@drawable/background_niu" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/setting_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_margin="16dp"
@@ -26,8 +26,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/setting_back"
-        android:layout_above="@id/logo_container">
+        android:layout_above="@id/logo_container"
+        android:layout_below="@id/setting_back">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -38,13 +38,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginRight="30dp"
                 android:background="@drawable/oval_edit_text_background"
-                android:paddingBottom="8dp"
                 android:paddingLeft="15dp"
-                android:paddingRight="15dp"
                 android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
                 android:textColor="@color/textColor"
                 android:textColorHint="@color/textColor"
                 android:textSize="15sp" />
@@ -53,9 +53,9 @@
                 android:id="@+id/tips_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignEnd="@id/user_name_edit_text"
-                android:layout_alignStart="@id/user_name_edit_text"
                 android:layout_below="@id/user_name_edit_text"
+                android:layout_alignStart="@id/user_name_edit_text"
+                android:layout_alignEnd="@id/user_name_edit_text"
                 android:layout_marginTop="15dp"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
@@ -68,15 +68,15 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tips_text_view"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:layout_marginTop="15dp"
+                android:layout_marginRight="30dp"
                 android:background="@drawable/oval_edit_text_background"
                 android:gravity="center_vertical"
                 android:onClick="onClickConfigParams"
-                android:paddingBottom="8dp"
-                android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:paddingTop="8dp">
+                android:paddingTop="8dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     android:id="@+id/config_text_view"
@@ -98,14 +98,14 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/config_spinner"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:layout_marginTop="15dp"
+                android:layout_marginRight="30dp"
                 android:background="@drawable/oval_edit_text_background"
                 android:orientation="horizontal"
-                android:paddingBottom="2dp"
-                android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:paddingTop="2dp">
+                android:paddingTop="2dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="2dp">
 
                 <RadioButton
                     android:id="@+id/sw_radio_button"
@@ -131,14 +131,14 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/codec_mode_button"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:layout_marginTop="15dp"
+                android:layout_marginRight="30dp"
                 android:background="@drawable/oval_edit_text_background"
                 android:orientation="horizontal"
-                android:paddingBottom="2dp"
-                android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:paddingTop="2dp">
+                android:paddingTop="2dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="2dp">
 
                 <RadioButton
                     android:id="@+id/maintain_res_button_yes"
@@ -164,14 +164,14 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/maintain_resolution_button"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:layout_marginTop="15dp"
+                android:layout_marginRight="30dp"
                 android:background="@drawable/oval_edit_text_background"
                 android:orientation="horizontal"
-                android:paddingBottom="2dp"
-                android:paddingEnd="15dp"
                 android:paddingStart="15dp"
-                android:paddingTop="2dp">
+                android:paddingTop="2dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="2dp">
 
                 <RadioButton
                     android:id="@+id/low_sample_rate_button"
@@ -195,12 +195,12 @@
                 android:id="@+id/tips_capture_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignEnd="@id/user_name_edit_text"
-                android:layout_alignStart="@id/user_name_edit_text"
                 android:layout_below="@id/sample_rate_button"
+                android:layout_alignStart="@id/user_name_edit_text"
+                android:layout_alignEnd="@id/user_name_edit_text"
                 android:layout_marginTop="15dp"
-                android:paddingEnd="15dp"
                 android:paddingStart="15dp"
+                android:paddingEnd="15dp"
                 android:text="@string/capture_tips"
                 android:textColor="@color/textColor" />
 
@@ -210,28 +210,28 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tips_capture_view"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginRight="30dp"
                 android:background="@drawable/oval_edit_text_background"
                 android:hint="修改APP_ID"
-                android:paddingBottom="8dp"
                 android:paddingLeft="15dp"
-                android:paddingRight="15dp"
                 android:paddingTop="8dp"
+                android:paddingRight="15dp"
+                android:paddingBottom="8dp"
                 android:textColor="@color/textColor"
                 android:textColorHint="@color/textColor"
                 android:textSize="15sp" />
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/webrtc_aec3_enable_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:switchPadding="10dp"
                 android:layout_below="@id/app_id_edit_text"
-                android:layout_marginTop="16dp"
                 android:layout_marginLeft="45dp"
+                android:layout_marginTop="16dp"
+                android:switchPadding="10dp"
                 android:text="启用 AEC3"
-                android:textColor="@color/textColor"/>
+                android:textColor="@color/textColor" />
 
             <LinearLayout
                 android:id="@+id/test_mode_layout"
@@ -239,8 +239,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/webrtc_aec3_enable_btn"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginRight="30dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -256,10 +256,10 @@
                         android:background="@drawable/oval_edit_text_background"
                         android:digits="0123456789"
                         android:hint="Width"
-                        android:paddingBottom="8dp"
                         android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
                         android:paddingTop="8dp"
+                        android:paddingRight="10dp"
+                        android:paddingBottom="8dp"
                         android:textColor="@color/textColor"
                         android:textColorHint="@color/textColor"
                         android:textSize="15sp" />
@@ -272,10 +272,10 @@
                         android:background="@drawable/oval_edit_text_background"
                         android:digits="0123456789"
                         android:hint="High"
-                        android:paddingBottom="8dp"
                         android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
                         android:paddingTop="8dp"
+                        android:paddingRight="10dp"
+                        android:paddingBottom="8dp"
                         android:textColor="@color/textColor"
                         android:textColorHint="@color/textColor"
                         android:textSize="15sp" />
@@ -288,10 +288,10 @@
                         android:background="@drawable/oval_edit_text_background"
                         android:digits="0123456789"
                         android:hint="FPS"
-                        android:paddingBottom="8dp"
                         android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
                         android:paddingTop="8dp"
+                        android:paddingRight="10dp"
+                        android:paddingBottom="8dp"
                         android:textColor="@color/textColor"
                         android:textColorHint="@color/textColor"
                         android:textSize="15sp" />
@@ -304,10 +304,10 @@
                         android:background="@drawable/oval_edit_text_background"
                         android:digits="0123456789"
                         android:hint="BITRATE"
-                        android:paddingBottom="8dp"
                         android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
                         android:paddingTop="8dp"
+                        android:paddingRight="10dp"
+                        android:paddingBottom="8dp"
                         android:textColor="@color/textColor"
                         android:textColorHint="@color/textColor"
                         android:textSize="15sp" />
@@ -319,13 +319,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/test_mode_layout"
-                android:layout_marginTop="24dp"
                 android:layout_marginLeft="30dp"
-                android:padding="10dp"
-                android:gravity="center"
-                android:onClick="onClickUploadLog"
+                android:layout_marginTop="24dp"
                 android:drawableLeft="@drawable/ic_upload"
                 android:drawablePadding="10dp"
+                android:gravity="center"
+                android:onClick="onClickUploadLog"
+                android:padding="10dp"
                 android:text="上传日志"
                 android:textColor="@color/textColor"
                 android:textSize="15sp" />
@@ -336,8 +336,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/report_log"
                 android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
                 android:layout_marginTop="24dp"
+                android:layout_marginRight="30dp"
                 android:background="@drawable/oval_btn_background"
                 android:gravity="center"
                 android:onClick="onClickSaveConfiguration"
@@ -357,9 +357,9 @@
         android:textColor="@color/versionCodeColor" />
 
     <RelativeLayout
+        android:id="@+id/logo_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/logo_container"
         android:layout_above="@id/version_code"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="4dp"
@@ -375,12 +375,12 @@
             android:background="@color/white" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_centerVertical="true"
             android:layout_margin="8dp"
             android:layout_toStartOf="@id/dividing_line"
-            android:src="@mipmap/ic_niu_logo" />
+            android:src="@drawable/ic_niu_logo" />
 
         <TextView
             android:layout_width="wrap_content"

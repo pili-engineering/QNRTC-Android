@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.FileProvider;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.FileProvider;
 import android.util.Log;
 
 import com.qiniu.droid.rtc.demo.R;
@@ -32,7 +32,7 @@ public class DownloadService extends IntentService {
 
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
-    private ProgressEvent mProgressEvent = new ProgressEvent();
+    private final ProgressEvent mProgressEvent = new ProgressEvent();
 
     public DownloadService() {
         super("DownloadService");
@@ -68,7 +68,7 @@ public class DownloadService extends IntentService {
             int byteRead = 0;
             in = urlConnection.getInputStream();
             File dir = getCacheDirectory(this);
-            String apkName = urlStr.substring(urlStr.lastIndexOf("/") + 1, urlStr.length());
+            String apkName = urlStr.substring(urlStr.lastIndexOf("/") + 1);
             File apkFile = new File(dir, apkName);
             out = new FileOutputStream(apkFile);
             byte[] buffer = new byte[BUFFER_SIZE];
@@ -90,7 +90,6 @@ public class DownloadService extends IntentService {
             installApk(this, apkFile);
 
             mNotifyManager.cancel(NOTIFICATION_ID);
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

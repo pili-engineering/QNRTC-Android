@@ -2,8 +2,8 @@ package com.qiniu.droid.rtc.demo.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -14,28 +14,26 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.qiniu.droid.rtc.QNRTCEngine;
+import com.qiniu.droid.rtc.QNCameraVideoTrack;
+import com.qiniu.droid.rtc.QNLocalVideoTrack;
+import com.qiniu.droid.rtc.QNRTCClient;
+import com.qiniu.droid.rtc.QNRemoteVideoTrack;
 import com.qiniu.droid.rtc.QNSurfaceView;
-import com.qiniu.droid.rtc.QNTrackInfo;
-import com.qiniu.droid.rtc.QNTrackKind;
+import com.qiniu.droid.rtc.QNTrack;
 import com.qiniu.droid.rtc.demo.R;
 
 import org.webrtc.RendererCommon;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import static com.qiniu.droid.rtc.demo.activity.RoomActivity.TRACK_TAG_CAMERA;
+import static com.qiniu.droid.rtc.demo.activity.RoomActivity.TRACK_TAG_SCREEN;
 
 public class UserTrackView extends FrameLayout {
 
     private static final String TAG = "UserTrackView";
     private static final boolean PRINT_DEBUG_LOG = false;
-
-    private static final boolean DISPLAY_LARGE_VIDEO_TRACK = true;
-    private static final boolean DISPLAY_SMALL_VIDEO_TRACK = true;
-
-    public static final String TAG_CAMERA = "camera";
-    public static final String TAG_SCREEN = "screen";
 
     private boolean inited = false;
     private ViewGroup mVideoViewLargeParent;
@@ -47,13 +45,13 @@ public class UserTrackView extends FrameLayout {
     private ImageView mMicrophoneStateView;
     private TextView mAudioView;
 
-    private QNRTCEngine mQNRTCEngine;
+    private QNRTCClient mClient;
     private String mUserId;
-    private QNTrackInfo mQNAudioTrackInfo;
-    private List<QNTrackInfo> mQNVideoTrackInfos = new ArrayList<>();
+    private QNTrack mQNAudioTrack;
+    private final List<QNTrack> mQNVideoTracks = new ArrayList<>();
 
-    private QNTrackInfo mTrackInfoDisplayInLargeView = null;
-    private QNTrackInfo mTrackInfoDisplayInSmallView = null;
+    private QNTrack mDisplayInLargeViewTrack = null;
+    private QNTrack mDisplayInSmallViewTrack = null;
     private int mMicrophoneViewVisibility = -1;
     private int mPos = -1;
 
@@ -87,42 +85,49 @@ public class UserTrackView extends FrameLayout {
         return !TextUtils.isEmpty(getUserId());
     }
 
-    public List<QNTrackInfo> getTrackInfos() {
-        List<QNTrackInfo> trackInfos = new ArrayList<>();
-        if (mQNAudioTrackInfo != null) {
-            trackInfos.add(mQNAudioTrackInfo);
+    public List<QNTrack> getTrackList() {
+        List<QNTrack> trackList = new ArrayList<>();
+        if (mQNAudioTrack != null) {
+            trackList.add(mQNAudioTrack);
         }
-        trackInfos.addAll(mQNVideoTrackInfos);
-        return trackInfos;
+        trackList.addAll(mQNVideoTracks);
+        return trackList;
     }
 
-
-    public void setUserTrackInfo(QNRTCEngine engine, String userId, List<QNTrackInfo> trackInfos) {
-        setUserTrackInfo(engine, userId, trackInfos, View.VISIBLE);
+    public void setUserTrack(QNRTCClient client, String userId, List<QNTrack> trackList) {
+        setUserTrack(client, userId, trackList, View.VISIBLE);
     }
 
-    public void setUserTrackInfo(QNRTCEngine engine, String userId, List<QNTrackInfo> trackInfos, int microphoneViewVisibility) {
-        LogD(TAG, "setUserTrackInfo() userId: " + userId);
-        mQNRTCEngine = engine;
+    public void setUserTrack(QNRTCClient client, String userId, List<QNTrack> trackList, int microphoneViewVisibility) {
+        LogD(TAG, "setUserTrack() userId: " + userId);
+        mClient = client;
         mUserId = userId;
-        mQNAudioTrackInfo = null;
-        mQNVideoTrackInfos.clear();
+        mQNAudioTrack = null;
+        mQNVideoTracks.clear();
 
         if (TextUtils.isEmpty(mUserId)) {
             return;
         }
         setMicrophoneStateVisibility(microphoneViewVisibility);
         mAudioView.setText(mUserId);
-        onAddTrackInfo(trackInfos);
+        onAddTrack(trackList);
     }
 
-    public void unSetUserTrackInfo() {
-        if (mQNRTCEngine != null) {
-            if (mTrackInfoDisplayInLargeView != null) {
-                mQNRTCEngine.setRenderWindow(mTrackInfoDisplayInLargeView, null);
+    public void unSetUserTrack() {
+        if (mClient != null) {
+            if (mDisplayInLargeViewTrack != null) {
+                if (mDisplayInLargeViewTrack instanceof QNRemoteVideoTrack) {
+                    ((QNRemoteVideoTrack) mDisplayInLargeViewTrack).play(null);
+                } else if (mDisplayInLargeViewTrack instanceof QNLocalVideoTrack) {
+                    ((QNLocalVideoTrack) mDisplayInLargeViewTrack).play(null);
+                }
             }
-            if (mTrackInfoDisplayInSmallView != null) {
-                mQNRTCEngine.setRenderWindow(mTrackInfoDisplayInSmallView, null);
+            if (mDisplayInSmallViewTrack != null) {
+                if (mDisplayInSmallViewTrack instanceof QNRemoteVideoTrack) {
+                    ((QNRemoteVideoTrack) mDisplayInSmallViewTrack).play(null);
+                } else if (mDisplayInSmallViewTrack instanceof QNLocalVideoTrack) {
+                    ((QNLocalVideoTrack) mDisplayInSmallViewTrack).play(null);
+                }
             }
         }
         reset();
@@ -130,10 +135,10 @@ public class UserTrackView extends FrameLayout {
 
     public void reset() {
         LogD(TAG, "reset()");
-        mQNRTCEngine = null;
+        mClient = null;
         mUserId = null;
-        mQNAudioTrackInfo = null;
-        mQNVideoTrackInfos.clear();
+        mQNAudioTrack = null;
+        mQNVideoTracks.clear();
         mPos = -1;
 
         mSurfaceViewLarge.setVisibility(View.GONE);
@@ -142,8 +147,8 @@ public class UserTrackView extends FrameLayout {
         mVideoViewSmallParent.setVisibility(View.GONE);
         mAudioView.setText("");
         mAudioView.setVisibility(View.GONE);
-        mTrackInfoDisplayInLargeView = null;
-        mTrackInfoDisplayInSmallView = null;
+        mDisplayInLargeViewTrack = null;
+        mDisplayInSmallViewTrack = null;
     }
 
     public void dispose() {
@@ -152,61 +157,51 @@ public class UserTrackView extends FrameLayout {
         mSurfaceViewSmall.release();
     }
 
-    public void onAddTrackInfo(List<QNTrackInfo> trackInfos) {
-        LogD(TAG, "onAddTrackInfo()");
-        for (QNTrackInfo item : trackInfos) {
-            onAddTrackInfo(item, false);
+    public void onAddTrack(List<QNTrack> trackList) {
+        LogD(TAG, "onAddTrack()");
+        for (QNTrack track : trackList) {
+            onAddTrack(track, false);
         }
-        onTrackInfoChanged();
+        onTrackChanged();
     }
 
-    @SuppressWarnings("unused")
-    public void onAddTrackInfo(QNTrackInfo trackInfo) {
-        onAddTrackInfo(trackInfo, true);
-    }
-
-    private void onAddTrackInfo(QNTrackInfo trackInfo, boolean notify) {
-        if (QNTrackKind.AUDIO.equals(trackInfo.getTrackKind())) {
-            mQNAudioTrackInfo = trackInfo;
+    private void onAddTrack(QNTrack track, boolean notify) {
+        if (track.isAudio()) {
+            mQNAudioTrack = track;
         } else {
-            mQNVideoTrackInfos.add(trackInfo);
+            mQNVideoTracks.add(track);
         }
         if (notify) {
-            onTrackInfoChanged();
+            onTrackChanged();
         }
     }
 
-    public boolean onRemoveTrackInfo(List<QNTrackInfo> trackInfos) {
-        LogD(TAG, "onRemoveTrackInfo()");
-        for (QNTrackInfo item : trackInfos) {
-            onRemoveTrackInfo(item, false);
+    public boolean onRemoveTrack(List<QNTrack> trackList) {
+        LogD(TAG, "onRemoveTrack()");
+        for (QNTrack track : trackList) {
+            onRemoveTrack(track, false);
         }
-        onTrackInfoChanged();
-        return mQNAudioTrackInfo != null || !mQNVideoTrackInfos.isEmpty();
+        onTrackChanged();
+        return mQNAudioTrack != null || !mQNVideoTracks.isEmpty();
     }
 
-    @SuppressWarnings("unused")
-    public void onRemoveTrackInfo(QNTrackInfo trackInfo) {
-        onRemoveTrackInfo(trackInfo, true);
-    }
-
-    public void onRemoveTrackInfo(QNTrackInfo trackInfo, boolean notify) {
-        if (QNTrackKind.AUDIO.equals(trackInfo.getTrackKind())) {
-            mQNAudioTrackInfo = null;
+    public void onRemoveTrack(QNTrack track, boolean notify) {
+        if (track.isAudio()) {
+            mQNAudioTrack = null;
         } else {
-            mQNVideoTrackInfos.remove(trackInfo);
+            mQNVideoTracks.remove(track);
         }
         if (notify) {
-            onTrackInfoChanged();
+            onTrackChanged();
         }
     }
 
     public void onTracksMuteChanged() {
         LogD(TAG, "onTracksMuteChanged()");
         // audio track
-        if (mQNAudioTrackInfo != null) {
+        if (mQNAudioTrack != null) {
             setMicrophoneStateVisibilityInner(View.VISIBLE);
-            updateMicrophoneStateView(mQNAudioTrackInfo.isMuted());
+            updateMicrophoneStateView(mQNAudioTrack.isMuted());
         } else {
             setMicrophoneStateVisibilityInner(View.INVISIBLE);
         }
@@ -215,76 +210,71 @@ public class UserTrackView extends FrameLayout {
         boolean hideAudioView = containsUnMutedVideoTracks(2);
         setAudioViewStateVisibility(hideAudioView ? View.GONE : View.VISIBLE);
         // note : mSurfaceViewSmall is on top, so set visibility
-        if (mTrackInfoDisplayInSmallView != null) {
+        if (mDisplayInSmallViewTrack != null) {
             mSurfaceViewSmall.setVisibility(hideAudioView ? View.VISIBLE : View.GONE);
         }
     }
 
-    private void onTrackInfoChanged() {
+    private void onTrackChanged() {
         onTracksMuteChanged();
 
-        QNTrackInfo cameraTrackInfo = findVideoTrack(TAG_CAMERA);
-        QNTrackInfo screenTrackInfo = findVideoTrack(TAG_SCREEN);
+        QNTrack cameraTrack = findVideoTrack(TRACK_TAG_CAMERA);
+        QNTrack screenTrack = findVideoTrack(TRACK_TAG_SCREEN);
 
         // in case, camera has no tag.
-        if (cameraTrackInfo == null && !mQNVideoTrackInfos.isEmpty()) {
-            List<QNTrackInfo> trackInfosExcludeScreenTrack = new ArrayList<>(mQNVideoTrackInfos);
-            trackInfosExcludeScreenTrack.remove(screenTrackInfo);
-            if (!trackInfosExcludeScreenTrack.isEmpty()) {
-                cameraTrackInfo = trackInfosExcludeScreenTrack.get(0);
+        if (cameraTrack == null && !mQNVideoTracks.isEmpty()) {
+            List<QNTrack> tracksExcludeScreenTrack = new ArrayList<>(mQNVideoTracks);
+            tracksExcludeScreenTrack.remove(screenTrack);
+            if (!tracksExcludeScreenTrack.isEmpty()) {
+                cameraTrack = tracksExcludeScreenTrack.get(0);
             }
         }
 
-        QNTrackInfo trackInfoDisplayInLargeView = null;
-        QNTrackInfo trackInfoDisplayInSmallView = null;
-        if (cameraTrackInfo != null && screenTrackInfo != null) {
+        QNTrack displayInLargeViewTrack = null;
+        QNTrack displayInSmallViewTrack = null;
+        if (cameraTrack != null && screenTrack != null) {
             LogD(TAG, "contains camera and screen track info");
-            trackInfoDisplayInLargeView = screenTrackInfo;
-            trackInfoDisplayInSmallView = cameraTrackInfo;
+            displayInLargeViewTrack = screenTrack;
+            displayInSmallViewTrack = cameraTrack;
         } else {
-            if (cameraTrackInfo != null) {
+            if (cameraTrack != null) {
                 LogD(TAG, "just contains camera track info");
-                trackInfoDisplayInLargeView = cameraTrackInfo;
+                displayInLargeViewTrack = cameraTrack;
             }
-            if (screenTrackInfo != null) {
+            if (screenTrack != null) {
                 LogD(TAG, "just contains screen track info");
-                trackInfoDisplayInLargeView = screenTrackInfo;
+                displayInLargeViewTrack = screenTrack;
             }
         }
-        updateTrackInfoInLargeView(trackInfoDisplayInLargeView);
-        updateTrackInfoInSmallView(trackInfoDisplayInSmallView);
+        updateLargeView(displayInLargeViewTrack);
+        updateSmallView(displayInSmallViewTrack);
     }
 
-    private QNTrackInfo findVideoTrack(String tag) {
-        QNTrackInfo found = null;
-        for (QNTrackInfo item : mQNVideoTrackInfos) {
-            if (tag.equals(item.getTag())) {
-                found = item;
+    private QNTrack findVideoTrack(String tag) {
+        QNTrack found = null;
+        for (QNTrack track : mQNVideoTracks) {
+            if (tag.equals(track.getTag())) {
+                found = track;
                 break;
             }
         }
         return found;
     }
 
-    private void updateTrackInfoInLargeView(QNTrackInfo trackInfoDisplayInLargeView) {
-        if (mTrackInfoDisplayInLargeView != null && mTrackInfoDisplayInLargeView == trackInfoDisplayInLargeView) {
-            LogD(TAG, "skip updateTrackInfoInLargeView, same track");
+    private void updateLargeView(QNTrack displayInLargeViewTrack) {
+        if (mDisplayInLargeViewTrack != null && mDisplayInLargeViewTrack == displayInLargeViewTrack) {
+            LogD(TAG, "skip updateLargeView, same track");
             return;
         }
-        mTrackInfoDisplayInLargeView = trackInfoDisplayInLargeView;
-        if (mTrackInfoDisplayInLargeView != null) {
-            if (DISPLAY_LARGE_VIDEO_TRACK) {
-                mSurfaceViewLarge.setVisibility(View.VISIBLE);
-                mQNRTCEngine.setRenderWindow(mTrackInfoDisplayInLargeView, mSurfaceViewLarge);
-                if (TAG_SCREEN.equals(mTrackInfoDisplayInLargeView.getTag())) {
-                    mSurfaceViewLarge.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
-                } else {
-                    mSurfaceViewLarge.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
-                }
-            } else {
-                mSurfaceViewLarge.setVisibility(View.GONE);
-                mVideoViewLargeParent.setBackgroundColor(getTargetColor(new Random().nextInt(6)));
+        mDisplayInLargeViewTrack = displayInLargeViewTrack;
+        if (mDisplayInLargeViewTrack != null) {
+            mSurfaceViewLarge.setVisibility(View.VISIBLE);
+            if (mDisplayInLargeViewTrack instanceof QNCameraVideoTrack) {
+                ((QNCameraVideoTrack) mDisplayInLargeViewTrack).play(mSurfaceViewLarge);
+            } else if (mDisplayInLargeViewTrack instanceof QNRemoteVideoTrack) {
+                ((QNRemoteVideoTrack) mDisplayInLargeViewTrack).play(mSurfaceViewLarge);
             }
+            mSurfaceViewLarge.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
             mVideoViewLargeParent.setVisibility(View.VISIBLE);
         } else {
             mSurfaceViewLarge.setVisibility(View.GONE);
@@ -292,20 +282,20 @@ public class UserTrackView extends FrameLayout {
         }
     }
 
-    private void updateTrackInfoInSmallView(QNTrackInfo trackInfoDisplayInSmallView) {
-        if (mTrackInfoDisplayInSmallView != null && mTrackInfoDisplayInSmallView == trackInfoDisplayInSmallView) {
-            LogD(TAG, "skip updateTrackInfoInSmallView, same track");
+    private void updateSmallView(QNTrack displayInSmallViewTrack) {
+        if (mDisplayInSmallViewTrack != null && mDisplayInSmallViewTrack == displayInSmallViewTrack) {
+            LogD(TAG, "skip updateSmallView, same track");
             return;
         }
-        mTrackInfoDisplayInSmallView = trackInfoDisplayInSmallView;
-        if (mTrackInfoDisplayInSmallView != null) {
-            if (DISPLAY_SMALL_VIDEO_TRACK) {
-                mSurfaceViewSmall.setVisibility(View.VISIBLE);
-                mQNRTCEngine.setRenderWindow(mTrackInfoDisplayInSmallView, mSurfaceViewSmall);
-            } else {
-                mSurfaceViewSmall.setVisibility(View.GONE);
-                mVideoViewSmallParent.setBackgroundColor(getTargetColor(new Random().nextInt(6)));
+        mDisplayInSmallViewTrack = displayInSmallViewTrack;
+        if (mDisplayInSmallViewTrack != null) {
+            mSurfaceViewSmall.setVisibility(View.VISIBLE);
+            if (mDisplayInSmallViewTrack instanceof QNCameraVideoTrack) {
+                ((QNCameraVideoTrack) mDisplayInSmallViewTrack).play(mSurfaceViewSmall);
+            } else if (mDisplayInLargeViewTrack instanceof QNRemoteVideoTrack) {
+                ((QNRemoteVideoTrack) mDisplayInSmallViewTrack).play(mSurfaceViewSmall);
             }
+            mSurfaceViewSmall.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
             mVideoViewSmallParent.setVisibility(View.VISIBLE);
         } else {
             mSurfaceViewSmall.setVisibility(View.GONE);
@@ -313,19 +303,17 @@ public class UserTrackView extends FrameLayout {
         }
     }
 
-    @SuppressWarnings("all")
     private boolean containsUnMutedVideoTracks(int count) {
         boolean unMuted = false;
-        for (int i = 0; i < mQNVideoTrackInfos.size() && i < count; i++) {
-            QNTrackInfo item = mQNVideoTrackInfos.get(i);
-            if (!item.isMuted()) {
+        for (int i = 0; i < mQNVideoTracks.size() && i < count; i++) {
+            QNTrack track = mQNVideoTracks.get(i);
+            if (!track.isMuted()) {
                 unMuted = true;
                 break;
             }
         }
         return unMuted;
     }
-
 
     public void changeViewBackgroundByPos(int pos) {
         LogD(TAG, "changeViewBackgroundByPos() " + pos);
@@ -351,21 +339,20 @@ public class UserTrackView extends FrameLayout {
     }
 
     private void updateMicrophoneStateView(boolean isMute) {
-        mMicrophoneStateView.setImageResource(isMute ? R.mipmap.microphone_disable : R.drawable.microphone_state_enable);
+        mMicrophoneStateView.setImageResource(isMute ? R.drawable.microphone_disable : R.drawable.microphone_state_enable);
     }
 
-    @SuppressWarnings("all")
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mVideoViewLargeParent = findViewById(R.id.qn_surface_view_large_parent);
-        mSurfaceViewLarge = (QNSurfaceView) findViewById(R.id.qn_surface_view_large);
+        mSurfaceViewLarge = findViewById(R.id.qn_surface_view_large);
 
         mVideoViewSmallParent = findViewById(R.id.qn_surface_view_small_parent);
-        mSurfaceViewSmall = (QNSurfaceView) findViewById(R.id.qn_surface_view_small);
+        mSurfaceViewSmall = findViewById(R.id.qn_surface_view_small);
 
-        mMicrophoneStateView = (ImageView) findViewById(R.id.microphone_state_view);
-        mAudioView = (TextView) findViewById(R.id.qn_audio_view);
+        mMicrophoneStateView = findViewById(R.id.microphone_state_view);
+        mAudioView = findViewById(R.id.qn_audio_view);
     }
 
     @Override
@@ -374,10 +361,10 @@ public class UserTrackView extends FrameLayout {
             mSurfaceViewLarge.setVisibility(visibility);
             mSurfaceViewSmall.setVisibility(visibility);
         } else {
-            if (mTrackInfoDisplayInLargeView != null) {
+            if (mDisplayInLargeViewTrack != null) {
                 mSurfaceViewLarge.setVisibility(visibility);
             }
-            if (mTrackInfoDisplayInSmallView != null) {
+            if (mDisplayInSmallViewTrack != null) {
                 mSurfaceViewSmall.setVisibility(visibility);
             }
         }
@@ -390,29 +377,25 @@ public class UserTrackView extends FrameLayout {
     }
 
     public void setZOrderMediaOverlay(boolean isMediaOverlay, boolean onTop) {
-        if (DISPLAY_LARGE_VIDEO_TRACK) {
-            mSurfaceViewLarge.setZOrderMediaOverlay(isMediaOverlay);
-        }
-        if (DISPLAY_SMALL_VIDEO_TRACK) {
-            mSurfaceViewSmall.setZOrderMediaOverlay(isMediaOverlay);
-            mSurfaceViewSmall.setZOrderOnTop(onTop);
-        }
+        mSurfaceViewLarge.setZOrderMediaOverlay(isMediaOverlay);
+        mSurfaceViewSmall.setZOrderMediaOverlay(isMediaOverlay);
+        mSurfaceViewSmall.setZOrderOnTop(onTop);
     }
 
-    public static void swap(QNRTCEngine engine, UserTrackView trackViewFirst, UserTrackView trackViewSecond) {
-        String userIdFirst = trackViewFirst.getUserId();
-        List<QNTrackInfo> trackInfosFirst = trackViewFirst.getTrackInfos();
-        int postFirst = trackViewFirst.mPos;
+    public static void swap(QNRTCClient client, UserTrackView firstTrackView, UserTrackView secondTrackView) {
+        String userIdFirst = firstTrackView.getUserId();
+        List<QNTrack> firstTrack = firstTrackView.getTrackList();
+        int postFirst = firstTrackView.mPos;
 
-        String userIdSecond = trackViewSecond.getUserId();
-        List<QNTrackInfo> trackInfosSecond = trackViewSecond.getTrackInfos();
-        int postSecond = trackViewSecond.mPos;
+        String userIdSecond = secondTrackView.getUserId();
+        List<QNTrack> secondTrack = secondTrackView.getTrackList();
+        int postSecond = secondTrackView.mPos;
 
-        trackViewFirst.setUserTrackInfo(engine, userIdSecond, trackInfosSecond, trackViewFirst.mMicrophoneViewVisibility);
-        trackViewFirst.changeViewBackgroundByPos(postSecond);
+        firstTrackView.setUserTrack(client, userIdSecond, secondTrack, firstTrackView.mMicrophoneViewVisibility);
+        firstTrackView.changeViewBackgroundByPos(postSecond);
 
-        trackViewSecond.setUserTrackInfo(engine, userIdFirst, trackInfosFirst, trackViewSecond.mMicrophoneViewVisibility);
-        trackViewSecond.changeViewBackgroundByPos(postFirst);
+        secondTrackView.setUserTrack(client, userIdFirst, firstTrack, secondTrackView.mMicrophoneViewVisibility);
+        secondTrackView.changeViewBackgroundByPos(postFirst);
     }
 
     public String getResourceName() {
@@ -422,7 +405,6 @@ public class UserTrackView extends FrameLayout {
             return "";
         }
     }
-
 
     private void LogD(String tag, String message) {
         if (PRINT_DEBUG_LOG) {

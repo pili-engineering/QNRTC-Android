@@ -4,15 +4,17 @@
     android:layout_height="wrap_content"
     android:background="#353535"
     android:orientation="vertical">
+
     <com.qiniu.droid.rtc.demo.ui.FixedHeightScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/streaming_enable_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -24,29 +26,29 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
-                android:background="@android:color/darker_gray"
-                android:layout_marginTop="10dp"
                 android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp" />
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="4dp"
+                android:background="@android:color/darker_gray" />
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/user_list_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:paddingLeft="18dp"
-                android:paddingRight="18dp"
-                android:layout_marginTop="10dp" />
+                android:paddingRight="18dp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:text="@string/merge_job_tips"
-                android:textSize="12sp"
-                android:textColor="@android:color/holo_red_light" />
+                android:textColor="@android:color/holo_red_light"
+                android:textSize="12sp" />
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/first_video_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -195,7 +197,7 @@
                     android:textSize="13sp" />
             </LinearLayout>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/second_video_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -343,7 +345,7 @@
                     android:textSize="13sp" />
             </LinearLayout>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/audio_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -357,13 +359,13 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
-                android:background="@android:color/darker_gray"
-                android:layout_marginTop="10dp"
                 android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp" />
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="4dp"
+                android:background="@android:color/darker_gray" />
 
-            <Switch
-                android:id="@+id/custom_mergejob_switch"
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/custom_merge_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
@@ -372,7 +374,7 @@
                 android:textColor="@color/white" />
 
             <LinearLayout
-                android:id="@+id/merge_job_layout"
+                android:id="@+id/merge_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
@@ -412,8 +414,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/oval_edit_text_background"
-                        android:inputType="number"
                         android:gravity="center"
+                        android:inputType="number"
                         android:singleLine="true"
                         android:text="480"
                         android:textColor="@color/white"
@@ -432,8 +434,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/oval_edit_text_background"
-                        android:inputType="number"
                         android:gravity="center"
+                        android:inputType="number"
                         android:text="848"
                         android:textColor="@color/white"
                         android:textColorHint="@color/white"
@@ -451,8 +453,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/oval_edit_text_background"
-                        android:inputType="number"
                         android:gravity="center"
+                        android:inputType="number"
                         android:singleLine="true"
                         android:text="25"
                         android:textColor="@color/white"
@@ -475,7 +477,7 @@
                         android:textColorHint="@color/white" />
 
                     <EditText
-                        android:id="@+id/edit_job_id"
+                        android:id="@+id/edit_config_id"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -497,8 +499,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/oval_edit_text_background"
-                        android:inputType="number"
                         android:gravity="center"
+                        android:inputType="number"
                         android:text="1000"
                         android:textColor="@color/white"
                         android:textColorHint="@color/white"
@@ -524,8 +526,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/oval_edit_text_background"
-                        android:inputType="number"
                         android:gravity="center"
+                        android:inputType="number"
                         android:text="1000"
                         android:textColor="@color/white"
                         android:textColorHint="@color/white"
@@ -543,8 +545,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/oval_edit_text_background"
-                        android:inputType="number"
                         android:gravity="center"
+                        android:inputType="number"
                         android:text="1000"
                         android:textColor="@color/white"
                         android:textColorHint="@color/white"
@@ -562,20 +564,19 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
-                        android:text="画面填充方式"
+                        android:text="画面填充方式:"
                         android:textColor="@color/white" />
 
                     <RadioGroup
                         android:id="@+id/stretch_mode_radio_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
                         <RadioButton
                             android:id="@+id/radio_aspect_fill"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:checked="true"
                             android:text="ASPECT_FILL"
                             android:textColor="@color/white"
@@ -583,33 +584,37 @@
 
                         <RadioButton
                             android:id="@+id/radio_aspect_fit"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:text="ASPECT_FIT"
                             android:textColor="@color/white"
                             android:textSize="12sp" />
 
                         <RadioButton
                             android:id="@+id/radio_scale_to_fit"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:text="SCALE_TO_FIT"
                             android:textColor="@color/white"
                             android:textSize="12sp" />
+
                     </RadioGroup>
+
                 </LinearLayout>
+
             </LinearLayout>
+
         </LinearLayout>
+
     </com.qiniu.droid.rtc.demo.ui.FixedHeightScrollView>
+
     <Button
         android:id="@+id/btn_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="41dp"
-        android:layout_marginEnd="41dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="41dp"
         android:layout_marginBottom="10dp"
         android:background="@drawable/oval_btn_background"
         android:gravity="center"

@@ -1,42 +1,42 @@
 package com.qiniu.droid.rtc.demo.model;
 
-import com.qiniu.droid.rtc.QNTrackInfo;
+import com.qiniu.droid.rtc.QNRenderMode;
+import com.qiniu.droid.rtc.QNTrack;
 import com.qiniu.droid.rtc.QNTrackKind;
+import com.qiniu.droid.rtc.QNTranscodingLiveStreamingTrack;
 import com.qiniu.droid.rtc.demo.utils.QNAppServer;
-import com.qiniu.droid.rtc.model.QNMergeTrackOption;
-import com.qiniu.droid.rtc.model.QNStretchMode;
 
 public class RTCTrackMergeOption {
 
     private final String mTrackId;
-    private final QNTrackInfo mQNTrackInfo;
+    private final QNTrack mTrack;
 
     private boolean mTrackInclude = true;
-    private final QNMergeTrackOption mQNMergeTrackOption;
+    private final QNTranscodingLiveStreamingTrack mMergeTrack;
 
-    public RTCTrackMergeOption(QNTrackInfo trackInfo) {
-        mQNTrackInfo = trackInfo;
-        mTrackId = mQNTrackInfo.getTrackId();
+    public RTCTrackMergeOption(QNTrack track) {
+        mTrack = track;
+        mTrackId = mTrack.getTrackID();
 
-        mQNMergeTrackOption = new QNMergeTrackOption();
-        if (trackInfo.getTrackKind().equals(QNTrackKind.VIDEO)) {
-            mQNMergeTrackOption.setWidth(QNAppServer.STREAMING_WIDTH);
-            mQNMergeTrackOption.setHeight(QNAppServer.STREAMING_HEIGHT);
-            mQNMergeTrackOption.setStretchMode(QNStretchMode.ASPECT_FILL);
+        mMergeTrack = new QNTranscodingLiveStreamingTrack();
+        if (track.isVideo()) {
+            mMergeTrack.setWidth(QNAppServer.STREAMING_WIDTH);
+            mMergeTrack.setHeight(QNAppServer.STREAMING_HEIGHT);
+            mMergeTrack.setRenderMode(QNRenderMode.ASPECT_FILL);
         }
-        mQNMergeTrackOption.setTrackId(mTrackId);
+        mMergeTrack.setTrackID(mTrackId);
     }
 
     public String getTrackId() {
         return mTrackId;
     }
 
-    public QNTrackInfo getQNTrackInfo() {
-        return mQNTrackInfo;
+    public QNTrack getTrack() {
+        return mTrack;
     }
 
-    public QNMergeTrackOption getQNMergeTrackOption() {
-        return mQNMergeTrackOption;
+    public QNTranscodingLiveStreamingTrack getMergeTrack() {
+        return mMergeTrack;
     }
 
     public boolean isTrackInclude() {
@@ -47,21 +47,21 @@ public class RTCTrackMergeOption {
         mTrackInclude = trackInclude;
     }
 
-    public void updateQNMergeTrackOption(QNMergeTrackOption option) {
-        if (option == null) {
+    public void updateMergeTrack(QNTranscodingLiveStreamingTrack track) {
+        if (track == null) {
             return;
         }
-        mQNMergeTrackOption.setX(option.getX());
-        mQNMergeTrackOption.setY(option.getY());
-        mQNMergeTrackOption.setZ(option.getZ());
-        mQNMergeTrackOption.setWidth(option.getWidth());
-        mQNMergeTrackOption.setHeight(option.getHeight());
+        mMergeTrack.setX(track.getX());
+        mMergeTrack.setY(track.getY());
+        mMergeTrack.setZOrder(track.getZOrder());
+        mMergeTrack.setWidth(track.getWidth());
+        mMergeTrack.setHeight(track.getHeight());
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof RTCTrackMergeOption) {
-            return mQNTrackInfo.equals(((RTCTrackMergeOption) obj).mQNTrackInfo);
+            return mTrack.equals(((RTCTrackMergeOption) obj).mTrack);
         } else {
             return false;
         }
@@ -69,6 +69,6 @@ public class RTCTrackMergeOption {
 
     @Override
     public int hashCode() {
-        return mQNTrackInfo.hashCode();
+        return mTrack.hashCode();
     }
 }

@@ -12,10 +12,10 @@
         android:layout_marginBottom="100dp"
         android:background="@drawable/background_niu" />
 
-    <ImageButton
-        android:id="@+id/setting_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/setting_iv"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
@@ -27,7 +27,7 @@
         android:id="@+id/room_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/setting_btn"
+        android:layout_below="@id/setting_iv"
         android:layout_marginLeft="30dp"
         android:layout_marginTop="40dp"
         android:layout_marginRight="30dp"
@@ -92,7 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:shadowColor="@color/blue"
-            android:text="@string/screen_capture"
+            android:text="@string/screen_share"
             android:textColor="@color/textColor" />
 
         <RadioButton
@@ -163,12 +163,12 @@
             android:background="@color/white" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_centerVertical="true"
             android:layout_margin="8dp"
             android:layout_toStartOf="@id/dividing_line"
-            android:src="@mipmap/ic_niu_logo" />
+            android:src="@drawable/ic_niu_logo" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -178,6 +178,7 @@
             android:layout_toEndOf="@id/dividing_line"
             android:text="@string/niu_conference"
             android:textColor="@color/white" />
+
     </RelativeLayout>
 
 </RelativeLayout>

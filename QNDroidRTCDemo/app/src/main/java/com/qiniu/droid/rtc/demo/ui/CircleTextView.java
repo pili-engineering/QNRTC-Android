@@ -10,8 +10,7 @@ import android.util.AttributeSet;
 
 import com.qiniu.droid.rtc.demo.R;
 
-
-public class CircleTextView extends android.support.v7.widget.AppCompatTextView {
+public class CircleTextView extends androidx.appcompat.widget.AppCompatTextView {
     private Paint mPaint;
     private RectF mRectf;
     private int mColor;
@@ -39,7 +38,7 @@ public class CircleTextView extends android.support.v7.widget.AppCompatTextView 
         mPaint.setColor(mColor);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setAntiAlias(true);
-        int r = getMeasuredWidth() > getMeasuredHeight() ? getMeasuredWidth() : getMeasuredHeight();
+        int r = Math.max(getMeasuredWidth(), getMeasuredHeight());
         mRectf.set(getPaddingLeft(), getPaddingTop(), r - getPaddingRight(), r - getPaddingBottom());
         canvas.drawArc(mRectf, 0, 360, false, mPaint);
         super.onDraw(canvas);

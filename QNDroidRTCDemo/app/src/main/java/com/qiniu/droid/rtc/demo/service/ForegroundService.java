@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
 public class ForegroundService extends Service {
@@ -27,13 +27,13 @@ public class ForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
         if (Build.VERSION.SDK_INT >= 26) {
-            String CHANNEL_ID = "screen share";
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+            String channelID = "screen share";
+            NotificationChannel channel = new NotificationChannel(channelID,
                     "screen share",
                     NotificationManager.IMPORTANCE_DEFAULT);
 
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
-            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+            Notification notification = new NotificationCompat.Builder(this, channelID)
                     .setContentTitle("")
                     .setContentText("").build();
             startForeground(1, notification);
