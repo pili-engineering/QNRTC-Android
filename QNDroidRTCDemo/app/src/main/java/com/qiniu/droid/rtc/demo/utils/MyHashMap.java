@@ -7,7 +7,7 @@ import java.util.List;
 
 public class MyHashMap<K, V> extends HashMap<K, V> {
 
-    private List<V> mOrderedValues = new LinkedList<>();
+    private final List<V> mOrderedValues = new LinkedList<>();
 
     public List<V> getOrderedValues() {
         return new ArrayList<>(mOrderedValues);

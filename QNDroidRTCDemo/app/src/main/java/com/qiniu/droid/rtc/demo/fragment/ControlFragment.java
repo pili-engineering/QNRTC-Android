@@ -1,7 +1,6 @@
 package com.qiniu.droid.rtc.demo.fragment;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.method.ScrollingMovementMethod;
@@ -13,30 +12,28 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
 import com.qiniu.droid.rtc.demo.R;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Fragment for call control.
  */
 public class ControlFragment extends Fragment {
-    private View mControlView;
-    private ImageButton mDisconnectButton;
-    private ImageButton mCameraSwitchButton;
     private ImageButton mToggleMuteButton;
     private ImageButton mToggleBeautyButton;
     private ImageButton mToggleSpeakerButton;
     private ImageButton mToggleVideoButton;
-    private ImageButton mLogShownButton;
     private LinearLayout mLogView;
-    private TextView mStreamingConfigButton;
-    private TextView mForwardJobButton;
+    private TextView mDirectStreamingButton;
     private TextView mLocalTextViewForVideo;
     private TextView mLocalTextViewForAudio;
     private TextView mRemoteTextView;
     private StringBuffer mRemoteLogText;
     private Chronometer mTimer;
     private OnCallEvents mCallEvents;
-    private boolean mIsVideoEnabled = true;
     private boolean mIsShowingLog = false;
     private boolean mIsScreenCaptureEnabled = false;
     private boolean mIsAudioOnly = false;
@@ -57,9 +54,9 @@ public class ControlFragment extends Fragment {
 
         boolean onToggleBeauty();
 
-        void onCallStreamingConfig();
+        void onCallMerge();
 
-        void onToggleForwardJob();
+        void onToggleDirectLiving();
     }
 
     public void setScreenCaptureEnabled(boolean isScreenCaptureEnabled) {
@@ -73,102 +70,67 @@ public class ControlFragment extends Fragment {
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mControlView = inflater.inflate(R.layout.fragment_room, container, false);
+        View controlView = inflater.inflate(R.layout.fragment_room, container, false);
 
-        mDisconnectButton = (ImageButton) mControlView.findViewById(R.id.disconnect_button);
-        mCameraSwitchButton = (ImageButton) mControlView.findViewById(R.id.camera_switch_button);
-        mToggleBeautyButton = (ImageButton) mControlView.findViewById(R.id.beauty_button);
-        mToggleMuteButton = (ImageButton) mControlView.findViewById(R.id.microphone_button);
-        mToggleSpeakerButton = (ImageButton) mControlView.findViewById(R.id.speaker_button);
-        mToggleVideoButton = (ImageButton) mControlView.findViewById(R.id.camera_button);
-        mLogShownButton = (ImageButton) mControlView.findViewById(R.id.log_shown_button);
-        mLogView = (LinearLayout) mControlView.findViewById(R.id.log_text);
-        mStreamingConfigButton = mControlView.findViewById(R.id.streaming_config_button);
-        mForwardJobButton = mControlView.findViewById(R.id.forward_job_button);
-        mLocalTextViewForVideo = (TextView) mControlView.findViewById(R.id.local_log_text_video);
+        ImageButton disconnectButton = controlView.findViewById(R.id.disconnect_button);
+        ImageButton cameraSwitchButton = controlView.findViewById(R.id.camera_switch_button);
+        mToggleBeautyButton = controlView.findViewById(R.id.beauty_button);
+        mToggleMuteButton = controlView.findViewById(R.id.microphone_button);
+        mToggleSpeakerButton = controlView.findViewById(R.id.speaker_button);
+        mToggleVideoButton = controlView.findViewById(R.id.camera_button);
+        ImageButton logShownButton = controlView.findViewById(R.id.log_shown_button);
+        mLogView = controlView.findViewById(R.id.log_text);
+        TextView transcodingStreamingButton = controlView.findViewById(R.id.transcoding_streaming_button);
+        mDirectStreamingButton = controlView.findViewById(R.id.direct_streaming_button);
+        mLocalTextViewForVideo = controlView.findViewById(R.id.local_log_text_video);
         mLocalTextViewForVideo.setMovementMethod(ScrollingMovementMethod.getInstance());
-        mLocalTextViewForAudio = (TextView) mControlView.findViewById(R.id.local_log_text_audio);
+        mLocalTextViewForAudio = controlView.findViewById(R.id.local_log_text_audio);
         mLocalTextViewForAudio.setMovementMethod(ScrollingMovementMethod.getInstance());
-        mRemoteTextView = (TextView) mControlView.findViewById(R.id.remote_log_text);
+        mRemoteTextView = controlView.findViewById(R.id.remote_log_text);
         mRemoteTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
-        mTimer = (Chronometer) mControlView.findViewById(R.id.timer);
+        mTimer = controlView.findViewById(R.id.timer);
 
-        mDisconnectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mCallEvents.onCallHangUp();
-            }
-        });
+        disconnectButton.setOnClickListener(view -> mCallEvents.onCallHangUp());
 
         if (!mIsScreenCaptureEnabled && !mIsAudioOnly) {
-            mCameraSwitchButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mCallEvents.onCameraSwitch();
-                }
-            });
+            cameraSwitchButton.setOnClickListener(view -> mCallEvents.onCameraSwitch());
         }
 
         if (!mIsScreenCaptureEnabled && !mIsAudioOnly) {
-            mToggleBeautyButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean enabled = mCallEvents.onToggleBeauty();
-                    mToggleBeautyButton.setImageResource(enabled ? R.mipmap.face_beauty_open : R.mipmap.face_beauty_close);
-                }
+            mToggleBeautyButton.setOnClickListener(v -> {
+                boolean enabled = mCallEvents.onToggleBeauty();
+                mToggleBeautyButton.setImageResource(enabled ? R.mipmap.face_beauty_open : R.mipmap.face_beauty_close);
             });
         }
 
-        mToggleMuteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                boolean enabled = mCallEvents.onToggleMic();
-                mToggleMuteButton.setImageResource(enabled ? R.mipmap.microphone : R.mipmap.microphone_disable);
-            }
+        mToggleMuteButton.setOnClickListener(view -> {
+            boolean enabled = mCallEvents.onToggleMic();
+            mToggleMuteButton.setImageResource(enabled ? R.mipmap.microphone : R.mipmap.microphone_disable);
         });
 
         if (mIsScreenCaptureEnabled || mIsAudioOnly) {
             mToggleVideoButton.setImageResource(R.mipmap.video_close);
         } else {
-            mToggleVideoButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean enabled = mCallEvents.onToggleVideo();
-                    mToggleVideoButton.setImageResource(enabled ? R.mipmap.video_open : R.mipmap.video_close);
-                }
+            mToggleVideoButton.setOnClickListener(v -> {
+                boolean enabled = mCallEvents.onToggleVideo();
+                mToggleVideoButton.setImageResource(enabled ? R.mipmap.video_open : R.mipmap.video_close);
             });
         }
 
-        mToggleSpeakerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean enabled = mCallEvents.onToggleSpeaker();
-                mToggleSpeakerButton.setImageResource(enabled ? R.mipmap.loudspeaker : R.mipmap.loudspeaker_disable);
-            }
+        mToggleSpeakerButton.setOnClickListener(v -> {
+            boolean enabled = mCallEvents.onToggleSpeaker();
+            mToggleSpeakerButton.setImageResource(enabled ? R.mipmap.loudspeaker : R.mipmap.loudspeaker_disable);
         });
 
-        mLogShownButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mLogView.setVisibility(mIsShowingLog ? View.INVISIBLE : View.VISIBLE);
-                mIsShowingLog = !mIsShowingLog;
-            }
+        logShownButton.setOnClickListener(v -> {
+            mLogView.setVisibility(mIsShowingLog ? View.INVISIBLE : View.VISIBLE);
+            mIsShowingLog = !mIsShowingLog;
         });
 
-        mStreamingConfigButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallEvents.onCallStreamingConfig();
-            }
-        });
+        transcodingStreamingButton.setOnClickListener(v -> mCallEvents.onCallMerge());
 
-        mForwardJobButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallEvents.onToggleForwardJob();
-            }
-        });
-        return mControlView;
+        mDirectStreamingButton.setOnClickListener(v -> mCallEvents.onToggleDirectLiving());
+        return controlView;
     }
 
     public void startTimer() {
@@ -201,24 +163,14 @@ public class ControlFragment extends Fragment {
         }
     }
 
-    public void updateForwardJobText(String forwardJobText) {
-        if (mForwardJobButton != null) {
-            mForwardJobButton.setText(forwardJobText);
+    public void updateDirectText(String directText) {
+        if (mDirectStreamingButton != null) {
+            mDirectStreamingButton.setText(directText);
         }
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        if (!mIsVideoEnabled) {
-            mCameraSwitchButton.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NotNull Activity activity) {
         super.onAttach(activity);
         mCallEvents = (OnCallEvents) activity;
     }

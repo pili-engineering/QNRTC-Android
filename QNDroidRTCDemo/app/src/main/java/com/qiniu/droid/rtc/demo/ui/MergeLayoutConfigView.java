@@ -2,76 +2,77 @@ package com.qiniu.droid.rtc.demo.ui;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.qiniu.droid.rtc.QNRenderMode;
+import com.qiniu.droid.rtc.QNTranscodingLiveStreamingConfig;
+import com.qiniu.droid.rtc.QNTranscodingLiveStreamingTrack;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.model.RTCTrackMergeOption;
 import com.qiniu.droid.rtc.demo.model.RTCUserMergeOptions;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
-import com.qiniu.droid.rtc.model.QNMergeJob;
-import com.qiniu.droid.rtc.model.QNMergeTrackOption;
-import com.qiniu.droid.rtc.model.QNStretchMode;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.qiniu.droid.rtc.demo.activity.RoomActivity.TRACK_TAG_CAMERA;
+import static com.qiniu.droid.rtc.demo.activity.RoomActivity.TRACK_TAG_SCREEN;
 
 public class MergeLayoutConfigView extends FrameLayout {
 
     private boolean mInit;
     private OnClickedListener mOnClickedListener;
     private RecyclerView mUserListView;
-    private Switch mStreamingEnableSwitch;
-    private Switch mFirstVideoSwitch;
+    private SwitchCompat mStreamingEnableSwitch;
+    private SwitchCompat mFirstVideoSwitch;
     private EditText mFirstEditTextX;
     private EditText mFirstEditTextY;
     private EditText mFirstEditTextZ;
     private EditText mFirstEditTextWidth;
     private EditText mFirstEditTextHeight;
 
-    private Switch mSecondVideoSwitch;
+    private SwitchCompat mSecondVideoSwitch;
     private EditText mSecondEditTextX;
     private EditText mSecondEditTextY;
     private EditText mSecondEditTextZ;
     private EditText mSecondEditTextWidth;
     private EditText mSecondEditTextHeight;
-    private Switch mAudioSwitch;
-    private Button mBtnConfirm;
+    private SwitchCompat mAudioSwitch;
 
-    private RTCTrackMergeOption mUserAudioTrack;
-    private RTCTrackMergeOption mUserFirstVideoTrack;
-    private RTCTrackMergeOption mUserSecondVideoTrack;
+    private RTCTrackMergeOption mUserAudioMergeOption;
+    private RTCTrackMergeOption mUserFirstVideoMergeOption;
+    private RTCTrackMergeOption mUserSecondVideoMergeOption;
 
-    private LinearLayout mCustomMergeJobLayout;
-    private Switch mCustomMergeJobSwitch;
+    private LinearLayout mCustomMergeConfigLayout;
+    private SwitchCompat mCustomMergeConfigSwitch;
     private TextView mPublishUrlText;
     private EditText mStreamWidthText;
     private EditText mStreamHeightText;
     private EditText mStreamFpsText;
-    private EditText mCustomJobIdText;
+    private EditText mCustomConfigIdText;
     private EditText mStreamBitrateText;
     private EditText mStreamMinBitrateText;
     private EditText mStreamMaxBitrateText;
     private RadioGroup mStretchModeRadioGroup;
-    private QNStretchMode mStretchMode;
-    private QNMergeJob mCurrentMergeJob;
-    private boolean mCurrentMergeJobValid;
+    private QNRenderMode mRenderMode;
+    private QNTranscodingLiveStreamingConfig mCurrentMergeConfig;
+    private boolean mCurrentMergeConfigValid;
 
     private String mRoomId;
     private boolean mIsStreamingEnabled;
-    private boolean mIsCustomMergeJobEnabled;
+    private boolean mIsCustomMergeEnabled;
     private volatile int mSerialNum;
 
     public interface OnClickedListener {
@@ -105,7 +106,7 @@ public class MergeLayoutConfigView extends FrameLayout {
 
     public void setRoomId(String roomId) {
         mRoomId = roomId;
-        mCustomJobIdText.setText(mRoomId);
+        mCustomConfigIdText.setText(mRoomId);
         String publishUrl = String.format(getResources().getString(R.string.publish_url), mRoomId, mSerialNum);
         mPublishUrlText.setText(publishUrl);
     }
@@ -128,31 +129,29 @@ public class MergeLayoutConfigView extends FrameLayout {
      *
      * @return true or false
      */
-    public boolean isCustomMergeJob() {
-        return mIsCustomMergeJobEnabled;
+    public boolean isCustomMerge() {
+        return mIsCustomMergeEnabled;
     }
 
     /**
-     * 获取 User 对应的 track 信息，并更新 UI
-     *
-     * @param chooseUser 对应 user
+     * 获取 User 对应的合流配置信息并更新 UI
      */
-    public void updateConfigInfo(RTCUserMergeOptions chooseUser) {
-        if (chooseUser == null) {
+    public void updateConfigInfo(RTCUserMergeOptions userMergeOptions) {
+        if (userMergeOptions == null) {
             return;
         }
 
-        mUserAudioTrack = chooseUser.getAudioTrack();
-        updateSwitchState(mUserAudioTrack, mAudioSwitch);
+        mUserAudioMergeOption = userMergeOptions.getAudioMergeOption();
+        updateSwitchState(mUserAudioMergeOption, mAudioSwitch);
 
-        List<RTCTrackMergeOption> videoTracks = chooseUser.getVideoTracks();
-        if (videoTracks.isEmpty()) {
+        List<RTCTrackMergeOption> videoMergeOptions = userMergeOptions.getVideoMergeOptions();
+        if (videoMergeOptions.isEmpty()) {
             setFirstRemoteTrack(null);
             setSecondRemoteTrack(null);
         } else {
-            setFirstRemoteTrack(videoTracks.get(0));
-            if (videoTracks.size() > 1) {
-                setSecondRemoteTrack(videoTracks.get(1));
+            setFirstRemoteTrack(videoMergeOptions.get(0));
+            if (videoMergeOptions.size() > 1) {
+                setSecondRemoteTrack(videoMergeOptions.get(1));
             } else {
                 setSecondRemoteTrack(null);
             }
@@ -163,12 +162,12 @@ public class MergeLayoutConfigView extends FrameLayout {
      * 同步 UI 选择的合流参数到合流配置类
      */
     public void updateMergeOptions() {
-        if (mUserAudioTrack != null) {
-            mUserAudioTrack.setTrackInclude(mAudioSwitch.isChecked());
+        if (mUserAudioMergeOption != null) {
+            mUserAudioMergeOption.setTrackInclude(mAudioSwitch.isChecked());
         }
-        if (mUserFirstVideoTrack != null) {
-            mUserFirstVideoTrack.setTrackInclude(mFirstVideoSwitch.isChecked());
-            QNMergeTrackOption option = mUserFirstVideoTrack.getQNMergeTrackOption();
+        if (mUserFirstVideoMergeOption != null) {
+            mUserFirstVideoMergeOption.setTrackInclude(mFirstVideoSwitch.isChecked());
+            QNTranscodingLiveStreamingTrack option = mUserFirstVideoMergeOption.getMergeTrack();
             try {
                 int x = Integer.parseInt(mFirstEditTextX.getText().toString());
                 int y = Integer.parseInt(mFirstEditTextY.getText().toString());
@@ -177,16 +176,16 @@ public class MergeLayoutConfigView extends FrameLayout {
                 int height = Integer.parseInt(mFirstEditTextHeight.getText().toString());
                 option.setX(x);
                 option.setY(y);
-                option.setZ(z);
+                option.setZOrder(z);
                 option.setWidth(width);
                 option.setHeight(height);
             } catch (Exception e) {
-                ToastUtils.s(getContext(), "请输入所有值");//处理空值
+                ToastUtils.showShortToast(getContext(), "请输入所有值");//处理空值
             }
         }
-        if (mUserSecondVideoTrack != null) {
-            mUserSecondVideoTrack.setTrackInclude(mSecondVideoSwitch.isChecked());
-            QNMergeTrackOption option = mUserSecondVideoTrack.getQNMergeTrackOption();
+        if (mUserSecondVideoMergeOption != null) {
+            mUserSecondVideoMergeOption.setTrackInclude(mSecondVideoSwitch.isChecked());
+            QNTranscodingLiveStreamingTrack option = mUserSecondVideoMergeOption.getMergeTrack();
             try {
                 int x = Integer.parseInt(mSecondEditTextX.getText().toString());
                 int y = Integer.parseInt(mSecondEditTextY.getText().toString());
@@ -195,70 +194,73 @@ public class MergeLayoutConfigView extends FrameLayout {
                 int height = Integer.parseInt(mSecondEditTextHeight.getText().toString());
                 option.setX(x);
                 option.setY(y);
-                option.setZ(z);
+                option.setZOrder(z);
                 option.setWidth(width);
                 option.setHeight(height);
             } catch (Exception e) {
-                ToastUtils.s(getContext(), "请输入所有值");//处理空值
+                ToastUtils.showShortToast(getContext(), "请输入所有值");//处理空值
             }
         }
     }
 
     /**
-     * 获取自定义合流任务的对象
+     * 获取自定义合流配置的对象
      *
-     * @return 合流任务对象实例
+     * @return 合流配置对象实例
      */
-    public QNMergeJob getCustomMergeJob() {
-        if (!isNeedUpdateMergeJob()) {
+    public QNTranscodingLiveStreamingConfig getCustomMergeConfig() {
+        if (!isNeedUpdateMergeConfig()) {
             return null;
         }
-        if (mCurrentMergeJob == null) {
-            mCurrentMergeJob = new QNMergeJob();
+        if (mCurrentMergeConfig == null) {
+            mCurrentMergeConfig = new QNTranscodingLiveStreamingConfig();
         }
-        mCurrentMergeJob.setMergeJobId(mCustomJobIdText.getText().toString().trim());
-        mCurrentMergeJob.setPublishUrl(mPublishUrlText.getText().toString().trim());
-        mCurrentMergeJob.setWidth(Integer.parseInt(mStreamWidthText.getText().toString().trim()));
-        mCurrentMergeJob.setHeight(Integer.parseInt(mStreamHeightText.getText().toString().trim()));
-        // QNMergeJob 中码率单位为 bps，所以，若期望码率为 1200kbps，则实际传入的参数值应为 1200 * 1000
-        mCurrentMergeJob.setBitrate(Integer.parseInt(mStreamBitrateText.getText().toString().trim()) * 1000);
-        mCurrentMergeJob.setMinBitrate(Integer.parseInt(mStreamMinBitrateText.getText().toString().trim()) * 1000);
-        mCurrentMergeJob.setMaxBitrate(Integer.parseInt(mStreamMaxBitrateText.getText().toString().trim()) * 1000);
-        mCurrentMergeJob.setFps(Integer.parseInt(mStreamFpsText.getText().toString().trim()));
-        mCurrentMergeJob.setStretchMode(mStretchMode);
-        mCurrentMergeJobValid = true;
-        return mCurrentMergeJob;
+        mCurrentMergeConfig.setStreamID(mCustomConfigIdText.getText().toString().trim());
+        mCurrentMergeConfig.setUrl(mPublishUrlText.getText().toString().trim());
+        mCurrentMergeConfig.setWidth(Integer.parseInt(mStreamWidthText.getText().toString().trim()));
+        mCurrentMergeConfig.setHeight(Integer.parseInt(mStreamHeightText.getText().toString().trim()));
+        // QNTranscodingLiveStreamingConfig 中码率单位为 Kbps，所以，若期望码率为 1200kbps，则实际传入的参数值应为 1200
+        mCurrentMergeConfig.setBitrate(Integer.parseInt(mStreamBitrateText.getText().toString().trim()));
+        int minBitrate = Integer.parseInt(mStreamMinBitrateText.getText().toString().trim());
+        int maxBitrate = Integer.parseInt(mStreamMaxBitrateText.getText().toString().trim());
+        mCurrentMergeConfig.setBitrateRange(minBitrate, maxBitrate);
+        mCurrentMergeConfig.setVideoFrameRate(Integer.parseInt(mStreamFpsText.getText().toString().trim()));
+        mCurrentMergeConfig.setRenderMode(mRenderMode);
+        mCurrentMergeConfigValid = true;
+        return mCurrentMergeConfig;
     }
 
     /**
-     * 更新合流任务信息，用于用户在更改后没有确认生效的场景下，恢复默认值
+     * 更新合流配置，用于用户在更改后没有确认生效的场景下，恢复默认值
      */
-    public void updateMergeJobConfigInfo() {
+    public void updateMergeConfigInfo() {
         mStreamingEnableSwitch.setChecked(mIsStreamingEnabled);
-        mCustomMergeJobSwitch.setChecked(mCurrentMergeJob != null && mIsCustomMergeJobEnabled);
-        mCustomMergeJobLayout.setVisibility(mCustomMergeJobSwitch.isChecked() ? VISIBLE : GONE);
+        mCustomMergeConfigSwitch.setChecked(mCurrentMergeConfig != null && mIsCustomMergeEnabled);
+        mCustomMergeConfigLayout.setVisibility(mCustomMergeConfigSwitch.isChecked() ? VISIBLE : GONE);
         String publishUrl = String.format(getResources().getString(R.string.publish_url), mRoomId, mSerialNum);
         mPublishUrlText.setText(publishUrl);
-        if (mIsCustomMergeJobEnabled) {
-            mStreamWidthText.setText(String.valueOf(mCurrentMergeJob != null ? mCurrentMergeJob.getWidth() : 480));
-            mStreamHeightText.setText(String.valueOf(mCurrentMergeJob != null ? mCurrentMergeJob.getHeight() : 848));
-            mStreamFpsText.setText(String.valueOf(mCurrentMergeJob != null ? mCurrentMergeJob.getFps() : 25));
-            mCustomJobIdText.setText(String.valueOf(mCurrentMergeJob != null ? mCurrentMergeJob.getMergeJobId() : mRoomId));
-            mStreamBitrateText.setText(String.valueOf(mCurrentMergeJob != null ? mCurrentMergeJob.getBitrate() / 1000 : 1000));
-            mStreamMinBitrateText.setText(String.valueOf(mCurrentMergeJob != null ? mCurrentMergeJob.getMinBitrate() / 1000 : 800));
-            mStreamMaxBitrateText.setText(String.valueOf(mCurrentMergeJob != null ? mCurrentMergeJob.getMaxBitrate() / 1000 : 1200));
-            if (mCurrentMergeJob == null || mCurrentMergeJob.getStretchMode() == null) {
+        if (mIsCustomMergeEnabled) {
+            mStreamWidthText.setText(String.valueOf(mCurrentMergeConfig != null ? mCurrentMergeConfig.getWidth() : 480));
+            mStreamHeightText.setText(String.valueOf(mCurrentMergeConfig != null ? mCurrentMergeConfig.getHeight() : 848));
+            mStreamFpsText.setText(String.valueOf(mCurrentMergeConfig != null ? mCurrentMergeConfig.getVideoFrameRate() : 25));
+            mCustomConfigIdText.setText(String.valueOf(mCurrentMergeConfig != null ? mCurrentMergeConfig.getStreamID() : mRoomId));
+            mStreamBitrateText.setText(String.valueOf(mCurrentMergeConfig != null ? mCurrentMergeConfig.getBitrate() : 1000));
+            mStreamMinBitrateText.setText(String.valueOf(mCurrentMergeConfig != null ? mCurrentMergeConfig.getMinBitrate() : 800));
+            mStreamMaxBitrateText.setText(String.valueOf(mCurrentMergeConfig != null ? mCurrentMergeConfig.getMaxBitrate() : 1200));
+            if (mCurrentMergeConfig == null || mCurrentMergeConfig.getRenderMode() == null) {
                 mStretchModeRadioGroup.check(R.id.radio_aspect_fill);
             } else {
-                switch (mCurrentMergeJob.getStretchMode()) {
+                switch (mCurrentMergeConfig.getRenderMode()) {
                     case ASPECT_FILL:
                         mStretchModeRadioGroup.check(R.id.radio_aspect_fill);
                         break;
                     case ASPECT_FIT:
                         mStretchModeRadioGroup.check(R.id.radio_aspect_fit);
                         break;
-                    case SCALE_TO_FIT:
+                    case FILL:
                         mStretchModeRadioGroup.check(R.id.radio_scale_to_fit);
+                        break;
+                    default:
                         break;
                 }
             }
@@ -266,19 +268,21 @@ public class MergeLayoutConfigView extends FrameLayout {
     }
 
     /**
-     * 更新当前合流任务是否可用
+     * 更新当前合流配置是否可用
+     *
      * @param valid 是否可用
      */
-    public void updateMergeJobValid(boolean valid) {
-        mCurrentMergeJobValid = valid;
+    public void updateMergeConfigValid(boolean valid) {
+        mCurrentMergeConfigValid = valid;
     }
 
     /**
-     * 当前合流任务是否可用
+     * 当前合流配置是否可用
+     *
      * @return valid 是否可用
      */
-    public boolean isMergeJobValid() {
-        return mCurrentMergeJobValid;
+    public boolean isMergeConfigValid() {
+        return mCurrentMergeConfigValid;
     }
 
     public void updateSerialNum(int serialNum) {
@@ -306,8 +310,8 @@ public class MergeLayoutConfigView extends FrameLayout {
         mUserListView.setLayoutManager(linearLayoutManager);
 
         mStreamingEnableSwitch = view.findViewById(R.id.streaming_enable_switch);
-        mCustomMergeJobLayout = view.findViewById(R.id.merge_job_layout);
-        mCustomMergeJobSwitch = view.findViewById(R.id.custom_mergejob_switch);
+        mCustomMergeConfigLayout = view.findViewById(R.id.merge_layout);
+        mCustomMergeConfigSwitch = view.findViewById(R.id.custom_merge_switch);
         mFirstVideoSwitch = view.findViewById(R.id.first_video_switch);
         mFirstEditTextX = view.findViewById(R.id.first_x_edit_text);
         mFirstEditTextY = view.findViewById(R.id.first_y_edit_text);
@@ -323,15 +327,12 @@ public class MergeLayoutConfigView extends FrameLayout {
         mSecondEditTextHeight = view.findViewById(R.id.second_height_edit_text);
 
         mAudioSwitch = view.findViewById(R.id.audio_switch);
-        mBtnConfirm = view.findViewById(R.id.btn_confirm);
-        mBtnConfirm.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mIsStreamingEnabled = mStreamingEnableSwitch.isChecked();
-                mIsCustomMergeJobEnabled = mCustomMergeJobSwitch.isChecked();
-                if (mOnClickedListener != null) {
-                    mOnClickedListener.onConfirmClicked();
-                }
+        Button btnConfirm = view.findViewById(R.id.btn_confirm);
+        btnConfirm.setOnClickListener(v -> {
+            mIsStreamingEnabled = mStreamingEnableSwitch.isChecked();
+            mIsCustomMergeEnabled = mCustomMergeConfigSwitch.isChecked();
+            if (mOnClickedListener != null) {
+                mOnClickedListener.onConfirmClicked();
             }
         });
 
@@ -339,38 +340,34 @@ public class MergeLayoutConfigView extends FrameLayout {
         mStreamWidthText = view.findViewById(R.id.stream_width);
         mStreamHeightText = view.findViewById(R.id.stream_height);
         mStreamFpsText = view.findViewById(R.id.stream_fps);
-        mCustomJobIdText = view.findViewById(R.id.edit_job_id);
+        mCustomConfigIdText = view.findViewById(R.id.edit_config_id);
         mStreamBitrateText = view.findViewById(R.id.stream_bitrate);
         mStreamMinBitrateText = view.findViewById(R.id.stream_bitrate_min);
         mStreamMaxBitrateText = view.findViewById(R.id.stream_bitrate_max);
         mStretchModeRadioGroup = view.findViewById(R.id.stretch_mode_radio_button);
 
-        mStretchModeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch (checkedId) {
-                    case R.id.radio_aspect_fill:
-                        mStretchMode = QNStretchMode.ASPECT_FILL;
-                        break;
-                    case R.id.radio_aspect_fit:
-                        mStretchMode = QNStretchMode.ASPECT_FIT;
-                        break;
-                    case R.id.radio_scale_to_fit:
-                        mStretchMode = QNStretchMode.SCALE_TO_FIT;
-                        break;
-                }
+        mStretchModeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            switch (checkedId) {
+                case R.id.radio_aspect_fill:
+                    mRenderMode = QNRenderMode.ASPECT_FILL;
+                    break;
+                case R.id.radio_aspect_fit:
+                    mRenderMode = QNRenderMode.ASPECT_FIT;
+                    break;
+                case R.id.radio_scale_to_fit:
+                    mRenderMode = QNRenderMode.FILL;
+                    break;
+                default:
+                    break;
             }
         });
 
-        mCustomMergeJobSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mCustomMergeJobLayout.setVisibility(isChecked ? VISIBLE : GONE);
-            }
+        mCustomMergeConfigSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mCustomMergeConfigLayout.setVisibility(isChecked ? VISIBLE : GONE);
         });
     }
 
-    private void updateSwitchState(RTCTrackMergeOption trackMergeOption, Switch switchButton) {
+    private void updateSwitchState(RTCTrackMergeOption trackMergeOption, SwitchCompat switchButton) {
         if (trackMergeOption != null) {
             switchButton.setChecked(trackMergeOption.isTrackInclude());
             switchButton.setEnabled(true);
@@ -381,11 +378,11 @@ public class MergeLayoutConfigView extends FrameLayout {
     }
 
 
-    private void setFirstRemoteTrack(RTCTrackMergeOption videoTrack) {
-        mUserFirstVideoTrack = videoTrack;
+    private void setFirstRemoteTrack(RTCTrackMergeOption videoMergeOption) {
+        mUserFirstVideoMergeOption = videoMergeOption;
 
-        updateSwitchState(mUserFirstVideoTrack, mFirstVideoSwitch);
-        boolean hasTrack = mUserFirstVideoTrack != null;
+        updateSwitchState(mUserFirstVideoMergeOption, mFirstVideoSwitch);
+        boolean hasTrack = mUserFirstVideoMergeOption != null;
         mFirstEditTextX.setEnabled(hasTrack);
         mFirstEditTextY.setEnabled(hasTrack);
         mFirstEditTextZ.setEnabled(hasTrack);
@@ -393,11 +390,11 @@ public class MergeLayoutConfigView extends FrameLayout {
         mFirstEditTextHeight.setEnabled(hasTrack);
 
         if (hasTrack) {
-            QNMergeTrackOption option = mUserFirstVideoTrack.getQNMergeTrackOption();
-            String videoTag = mUserFirstVideoTrack.getQNTrackInfo().getTag();
-            if (UserTrackView.TAG_CAMERA.equals(videoTag)) {
+            QNTranscodingLiveStreamingTrack option = mUserFirstVideoMergeOption.getMergeTrack();
+            String videoTag = mUserFirstVideoMergeOption.getTrack().getTag();
+            if (TRACK_TAG_CAMERA.equals(videoTag)) {
                 mFirstVideoSwitch.setText(R.string.video_camera);
-            } else if (UserTrackView.TAG_SCREEN.equals(videoTag)) {
+            } else if (TRACK_TAG_SCREEN.equals(videoTag)) {
                 mFirstVideoSwitch.setText(R.string.video_screen);
             } else {
                 if (TextUtils.isEmpty(videoTag)) {
@@ -408,7 +405,7 @@ public class MergeLayoutConfigView extends FrameLayout {
             }
             mFirstEditTextX.setText(String.valueOf(option.getX()));
             mFirstEditTextY.setText(String.valueOf(option.getY()));
-            mFirstEditTextZ.setText(String.valueOf(option.getZ()));
+            mFirstEditTextZ.setText(String.valueOf(option.getZOrder()));
             mFirstEditTextWidth.setText(String.valueOf(option.getWidth()));
             mFirstEditTextHeight.setText(String.valueOf(option.getHeight()));
         } else {
@@ -422,9 +419,9 @@ public class MergeLayoutConfigView extends FrameLayout {
     }
 
     private void setSecondRemoteTrack(RTCTrackMergeOption videoTrack) {
-        mUserSecondVideoTrack = videoTrack;
-        updateSwitchState(mUserSecondVideoTrack, mSecondVideoSwitch);
-        boolean hasTrack = mUserSecondVideoTrack != null;
+        mUserSecondVideoMergeOption = videoTrack;
+        updateSwitchState(mUserSecondVideoMergeOption, mSecondVideoSwitch);
+        boolean hasTrack = mUserSecondVideoMergeOption != null;
         mSecondEditTextX.setEnabled(hasTrack);
         mSecondEditTextY.setEnabled(hasTrack);
         mSecondEditTextZ.setEnabled(hasTrack);
@@ -432,11 +429,11 @@ public class MergeLayoutConfigView extends FrameLayout {
         mSecondEditTextHeight.setEnabled(hasTrack);
 
         if (hasTrack) {
-            QNMergeTrackOption option = mUserSecondVideoTrack.getQNMergeTrackOption();
-            String videoTag = mUserSecondVideoTrack.getQNTrackInfo().getTag();
-            if (UserTrackView.TAG_CAMERA.equals(videoTag)) {
+            QNTranscodingLiveStreamingTrack option = mUserSecondVideoMergeOption.getMergeTrack();
+            String videoTag = mUserSecondVideoMergeOption.getTrack().getTag();
+            if (TRACK_TAG_CAMERA.equals(videoTag)) {
                 mSecondVideoSwitch.setText(R.string.video_camera);
-            } else if (UserTrackView.TAG_SCREEN.equals(videoTag)) {
+            } else if (TRACK_TAG_SCREEN.equals(videoTag)) {
                 mSecondVideoSwitch.setText(R.string.video_screen);
             } else {
                 if (TextUtils.isEmpty(videoTag)) {
@@ -447,7 +444,7 @@ public class MergeLayoutConfigView extends FrameLayout {
             }
             mSecondEditTextX.setText(String.valueOf(option.getX()));
             mSecondEditTextY.setText(String.valueOf(option.getY()));
-            mSecondEditTextZ.setText(String.valueOf(option.getZ()));
+            mSecondEditTextZ.setText(String.valueOf(option.getZOrder()));
             mSecondEditTextWidth.setText(String.valueOf(option.getWidth()));
             mSecondEditTextHeight.setText(String.valueOf(option.getHeight()));
         } else {
@@ -460,25 +457,24 @@ public class MergeLayoutConfigView extends FrameLayout {
         }
     }
 
-    private boolean isNeedUpdateMergeJob() {
-        if (mCurrentMergeJob == null) {
+    private boolean isNeedUpdateMergeConfig() {
+        if (mCurrentMergeConfig == null) {
             return true;
         }
-        return  !mCurrentMergeJobValid
-                || !mCustomJobIdText.getText().toString().trim().equals(mCurrentMergeJob.getMergeJobId())
-                || !isPublishUrlIdentity()
-                || Integer.parseInt(mStreamWidthText.getText().toString().trim()) != mCurrentMergeJob.getWidth()
-                || Integer.parseInt(mStreamHeightText.getText().toString().trim()) != mCurrentMergeJob.getHeight()
-                || Integer.parseInt(mStreamBitrateText.getText().toString().trim()) != mCurrentMergeJob.getBitrate() / 1000
-                || Integer.parseInt(mStreamMinBitrateText.getText().toString().trim()) != mCurrentMergeJob.getMinBitrate() / 1000
-                || Integer.parseInt(mStreamMaxBitrateText.getText().toString().trim()) != mCurrentMergeJob.getMaxBitrate() / 1000
-                || Integer.parseInt(mStreamFpsText.getText().toString().trim()) != mCurrentMergeJob.getFps()
-                || mStretchMode != mCurrentMergeJob.getStretchMode();
+        return !mCurrentMergeConfigValid || !isPublishUrlIdentity()
+                || !mCustomConfigIdText.getText().toString().trim().equals(mCurrentMergeConfig.getStreamID())
+                || Integer.parseInt(mStreamWidthText.getText().toString().trim()) != mCurrentMergeConfig.getWidth()
+                || Integer.parseInt(mStreamHeightText.getText().toString().trim()) != mCurrentMergeConfig.getHeight()
+                || Integer.parseInt(mStreamBitrateText.getText().toString().trim()) != mCurrentMergeConfig.getBitrate() / 1000
+                || Integer.parseInt(mStreamMinBitrateText.getText().toString().trim()) != mCurrentMergeConfig.getMinBitrate() / 1000
+                || Integer.parseInt(mStreamMaxBitrateText.getText().toString().trim()) != mCurrentMergeConfig.getMaxBitrate() / 1000
+                || Integer.parseInt(mStreamFpsText.getText().toString().trim()) != mCurrentMergeConfig.getVideoFrameRate()
+                || mRenderMode != mCurrentMergeConfig.getRenderMode();
     }
 
     private boolean isPublishUrlIdentity() {
         String url1 = mPublishUrlText.getText().toString().trim();
-        String url2 = mCurrentMergeJob.getPublishUrl();
+        String url2 = mCurrentMergeConfig.getUrl();
         return url1.substring(0, url1.indexOf("?serialnum")).equals(url2.substring(0, url2.indexOf("?serialnum")));
     }
 }

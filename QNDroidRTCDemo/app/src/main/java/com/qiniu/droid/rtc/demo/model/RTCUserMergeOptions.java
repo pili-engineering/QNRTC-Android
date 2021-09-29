@@ -1,33 +1,44 @@
 package com.qiniu.droid.rtc.demo.model;
 
-import com.qiniu.droid.rtc.QNRTCUser;
-import com.qiniu.droid.rtc.QNTrackInfo;
+import com.qiniu.droid.rtc.QNTrack;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RTCUserMergeOptions extends QNRTCUser {
+public class RTCUserMergeOptions {
 
-    private RTCTrackMergeOption mAudioTrack;
-    private List<RTCTrackMergeOption> mVideoTracks = new LinkedList<>();
+    private final String mUserID;
+    private final String mUserData;
 
-    public RTCUserMergeOptions(String userId, String userData) {
-        super(userId, userData);
+    private RTCTrackMergeOption mAudioMergeOption;
+    private final List<RTCTrackMergeOption> mVideoMergeOptions = new LinkedList<>();
+
+    public RTCUserMergeOptions(String userID, String userData) {
+        mUserID = userID;
+        mUserData = userData;
     }
 
-    public RTCTrackMergeOption getAudioTrack() {
-        return mAudioTrack;
+    public String getUserID() {
+        return mUserID;
     }
 
-    public List<RTCTrackMergeOption> getVideoTracks() {
-        return mVideoTracks;
+    public String getUserData() {
+        return mUserData;
     }
 
-    public List<RTCTrackMergeOption> addTracks(List<QNTrackInfo> trackInfoList) {
+    public RTCTrackMergeOption getAudioMergeOption() {
+        return mAudioMergeOption;
+    }
+
+    public List<RTCTrackMergeOption> getVideoMergeOptions() {
+        return mVideoMergeOptions;
+    }
+
+    public List<RTCTrackMergeOption> addTracks(List<QNTrack> trackList) {
         List<RTCTrackMergeOption> videoTracks = new ArrayList<>();
-        for (QNTrackInfo item : trackInfoList) {
-            RTCTrackMergeOption newVideoTrack = addTrack(item);
+        for (QNTrack track : trackList) {
+            RTCTrackMergeOption newVideoTrack = addTrack(track);
             if (newVideoTrack != null) {
                 videoTracks.add(newVideoTrack);
             }
@@ -35,23 +46,23 @@ public class RTCUserMergeOptions extends QNRTCUser {
         return videoTracks;
     }
 
-    private RTCTrackMergeOption addTrack(QNTrackInfo trackInfo) {
-        if (trackInfo.isAudio()) {
-            mAudioTrack = new RTCTrackMergeOption(trackInfo);
+    private RTCTrackMergeOption addTrack(QNTrack track) {
+        if (track.isAudio()) {
+            mAudioMergeOption = new RTCTrackMergeOption(track);
             return null;
         } else {
-            RTCTrackMergeOption newVideoTrack = new RTCTrackMergeOption(trackInfo);
+            RTCTrackMergeOption newVideoTrack = new RTCTrackMergeOption(track);
             // replace
-            mVideoTracks.remove(newVideoTrack);
-            mVideoTracks.add(newVideoTrack);
+            mVideoMergeOptions.remove(newVideoTrack);
+            mVideoMergeOptions.add(newVideoTrack);
             return newVideoTrack;
         }
     }
 
-    public List<RTCTrackMergeOption> removeTracks(List<QNTrackInfo> trackInfoList) {
+    public List<RTCTrackMergeOption> removeTracks(List<QNTrack> trackList) {
         List<RTCTrackMergeOption> videoTracks = new ArrayList<>();
-        for (QNTrackInfo item : trackInfoList) {
-            RTCTrackMergeOption removedVideoTrack = removeTracks(item);
+        for (QNTrack track : trackList) {
+            RTCTrackMergeOption removedVideoTrack = removeTracks(track);
             if (removedVideoTrack != null) {
                 videoTracks.add(removedVideoTrack);
             }
@@ -59,13 +70,13 @@ public class RTCUserMergeOptions extends QNRTCUser {
         return videoTracks;
     }
 
-    private RTCTrackMergeOption removeTracks(QNTrackInfo trackInfo) {
-        if (trackInfo.isAudio()) {
-            mAudioTrack = null;
+    private RTCTrackMergeOption removeTracks(QNTrack track) {
+        if (track.isAudio()) {
+            mAudioMergeOption = null;
             return null;
         } else {
-            RTCTrackMergeOption newUserTrack = new RTCTrackMergeOption(trackInfo);
-            mVideoTracks.remove(newUserTrack);
+            RTCTrackMergeOption newUserTrack = new RTCTrackMergeOption(track);
+            mVideoMergeOptions.remove(newUserTrack);
             return newUserTrack;
         }
     }

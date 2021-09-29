@@ -14,9 +14,8 @@ import com.qiniu.droid.rtc.demo.R;
 
 public class SpinnerPopupWindow extends PopupWindow implements AdapterView.OnItemClickListener {
 
-    private Context mContext;
+    private final Context mContext;
     private ListView mDataSource;
-    private ArrayAdapter<String> mAdapter;
     private OnSpinnerItemClickListener mOnSpinnerItemClickListener;
 
     public interface OnSpinnerItemClickListener {
@@ -34,8 +33,7 @@ public class SpinnerPopupWindow extends PopupWindow implements AdapterView.OnIte
     }
 
     public void setAdapter(ArrayAdapter<String> adapter) {
-        mAdapter = adapter;
-        mDataSource.setAdapter(mAdapter);
+        mDataSource.setAdapter(adapter);
     }
 
     private void init() {
@@ -47,7 +45,7 @@ public class SpinnerPopupWindow extends PopupWindow implements AdapterView.OnIte
         setFocusable(true);
         setBackgroundDrawable(new ColorDrawable(mContext.getResources().getColor(R.color.editTextBackground)));
 
-        mDataSource = (ListView) view.findViewById(R.id.config_list_view);
+        mDataSource = view.findViewById(R.id.config_list_view);
         mDataSource.setOnItemClickListener(this);
     }
 

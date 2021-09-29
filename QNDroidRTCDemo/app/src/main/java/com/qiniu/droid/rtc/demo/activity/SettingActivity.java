@@ -6,18 +6,18 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+
 import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.qiniu.droid.rtc.QNFileLogHelper;
@@ -38,19 +38,8 @@ public class SettingActivity extends AppCompatActivity {
 
     private EditText mUserNameEditText;
     private TextView mConfigTextView;
-    private TextView mVersionCodeTextView;
     private TextView mUploadTextView;
-    private RadioGroup mCodecModeRadioGroup;
-    private RadioButton mHwCodecMode;
-    private RadioButton mSwCodecMode;
-    private RadioGroup mAudioSampleRateRadioGroup;
-    private RadioButton mLowSampleRateBtn;
-    private RadioButton mHighSampleRateBtn;
-    private RadioGroup mMaintainResRadioGroup;
-    private RadioButton mMaintainResolutionYes;
-    private RadioButton mMaintainResolutionNo;
     private EditText mAppIdEditText;
-    private Switch mAec3Switch;
 
     private int mSelectPos = 0;
     private String mUserName;
@@ -58,7 +47,7 @@ public class SettingActivity extends AppCompatActivity {
     private int mSampleRatePos = 0;
     private boolean mMaintainResolution = false;
     private boolean mIsAec3Enabled = false;
-    private List<String> mDefaultConfiguration = new ArrayList<>();
+    private final List<String> mDefaultConfiguration = new ArrayList<>();
     private ArrayAdapter<String> mConfigAdapter;
     private SpinnerPopupWindow mConfigPopupWindow;
     private List<String> mLogFileNames;
@@ -72,34 +61,29 @@ public class SettingActivity extends AppCompatActivity {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
 
-        mUserNameEditText = (EditText) findViewById(R.id.user_name_edit_text);
-        mConfigTextView = (TextView) findViewById(R.id.config_text_view);
-        mVersionCodeTextView = (TextView) findViewById(R.id.version_code);
-        mUploadTextView = (TextView) findViewById(R.id.report_log);
-        mCodecModeRadioGroup = (RadioGroup) findViewById(R.id.codec_mode_button);
-        mCodecModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
-        mHwCodecMode = (RadioButton) findViewById(R.id.hw_radio_button);
-        mSwCodecMode = (RadioButton) findViewById(R.id.sw_radio_button);
-        mAudioSampleRateRadioGroup = findViewById(R.id.sample_rate_button);
-        mAudioSampleRateRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
-        mLowSampleRateBtn = findViewById(R.id.low_sample_rate_button);
-        mHighSampleRateBtn = findViewById(R.id.high_sample_rate_button);
+        mUserNameEditText = findViewById(R.id.user_name_edit_text);
+        mConfigTextView = findViewById(R.id.config_text_view);
+        TextView versionCodeTextView = findViewById(R.id.version_code);
+        mUploadTextView = findViewById(R.id.report_log);
+        RadioGroup codecModeRadioGroup = findViewById(R.id.codec_mode_button);
+        codecModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
+        RadioButton hwCodecMode = findViewById(R.id.hw_radio_button);
+        RadioButton swCodecMode = findViewById(R.id.sw_radio_button);
+        RadioGroup audioSampleRateRadioGroup = findViewById(R.id.sample_rate_button);
+        audioSampleRateRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
+        RadioButton lowSampleRateBtn = findViewById(R.id.low_sample_rate_button);
+        RadioButton highSampleRateBtn = findViewById(R.id.high_sample_rate_button);
 
-        mMaintainResRadioGroup = (RadioGroup) findViewById(R.id.maintain_resolution_button);
-        mMaintainResRadioGroup.setOnCheckedChangeListener(mOnMaintainResCheckedChangeListener);
-        mMaintainResolutionYes = (RadioButton) findViewById(R.id.maintain_res_button_yes);
-        mMaintainResolutionNo = (RadioButton) findViewById(R.id.maintain_res_button_no);
+        RadioGroup maintainResRadioGroup = findViewById(R.id.maintain_resolution_button);
+        maintainResRadioGroup.setOnCheckedChangeListener(mOnMaintainResCheckedChangeListener);
+        RadioButton maintainResolutionYes = findViewById(R.id.maintain_res_button_yes);
+        RadioButton maintainResolutionNo = findViewById(R.id.maintain_res_button_no);
 
-        mAppIdEditText = (EditText) findViewById(R.id.app_id_edit_text);
-        mAec3Switch = findViewById(R.id.webrtc_aec3_enable_btn);
-        mAec3Switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mIsAec3Enabled = isChecked;
-            }
-        });
+        mAppIdEditText = findViewById(R.id.app_id_edit_text);
+        SwitchCompat aec3Switch = findViewById(R.id.webrtc_aec3_enable_btn);
+        aec3Switch.setOnCheckedChangeListener((buttonView, isChecked) -> mIsAec3Enabled = isChecked);
 
-        mVersionCodeTextView.setText(String.format(getString(R.string.version_code), getVersionDescription(), getBuildTimeDescription(), getSdkVersion()));
+        versionCodeTextView.setText(String.format(getString(R.string.version_code), getVersionDescription(), getBuildTimeDescription(), getSdkVersion()));
 
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mUserName = preferences.getString(Config.USER_NAME, "");
@@ -111,7 +95,7 @@ public class SettingActivity extends AppCompatActivity {
         }
 
         //test mode setting
-        LinearLayout testModeLayout = (LinearLayout) findViewById(R.id.test_mode_layout);
+        LinearLayout testModeLayout = findViewById(R.id.test_mode_layout);
         testModeLayout.setVisibility(isTestMode() ? View.VISIBLE : View.GONE);
 
         String[] configurations = getResources().getStringArray(R.array.conference_configuration);
@@ -122,27 +106,27 @@ public class SettingActivity extends AppCompatActivity {
 
         int codecMode = preferences.getInt(Config.CODEC_MODE, Config.HW);
         if (codecMode == Config.HW) {
-            mHwCodecMode.setChecked(true);
+            hwCodecMode.setChecked(true);
         } else {
-            mSwCodecMode.setChecked(true);
+            swCodecMode.setChecked(true);
         }
 
         int sampleRatePos = preferences.getInt(Config.SAMPLE_RATE, Config.LOW_SAMPLE_RATE);
         if (sampleRatePos == Config.LOW_SAMPLE_RATE) {
-            mLowSampleRateBtn.setChecked(true);
+            lowSampleRateBtn.setChecked(true);
         } else {
-            mHighSampleRateBtn.setChecked(true);
+            highSampleRateBtn.setChecked(true);
         }
 
         mMaintainResolution = preferences.getBoolean(Config.MAINTAIN_RES, false);
         if (mMaintainResolution) {
-            mMaintainResolutionYes.setChecked(true);
+            maintainResolutionYes.setChecked(true);
         } else {
-            mMaintainResolutionNo.setChecked(true);
+            maintainResolutionNo.setChecked(true);
         }
 
         mIsAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, true);
-        mAec3Switch.setChecked(mIsAec3Enabled);
+        aec3Switch.setChecked(mIsAec3Enabled);
 
         mConfigPopupWindow = new SpinnerPopupWindow(this);
         mConfigPopupWindow.setOnSpinnerItemClickListener(mOnSpinnerItemClickListener);
@@ -167,9 +151,9 @@ public class SettingActivity extends AppCompatActivity {
         String appId = mAppIdEditText.getText().toString().trim();
 
         SharedPreferences.Editor editor = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE).edit();
-        if (!userName.equals("")) {
+        if (!"".equals(userName)) {
             if (!MainActivity.isUserNameOk(userName)) {
-                ToastUtils.s(this, getString(R.string.wrong_user_name_toast));
+                ToastUtils.showShortToast(this, getString(R.string.wrong_user_name_toast));
                 return;
             }
 
@@ -204,10 +188,10 @@ public class SettingActivity extends AppCompatActivity {
         int testModeFPS = 0;
         int testModeBitrate = 0;
 
-        EditText testModeWidthEditText = (EditText) findViewById(R.id.test_mode_width);
-        EditText testModeHighEditText = (EditText) findViewById(R.id.test_mode_high);
-        EditText testModeFPSEditText = (EditText) findViewById(R.id.test_mode_fps);
-        EditText testModeBitrateEditText = (EditText) findViewById(R.id.test_mode_bitrate);
+        EditText testModeWidthEditText = findViewById(R.id.test_mode_width);
+        EditText testModeHighEditText = findViewById(R.id.test_mode_high);
+        EditText testModeFPSEditText = findViewById(R.id.test_mode_fps);
+        EditText testModeBitrateEditText = findViewById(R.id.test_mode_bitrate);
 
         try {
             testModeWidth = Integer.parseInt(testModeWidthEditText.getText().toString());
@@ -215,6 +199,7 @@ public class SettingActivity extends AppCompatActivity {
             testModeFPS = Integer.parseInt(testModeFPSEditText.getText().toString());
             testModeBitrate = Integer.parseInt(testModeBitrateEditText.getText().toString());
         } catch (NumberFormatException e) {
+            e.printStackTrace();
         }
 
         if (testModeWidth > 0 && testModeHigh > 0 && testModeFPS > 0 && testModeBitrate > 0) {
@@ -240,12 +225,12 @@ public class SettingActivity extends AppCompatActivity {
                     QNFileLogHelper.getInstance().reportLogFile(mLogFileNames.get(pos), new QNFileLogHelper.LogReportCallback() {
                         @Override
                         public void onReportSuccess(String name) {
-                            ToastUtils.s(SettingActivity.this, "上传成功：" + name);
+                            ToastUtils.showShortToast(SettingActivity.this, "上传成功：" + name);
                         }
 
                         @Override
                         public void onReportError(String name, String errorMsg) {
-                            ToastUtils.s(SettingActivity.this, "上传失败：" + name + "；" + errorMsg);
+                            ToastUtils.showShortToast(SettingActivity.this, "上传失败：" + name + "；" + errorMsg);
                         }
                     });
                     mLogFilePopupWindow.dismiss();
@@ -254,7 +239,7 @@ public class SettingActivity extends AppCompatActivity {
         }
         mLogFileNames = QNFileLogHelper.getInstance().getLogFiles();
         if (mLogFileNames == null || mLogFileNames.size() == 0) {
-            ToastUtils.s(SettingActivity.this, "当前无可上报日志");
+            ToastUtils.showShortToast(SettingActivity.this, "当前无可上报日志");
             return;
         }
 
@@ -284,13 +269,10 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     private boolean isTestMode() {
-//        if (mAppIdEditText.getText().toString().compareTo(QNAppServer.TEST_MODE_APP_ID) == 0) {
-//            return true;
-//        }
-        return false;
+        return mAppIdEditText.getText().toString().compareTo(QNAppServer.TEST_MODE_APP_ID) == 0;
     }
 
-    private SpinnerPopupWindow.OnSpinnerItemClickListener mOnSpinnerItemClickListener = new SpinnerPopupWindow.OnSpinnerItemClickListener() {
+    private final SpinnerPopupWindow.OnSpinnerItemClickListener mOnSpinnerItemClickListener = new SpinnerPopupWindow.OnSpinnerItemClickListener() {
         @Override
         public void onItemClick(int pos) {
             mSelectPos = pos;
@@ -299,37 +281,35 @@ public class SettingActivity extends AppCompatActivity {
         }
     };
 
-    private RadioGroup.OnCheckedChangeListener mOnCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(RadioGroup group, int checkedId) {
-            switch (group.getCheckedRadioButtonId()) {
-                case R.id.hw_radio_button:
-                    mEncodeMode = Config.HW;
-                    break;
-                case R.id.sw_radio_button:
-                    mEncodeMode = Config.SW;
-                    break;
-                case R.id.low_sample_rate_button:
-                    mSampleRatePos = Config.LOW_SAMPLE_RATE;
-                    break;
-                case R.id.high_sample_rate_button:
-                    mSampleRatePos = Config.HIGH_SAMPLE_RATE;
-                    break;
-            }
+    private final RadioGroup.OnCheckedChangeListener mOnCheckedChangeListener = (group, checkedId) -> {
+        switch (group.getCheckedRadioButtonId()) {
+            case R.id.hw_radio_button:
+                mEncodeMode = Config.HW;
+                break;
+            case R.id.sw_radio_button:
+                mEncodeMode = Config.SW;
+                break;
+            case R.id.low_sample_rate_button:
+                mSampleRatePos = Config.LOW_SAMPLE_RATE;
+                break;
+            case R.id.high_sample_rate_button:
+                mSampleRatePos = Config.HIGH_SAMPLE_RATE;
+                break;
+            default:
+                break;
         }
     };
 
-    private RadioGroup.OnCheckedChangeListener mOnMaintainResCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(RadioGroup group, int checkedId) {
-            switch (group.getCheckedRadioButtonId()) {
-                case R.id.maintain_res_button_yes:
-                    mMaintainResolution = true;
-                    break;
-                case R.id.maintain_res_button_no:
-                    mMaintainResolution = false;
-                    break;
-            }
+    private final RadioGroup.OnCheckedChangeListener mOnMaintainResCheckedChangeListener = (group, checkedId) -> {
+        switch (group.getCheckedRadioButtonId()) {
+            case R.id.maintain_res_button_yes:
+                mMaintainResolution = true;
+                break;
+            case R.id.maintain_res_button_no:
+                mMaintainResolution = false;
+                break;
+            default:
+                break;
         }
     };
 }

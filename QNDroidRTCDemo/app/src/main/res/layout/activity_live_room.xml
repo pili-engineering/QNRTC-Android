@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/backgroundColor"
+    android:orientation="vertical"
     tools:context=".activity.LiveRoomActivity">
 
     <com.pili.pldroid.player.widget.PLVideoView
@@ -14,43 +13,44 @@
         android:layout_height="0dp"
         android:layout_gravity="top"
         android:layout_weight="6">
+
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <ImageButton
-                android:id="@+id/log_shown_button"
+            <ImageView
+                android:id="@+id/log_shown_iv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_margin="16dp"
                 android:background="#0000"
-                android:src="@mipmap/log_btn" />
+                android:src="@drawable/ic_info" />
 
             <TextView
                 android:id="@+id/play_url_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/log_shown_button"
-                android:layout_alignTop="@id/log_shown_button"
-                android:layout_alignBottom="@id/log_shown_button"
-                android:gravity="center_vertical"
+                android:layout_alignTop="@id/log_shown_iv"
+                android:layout_alignBottom="@id/log_shown_iv"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
-                android:textSize="12sp"
-                android:textColor="@color/white" />
+                android:layout_toEndOf="@id/log_shown_iv"
+                android:gravity="center_vertical"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
 
             <LinearLayout
                 android:id="@+id/log_text"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
-                android:layout_alignStart="@id/log_shown_button"
-                android:layout_below="@id/log_shown_button"
+                android:layout_below="@id/log_shown_iv"
+                android:layout_alignStart="@id/log_shown_iv"
                 android:alpha="0.5"
-                android:padding="8dp"
                 android:background="@color/editTextBackground"
                 android:orientation="vertical"
+                android:padding="8dp"
                 android:visibility="gone">
 
                 <TextView
@@ -58,22 +58,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white" />
+
                 <TextView
                     android:id="@+id/audio_fps_log_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white" />
+
                 <TextView
                     android:id="@+id/video_bitrate_log_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white" />
+
                 <TextView
                     android:id="@+id/video_fps_log_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white" />
             </LinearLayout>
+
         </RelativeLayout>
+
     </com.pili.pldroid.player.widget.PLVideoView>
+
 </LinearLayout>

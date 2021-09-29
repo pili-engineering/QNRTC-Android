@@ -1,9 +1,13 @@
 package com.qiniu.droid.rtc.demo.utils;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.view.View;
 
 import com.qiniu.android.dns.DnsManager;
 import com.qiniu.android.dns.IResolver;
@@ -11,11 +15,23 @@ import com.qiniu.android.dns.NetworkInfo;
 import com.qiniu.android.dns.http.DnspodFree;
 import com.qiniu.android.dns.local.AndroidDnsServer;
 import com.qiniu.android.dns.local.Resolver;
+import com.qiniu.droid.rtc.demo.R;
 
 import java.io.IOException;
 import java.net.InetAddress;
 
 public final class Utils {
+
+    public static String packageName(Context context) {
+        PackageInfo info;
+        try {
+            info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return info.packageName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
     public static int appVersion(Context context) {
         PackageInfo info;
@@ -35,6 +51,15 @@ public final class Utils {
                 .setPositiveButton("确定", (dialog, which) -> dialog.dismiss())
                 .create()
                 .show();
+    }
+
+    @TargetApi(19)
+    public static int getSystemUiVisibility() {
+        int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            flags |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
+        return flags;
     }
 
     /**
