@@ -483,7 +483,6 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
             case Config.SCREEN_CAPTURE:
                 // 创建屏幕录制的视频 Track
                 createScreenTrack();
-                mLocalTrackList.add(mLocalScreenTrack);
                 mControlFragment.setAudioOnly(true);
                 break;
             case Config.MUTI_TRACK_CAPTURE:
@@ -492,7 +491,6 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 mLocalVideoTrack = mEngine.createTrackInfoBuilder()
                         .setSourceType(QNSourceType.VIDEO_CAMERA)
                         .setTag(UserTrackView.TAG_CAMERA).create();
-                mLocalTrackList.add(mLocalScreenTrack);
                 mLocalTrackList.add(mLocalVideoTrack);
                 break;
         }
@@ -536,6 +534,7 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
                 .setBitrate(BITRATE_FOR_SCREEN_VIDEO)
                 .setMaster(true)
                 .setTag(UserTrackView.TAG_SCREEN).create();
+            mLocalTrackList.add(mLocalScreenTrack);
         }
     }
 
