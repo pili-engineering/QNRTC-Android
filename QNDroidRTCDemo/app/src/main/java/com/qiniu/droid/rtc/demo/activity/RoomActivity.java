@@ -33,9 +33,11 @@ import android.widget.Toast;
 import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCameraSwitchResultCallback;
 import com.qiniu.droid.rtc.QNCaptureVideoCallback;
+import com.qiniu.droid.rtc.QNClientRole;
 import com.qiniu.droid.rtc.QNCustomMessage;
 import com.qiniu.droid.rtc.QNErrorCode;
 import com.qiniu.droid.rtc.QNLocalAudioPacketCallback;
+import com.qiniu.droid.rtc.QNMediaRelayState;
 import com.qiniu.droid.rtc.QNRTCEngine;
 import com.qiniu.droid.rtc.QNRTCEngineEventListener;
 import com.qiniu.droid.rtc.QNRTCSetting;
@@ -75,6 +77,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -1239,6 +1242,16 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
 
     }
 
+    @Override
+    public void onClientRoleChanged(QNClientRole clientRole) {
+
+    }
+
+    @Override
+    public void onMediaRelayStateChanged(Map<String, QNMediaRelayState> stateMap) {
+
+    }
+
     // Demo control
     @Override
     public void onCallHangUp() {
@@ -1370,6 +1383,11 @@ public class RoomActivity extends Activity implements QNRTCEngineEventListener, 
             mControlFragment.updateForwardJobText(getString(R.string.forward_job_btn_text));
             ToastUtils.s(RoomActivity.this, "已停止 id=" + mForwardJob.getForwardJobId() + " 的单流转推！！！");
         }
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
     }
 
     /**
