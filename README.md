@@ -138,7 +138,7 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 
 # 6 开发文档
 
-- 可通过 [QNDroidRTC 快速入门](https://developer.qiniu.com/rtc/8765/prepare-android-development) 了解如何快速搭建音视频通话应用
+- 可通过[开发准备](https://developer.qiniu.com/rtc/8765/prepare-android-development)和[实现视频通话](https://developer.qiniu.com/rtc/8765/prepare-android-development) 了解如何快速搭建音视频通话应用
 - 可通过 [QNDroidRTC 使用指南](https://developer.qiniu.com/rtc/8727/initialization-android) 了解不同场景的实现方式
 - 可通过 [QNDroidRTC API 概览](https://developer.qiniu.com/rtc/8773/API%20%E6%A6%82%E8%A7%88) 了解 SDK 的接口设计及使用姿势
 
