@@ -51,6 +51,7 @@ import com.qiniu.droid.rtc.QNErrorCode;
 import com.qiniu.droid.rtc.QNLiveStreamingErrorInfo;
 import com.qiniu.droid.rtc.QNLiveStreamingListener;
 import com.qiniu.droid.rtc.QNLocalTrack;
+import com.qiniu.droid.rtc.QNMediaRelayState;
 import com.qiniu.droid.rtc.QNMicrophoneAudioTrack;
 import com.qiniu.droid.rtc.QNMicrophoneAudioTrackConfig;
 import com.qiniu.droid.rtc.QNNetworkQuality;
@@ -899,7 +900,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
          */
         @Override
         public void onConnectionStateChanged(QNConnectionState state, @Nullable QNConnectionDisconnectedInfo info) {
-            Log.i(TAG, "onRoomStateChanged:" + state.name());
+            Log.i(TAG, "onConnectionStateChanged:" + state.name());
             switch (state) {
                 case DISCONNECTED:
                     /**
@@ -1114,6 +1115,11 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
                 ToastUtils.showShortToast(RoomActivity.this, "您被踢出房间！");
                 finish();
             }
+        }
+
+        @Override
+        public void onMediaRelayStateChanged(String relayRoom, QNMediaRelayState state) {
+
         }
     };
 
