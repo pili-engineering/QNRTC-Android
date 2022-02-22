@@ -319,28 +319,27 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
     }
 
     @Override
-    public void finish() {
-        if (isFinishing()) {
-            return;
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mClient != null) {
+            if (mIsAdmin && mIsMergeStreaming) {
+                // 如果当前正在合流，则停止
+                mClient.stopLiveStreaming(mCurrentMergeConfig);
+                mIsMergeStreaming = false;
+            }
+            if (mIsAdmin && mIsDirectStreaming) {
+                // 如果当前正在单路转推，则停止
+                mClient.stopLiveStreaming(mCurrentDirectConfig);
+                mIsDirectStreaming = false;
+            }
+            // 离开房间
+            mClient.leave();
+            mClient = null;
         }
-        if (mIsAdmin && mIsMergeStreaming) {
-            // 如果当前正在合流，则停止
-            mClient.stopLiveStreaming(mCurrentMergeConfig);
-            mIsMergeStreaming = false;
-        }
-        if (mIsAdmin && mIsDirectStreaming) {
-            // 如果当前正在单路转推，则停止
-            mClient.stopLiveStreaming(mCurrentDirectConfig);
-            mIsDirectStreaming = false;
-        }
-        mUpdateNetWorkQualityInfoTask.cancel();
-        mClient.unpublish(mLocalTrackList);
-        // 离开房间
-        mClient.leave();
-        mClient = null;
         // 反初始化
         QNRTC.deinit();
 
+        mUpdateNetWorkQualityInfoTask.cancel();
         if (mTrackWindowFullScreen != null) {
             mTrackWindowFullScreen.dispose();
         }
@@ -349,7 +348,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
         }
         mTrackWindowsList.clear();
         mPopWindow = null;
-        super.finish();
     }
 
     /**
