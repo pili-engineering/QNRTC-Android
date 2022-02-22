@@ -25,6 +25,7 @@ import com.qiniu.droid.rtc.demo.model.UpdateInfo;
 import com.qiniu.droid.rtc.demo.service.DownloadService;
 import com.qiniu.droid.rtc.demo.ui.RadioGroupFlow;
 import com.qiniu.droid.rtc.demo.utils.Config;
+import com.qiniu.droid.rtc.demo.utils.PermissionChecker;
 import com.qiniu.droid.rtc.demo.utils.QNAppServer;
 import com.qiniu.droid.rtc.demo.utils.ToastUtils;
 import com.qiniu.droid.rtc.demo.utils.Utils;
@@ -124,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startConference(final String roomName) {
+        if (!isPermissionOK()) {
+            return;
+        }
         if (!handleRoomInfo()) {
             return;
         }
@@ -250,6 +254,15 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, DownloadService.class);
         intent.putExtra(Config.DOWNLOAD_URL, downloadUrl);
         startService(intent);
+    }
+
+    private boolean isPermissionOK() {
+        PermissionChecker checker = new PermissionChecker(this);
+        boolean isPermissionOK = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || checker.checkPermission();
+        if (!isPermissionOK) {
+            ToastUtils.showLongToast(this, "Some permissions is not approved !!!");
+        }
+        return isPermissionOK;
     }
 
     private final RadioGroup.OnCheckedChangeListener mOnCheckedChangeListener = (group, checkedId) -> {

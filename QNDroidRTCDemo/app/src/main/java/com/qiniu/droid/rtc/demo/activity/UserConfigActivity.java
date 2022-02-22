@@ -53,15 +53,6 @@ public class UserConfigActivity extends AppCompatActivity {
         saveUserName();
     }
 
-    private boolean isPermissionOK() {
-        PermissionChecker checker = new PermissionChecker(this);
-        boolean isPermissionOK = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || checker.checkPermission();
-        if (!isPermissionOK) {
-            ToastUtils.showLongToast(this, "Some permissions is not approved !!!");
-        }
-        return isPermissionOK;
-    }
-
     private void saveUserName() {
         final String userName = mUsernameEditText.getText().toString();
         if (userName.isEmpty()) {
@@ -70,9 +61,6 @@ public class UserConfigActivity extends AppCompatActivity {
         }
         if (!MainActivity.isUserNameOk(userName)) {
             ToastUtils.showShortToast(this, getString(R.string.wrong_user_name_toast));
-            return;
-        }
-        if (!isPermissionOK()) {
             return;
         }
 
