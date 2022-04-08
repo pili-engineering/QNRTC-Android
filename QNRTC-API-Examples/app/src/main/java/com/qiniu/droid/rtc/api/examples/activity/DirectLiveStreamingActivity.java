@@ -177,6 +177,7 @@ public class DirectLiveStreamingActivity extends AppCompatActivity {
         mRemoteRenderView.setZOrderOnTop(true);
 
         mPublishUrlEditText = findViewById(R.id.publish_url_edit_text);
+        mPublishUrlEditText.setText(Config.PUBLISH_URL);
     }
 
     /**

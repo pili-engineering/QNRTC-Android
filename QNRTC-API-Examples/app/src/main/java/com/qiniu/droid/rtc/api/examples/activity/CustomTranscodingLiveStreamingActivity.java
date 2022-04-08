@@ -344,6 +344,7 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
         mRemoteRenderView.setZOrderOnTop(true);
 
         mPublishUrlEditText = findViewById(R.id.publish_url_edit_text);
+        mPublishUrlEditText.setText(Config.PUBLISH_URL);
         mConfigWidthEditText = findViewById(R.id.transcoding_config_width_edit_text);
         mConfigHeightEditText = findViewById(R.id.transcoding_config_height_edit_text);
         mConfigBitrateEditText = findViewById(R.id.transcoding_config_bitrate_edit_text);
