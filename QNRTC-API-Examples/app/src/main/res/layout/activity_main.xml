@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.MainActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/title_video_audio"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:background="@color/title_grey"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:text="@string/type_video_audio"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/camera_microphone"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/camera_microphone_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_video_audio"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/custom_video_audio"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/custom_video_audio_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/camera_microphone"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/screen_microphone"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/screen_microphone_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/custom_video_audio"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/title_audio"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:background="@color/title_grey"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:text="@string/type_audio_only"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/screen_microphone" />
+
+        <TextView
+            android:id="@+id/microphone_only"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/microphone_only_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_audio"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/custom_audio_only"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/custom_audio_only_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/microphone_only"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/title_cdn_streaming"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:background="@color/title_grey"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:text="@string/type_CDN_streaming"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/custom_audio_only" />
+
+        <TextView
+            android:id="@+id/direct_streaming"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/direct_streaming_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_cdn_streaming"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/default_transcoding_streaming"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/default_transcoding_streaming_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/direct_streaming"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/custom_transcoding_streaming"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/custom_transcoding_streaming_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/default_transcoding_streaming"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/title_others"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:background="@color/title_grey"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:text="@string/type_others"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/custom_transcoding_streaming" />
+
+        <TextView
+            android:id="@+id/audio_mixing"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/audio_mixing_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_others"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/custom_message"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/custom_message_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/audio_mixing"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/multi_profile"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/multi_profile_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/custom_message"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/media_statistics"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/media_statistics_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/multi_profile"
+            tools:ignore="TouchTargetSizeCheck" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

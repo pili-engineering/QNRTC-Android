@@ -1,0 +1,2 @@
+rootProject.name = "QNRTC-API-Examples"
+include ':app'
