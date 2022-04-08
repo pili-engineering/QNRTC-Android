@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/custom_message_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/vertical_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/horizontal_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.33" />
+
+    <com.qiniu.droid.rtc.QNSurfaceView
+        android:id="@+id/local_render_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        app:layout_constraintBottom_toTopOf="@+id/horizontal_guideline"
+        app:layout_constraintEnd_toStartOf="@+id/vertical_guideline"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/local_render_view_tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/local_window_tips"
+        app:layout_constraintBottom_toBottomOf="@+id/local_render_view"
+        app:layout_constraintEnd_toEndOf="@+id/local_render_view"
+        app:layout_constraintStart_toStartOf="@+id/local_render_view"
+        app:layout_constraintTop_toTopOf="@+id/local_render_view" />
+
+    <com.qiniu.droid.rtc.QNSurfaceView
+        android:id="@+id/remote_render_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        app:layout_constraintBottom_toTopOf="@+id/horizontal_guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/vertical_guideline"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/remote_render_view_tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/remote_window_tips"
+        app:layout_constraintBottom_toBottomOf="@+id/remote_render_view"
+        app:layout_constraintEnd_toEndOf="@id/remote_render_view"
+        app:layout_constraintStart_toStartOf="@+id/remote_render_view"
+        app:layout_constraintTop_toTopOf="@+id/remote_render_view" />
+
+    <View
+        android:id="@+id/control_view_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/grey_round_rect_background"
+        app:layout_constraintBottom_toTopOf="@+id/camera_microphone_tips"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/horizontal_guideline" />
+
+    <TextView
+        android:id="@+id/camera_microphone_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/custom_message_scene_tips"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/custom_message_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/custom_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/control_view_background" />
+
+    <EditText
+        android:id="@+id/custom_message_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/white_round_rect_background"
+        android:hint="@string/custom_message_tips"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:singleLine="true"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/custom_message_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/custom_message_text"
+        app:layout_constraintTop_toTopOf="@+id/custom_message_text"
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <Button
+        android:id="@+id/send_message_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:onClick="onClickSendMessage"
+        android:text="@string/send_message"
+        app:layout_constraintEnd_toEndOf="@+id/custom_message_edit_text"
+        app:layout_constraintTop_toBottomOf="@+id/custom_message_edit_text" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

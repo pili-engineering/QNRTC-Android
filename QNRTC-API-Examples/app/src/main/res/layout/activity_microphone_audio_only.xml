@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/microphone_only_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.33" />
+
+    <TextView
+        android:id="@+id/local_window_tips_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/local_audio_window_tips"
+        app:layout_constraintBottom_toTopOf="@+id/guideline9"
+        app:layout_constraintEnd_toStartOf="@+id/guideline8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/remote_window_tips_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/remote_audio_window_tips"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/guideline9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline8"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/control_view_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/grey_round_rect_background"
+        app:layout_constraintBottom_toTopOf="@+id/microphone_audio_only_tips"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline9" />
+
+    <TextView
+        android:id="@+id/local_audio_volume_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/local_audio_volume"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/control_view_background" />
+
+    <SeekBar
+        android:id="@+id/local_audio_volume_seek_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:max="100"
+        android:progress="10"
+        app:layout_constraintBottom_toBottomOf="@+id/local_audio_volume_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/local_audio_volume_title"
+        app:layout_constraintTop_toTopOf="@+id/local_audio_volume_title" />
+
+    <TextView
+        android:id="@+id/remote_audio_volume_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/remote_audio_volume"
+        app:layout_constraintStart_toStartOf="@+id/local_audio_volume_title"
+        app:layout_constraintTop_toBottomOf="@+id/local_audio_volume_title" />
+
+    <SeekBar
+        android:id="@+id/remote_audio_volume_seek_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="10"
+        app:layout_constraintBottom_toBottomOf="@+id/remote_audio_volume_title"
+        app:layout_constraintEnd_toEndOf="@+id/local_audio_volume_seek_bar"
+        app:layout_constraintStart_toStartOf="@+id/local_audio_volume_seek_bar"
+        app:layout_constraintTop_toTopOf="@+id/remote_audio_volume_title" />
+
+    <TextView
+        android:id="@+id/remote_audio_volume_tips"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/remote_audio_volume_tips"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/remote_audio_volume_seek_bar"
+        app:layout_constraintStart_toStartOf="@+id/remote_audio_volume_title"
+        app:layout_constraintTop_toBottomOf="@+id/remote_audio_volume_title" />
+
+    <TextView
+        android:id="@+id/microphone_audio_only_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/microphone_only_scene_tips"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

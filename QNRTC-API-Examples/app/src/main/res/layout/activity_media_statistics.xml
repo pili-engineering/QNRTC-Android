@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/media_statistics_layout"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.qiniu.droid.rtc.QNSurfaceView
+        android:id="@+id/local_render_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/local_render_view_tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/local_window_tips"
+        app:layout_constraintBottom_toBottomOf="@+id/local_render_view"
+        app:layout_constraintEnd_toEndOf="@+id/local_render_view"
+        app:layout_constraintStart_toStartOf="@+id/local_render_view"
+        app:layout_constraintTop_toTopOf="@+id/local_render_view" />
+
+    <com.qiniu.droid.rtc.QNSurfaceView
+        android:id="@+id/remote_render_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/remote_render_view_tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/remote_window_tips"
+        app:layout_constraintBottom_toBottomOf="@+id/remote_render_view"
+        app:layout_constraintEnd_toEndOf="@id/remote_render_view"
+        app:layout_constraintStart_toStartOf="@+id/remote_render_view"
+        app:layout_constraintTop_toTopOf="@+id/remote_render_view" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.33" />
+
+    <ScrollView
+        android:id="@+id/control_view_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/grey_round_rect_background"
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/media_statistics_tips"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/local_upload_network_quality"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/upload_network_quality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/none"
+                    android:textColor="@color/light_blue"
+                    app:layout_constraintEnd_toEndOf="@+id/textView"
+                    app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/local_download_network_quality"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="@+id/textView"
+                    app:layout_constraintTop_toBottomOf="@+id/upload_network_quality" />
+
+                <TextView
+                    android:id="@+id/downlink_network_quality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/none"
+                    android:textColor="@color/light_blue"
+                    app:layout_constraintEnd_toEndOf="@+id/textView2"
+                    app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/local_audio_track_statistics"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/downlink_network_quality" />
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/uplink_bitrate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/textView4"
+                    app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+                <TextView
+                    android:id="@+id/local_audio_bitrate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_bitrate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView5"
+                    app:layout_constraintStart_toEndOf="@+id/textView5"
+                    app:layout_constraintTop_toTopOf="@+id/textView5" />
+
+                <TextView
+                    android:id="@+id/textView7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_rtt"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/textView5"
+                    app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+                <TextView
+                    android:id="@+id/local_audio_rtt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_rtt"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView7"
+                    app:layout_constraintStart_toEndOf="@+id/textView7"
+                    app:layout_constraintTop_toTopOf="@+id/textView7" />
+
+                <TextView
+                    android:id="@+id/textView9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_lost_rate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/textView7"
+                    app:layout_constraintTop_toBottomOf="@+id/textView7" />
+
+                <TextView
+                    android:id="@+id/local_audio_lost_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_lost_rate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView9"
+                    app:layout_constraintStart_toEndOf="@+id/textView9"
+                    app:layout_constraintTop_toTopOf="@+id/textView9" />
+
+                <TextView
+                    android:id="@+id/textView11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/local_video_track_statistics"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="@+id/textView4"
+                    app:layout_constraintTop_toTopOf="@+id/remote_video_track_statistics_title" />
+
+                <TextView
+                    android:id="@+id/video_profile_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/profile_level"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/textView11"
+                    app:layout_constraintTop_toBottomOf="@+id/textView11" />
+
+                <TextView
+                    android:id="@+id/local_video_profile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/none"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/video_profile_title"
+                    app:layout_constraintStart_toEndOf="@+id/video_profile_title"
+                    app:layout_constraintTop_toTopOf="@+id/video_profile_title" />
+
+                <TextView
+                    android:id="@+id/textView12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_frame_rate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/video_profile_title"
+                    app:layout_constraintTop_toBottomOf="@+id/video_profile_title" />
+
+                <TextView
+                    android:id="@+id/local_video_frame_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_fps"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/textView12"
+                    app:layout_constraintStart_toEndOf="@+id/textView12"
+                    app:layout_constraintTop_toTopOf="@+id/textView12" />
+
+                <TextView
+                    android:id="@+id/local_video_bitrate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_bitrate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/textView12"
+                    app:layout_constraintTop_toBottomOf="@+id/textView12" />
+
+                <TextView
+                    android:id="@+id/local_video_bitrate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_bitrate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/local_video_bitrate_title"
+                    app:layout_constraintStart_toEndOf="@+id/local_video_bitrate_title"
+                    app:layout_constraintTop_toTopOf="@+id/local_video_bitrate_title" />
+
+                <TextView
+                    android:id="@+id/local_video_rtt_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_rtt"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/local_video_bitrate_title"
+                    app:layout_constraintTop_toBottomOf="@+id/local_video_bitrate_title" />
+
+                <TextView
+                    android:id="@+id/local_video_rtt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_rtt"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/local_video_rtt_title"
+                    app:layout_constraintStart_toEndOf="@+id/local_video_rtt_title"
+                    app:layout_constraintTop_toTopOf="@+id/local_video_rtt_title" />
+
+                <TextView
+                    android:id="@+id/local_video_lost_rate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_lost_rate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/local_video_rtt_title"
+                    app:layout_constraintTop_toBottomOf="@+id/local_video_rtt_title" />
+
+                <TextView
+                    android:id="@+id/local_video_lost_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_lost_rate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/local_video_lost_rate_title"
+                    app:layout_constraintStart_toEndOf="@+id/local_video_lost_rate_title"
+                    app:layout_constraintTop_toTopOf="@+id/local_video_lost_rate_title" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/control_view_guideline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5" />
+
+                <TextView
+                    android:id="@+id/remote_upload_network_quality_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/remote_upload_network_quality"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="@+id/control_view_guideline"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/remote_upload_network_quality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/none"
+                    android:textColor="@color/light_blue"
+                    app:layout_constraintEnd_toEndOf="@+id/remote_upload_network_quality_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_upload_network_quality_title" />
+
+                <TextView
+                    android:id="@+id/remote_downlink_network_quality_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/remote_download_network_quality"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="@+id/remote_upload_network_quality_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_upload_network_quality" />
+
+                <TextView
+                    android:id="@+id/remote_downlink_network_quality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/none"
+                    android:textColor="@color/light_blue"
+                    app:layout_constraintEnd_toEndOf="@+id/remote_downlink_network_quality_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_downlink_network_quality_title" />
+
+                <TextView
+                    android:id="@+id/remote_audio_statistics_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/local_audio_track_statistics"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="@+id/control_view_guideline"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_downlink_network_quality" />
+
+                <TextView
+                    android:id="@+id/remote_audio_downlink_bitrate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/downlink_bitrate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_audio_statistics_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_audio_statistics_title" />
+
+                <TextView
+                    android:id="@+id/remote_audio_downlink_bitrate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_bitrate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_audio_downlink_bitrate_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_audio_downlink_bitrate_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_audio_downlink_bitrate_title" />
+
+                <TextView
+                    android:id="@+id/remote_audio_downlink_lost_rate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/downlink_lost_rate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_audio_downlink_bitrate_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_audio_downlink_bitrate_title" />
+
+                <TextView
+                    android:id="@+id/remote_audio_downlink_lost_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_lost_rate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_audio_downlink_lost_rate_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_audio_downlink_lost_rate_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_audio_downlink_lost_rate_title" />
+
+                <TextView
+                    android:id="@+id/remote_audio_uplink_rtt_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_rtt"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_audio_downlink_lost_rate_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_audio_downlink_lost_rate_title" />
+
+                <TextView
+                    android:id="@+id/remote_audio_uplink_rtt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_rtt"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_audio_uplink_rtt_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_audio_uplink_rtt_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_audio_uplink_rtt_title" />
+
+                <TextView
+                    android:id="@+id/remote_audio_uplink_lost_rate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_lost_rate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_audio_uplink_rtt_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_audio_uplink_rtt_title" />
+
+                <TextView
+                    android:id="@+id/remote_audio_uplink_lost_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_lost_rate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_audio_uplink_lost_rate_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_audio_uplink_lost_rate_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_audio_uplink_lost_rate_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_track_statistics_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/remote_video_track_statistics"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="@+id/control_view_guideline"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_audio_uplink_lost_rate_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_profile_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/profile_level"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/control_view_guideline"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_video_track_statistics_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_profile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/none"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_video_profile_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_video_profile_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_video_profile_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_downlink_frame_rate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/downlink_frame_rate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_video_profile_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_video_profile_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_downlink_frame_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_fps"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_video_downlink_frame_rate_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_video_downlink_frame_rate_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_video_downlink_frame_rate_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_downlink_bitrate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/downlink_bitrate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_video_downlink_frame_rate_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_video_downlink_frame_rate_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_downlink_bitrate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_bitrate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_video_downlink_bitrate_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_video_downlink_bitrate_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_video_downlink_bitrate_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_downlink_lost_rate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/downlink_lost_rate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_video_downlink_bitrate_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_video_downlink_bitrate_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_downlink_lost_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_lost_rate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_video_downlink_lost_rate_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_video_downlink_lost_rate_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_video_downlink_lost_rate_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_uplink_rtt_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_rtt"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_video_downlink_lost_rate_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_video_downlink_lost_rate_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_uplink_rtt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_rtt"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_video_uplink_rtt_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_video_uplink_rtt_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_video_uplink_rtt_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_uplink_lost_rate_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/uplink_lost_rate"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/remote_video_uplink_rtt_title"
+                    app:layout_constraintTop_toBottomOf="@+id/remote_video_uplink_rtt_title" />
+
+                <TextView
+                    android:id="@+id/remote_video_uplink_lost_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/default_lost_rate"
+                    android:textColor="@color/light_blue"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/remote_video_uplink_lost_rate_title"
+                    app:layout_constraintStart_toEndOf="@+id/remote_video_uplink_lost_rate_title"
+                    app:layout_constraintTop_toTopOf="@+id/remote_video_uplink_lost_rate_title" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/media_statistics_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/media_statistics_scene_tips"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
