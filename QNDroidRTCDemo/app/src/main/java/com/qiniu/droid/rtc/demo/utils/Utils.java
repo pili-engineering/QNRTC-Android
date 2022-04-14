@@ -88,4 +88,16 @@ public final class Utils {
         IResolver r2 = AndroidDnsServer.defaultResolver(context);
         return new DnsManager(NetworkInfo.normal, new IResolver[]{r0, r1, r2});
     }
+
+    public static String getVersion(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionName;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 }
