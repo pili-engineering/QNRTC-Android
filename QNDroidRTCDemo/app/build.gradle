@@ -6,8 +6,8 @@ android {
         applicationId "com.qiniu.droid.rtc.demo"
         minSdkVersion 18
         targetSdkVersion 30
-        versionCode 33
-        versionName "4.0.1"
+        versionCode 34
+        versionName "5.0.0"
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
     }
 
@@ -41,11 +41,13 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
     implementation 'com.qiniu:happy-dns:0.2.18'
+    // xCrash
+    implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
 
     // QNDroidRTCLibrary
     if (buildWithQNDroidRTCLibrary) {
         implementation project(':library')
-        implementation files('libs/pldroid-player-2.1.4.jar')
+        implementation files('libs/pldroid-player-2.4.0.jar')
     } else {
         implementation fileTree(include: ['*.jar'], dir: 'libs')
     }
