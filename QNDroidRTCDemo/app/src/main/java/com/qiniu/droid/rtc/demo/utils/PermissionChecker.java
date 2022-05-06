@@ -53,10 +53,6 @@ public class PermissionChecker {
         if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO)) {
             permissionsNeeded.add("MICROPHONE");
         }
-        if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            permissionsNeeded.add("Write external storage");
-        }
-
         if (permissionsNeeded.size() > 0) {
             // Need Rationale
             String message = "You need to grant access to " + permissionsNeeded.get(0);
