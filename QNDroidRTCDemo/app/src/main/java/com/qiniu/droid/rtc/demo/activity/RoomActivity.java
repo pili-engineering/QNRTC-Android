@@ -401,7 +401,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
     private void initLocalTracks() {
         mLocalTrackList = new ArrayList<>();
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(TRACK_TAG_MIC);
-        microphoneAudioTrackConfig.setAudioQuality(QNAudioQualityPreset.STANDARD_STEREO);
+        microphoneAudioTrackConfig.setAudioQuality(QNAudioQualityPreset.STANDARD);
         microphoneAudioTrackConfig.setCommunicationModeOn(true);
         mMicrophoneTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
 
