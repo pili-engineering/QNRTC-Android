@@ -77,7 +77,7 @@ public class LiveRoomActivity extends Activity {
 
         //播放器相关
         mVideoView.setVideoPath(mRtmpUrl);
-        mVideoView.setOnErrorListener((errorCode, extraData) -> {
+        mVideoView.setOnErrorListener(errorCode -> {
             switch (errorCode) {
                 case PLOnErrorListener.ERROR_CODE_OPEN_FAILED:
                     logAndToast("播放器打开失败，请确认是否在推流！");
@@ -91,7 +91,7 @@ public class LiveRoomActivity extends Activity {
             }
             return false;
         });
-        mVideoView.setOnInfoListener((what, extra, extraData) -> {
+        mVideoView.setOnInfoListener((what, extra) -> {
             switch (what) {
                 case PLOnInfoListener.MEDIA_INFO_VIDEO_RENDERING_START:
                     break;
