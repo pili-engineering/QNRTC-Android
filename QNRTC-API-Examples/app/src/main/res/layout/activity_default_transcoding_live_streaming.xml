@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/deault_transcoding_live_streaming_layout"
     android:background="@color/white"
     android:layout_width="match_parent"
@@ -76,10 +77,10 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="32dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/grey_round_rect_background"
         android:padding="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/default_transcoding_live_streaming_scene_tips"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline3">
@@ -113,10 +114,10 @@
                     android:id="@+id/role_select"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
                     android:text="@string/role_select_text"
                     android:textColor="@color/black"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginStart="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/transcoding_layout_setting" />
 
@@ -126,8 +127,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="32dp"
-                    android:orientation="horizontal"
                     android:gravity="center"
+                    android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/role_select"
                     app:layout_constraintTop_toBottomOf="@+id/role_select">
@@ -161,20 +162,20 @@
                     android:id="@+id/layout_x"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
                     android:text="@string/layout_x"
-                    app:layout_constraintTop_toBottomOf="@+id/video_transcoding_track_setting"
-                    app:layout_constraintStart_toStartOf="@+id/video_transcoding_track_setting" />
+                    app:layout_constraintStart_toStartOf="@+id/video_transcoding_track_setting"
+                    app:layout_constraintTop_toBottomOf="@+id/video_transcoding_track_setting" />
 
                 <EditText
                     android:id="@+id/layout_x_edit_text"
                     android:layout_width="64dp"
                     android:layout_height="wrap_content"
-                    android:padding="2dp"
                     android:background="@drawable/white_round_rect_background"
                     android:gravity="center"
                     android:inputType="number"
+                    android:padding="2dp"
                     android:text="0"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_x"
@@ -187,8 +188,8 @@
                     android:layout_margin="8dp"
                     android:text="@string/px"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_x"
-                    app:layout_constraintTop_toTopOf="@+id/layout_x"
-                    app:layout_constraintStart_toEndOf="@+id/layout_x_edit_text" />
+                    app:layout_constraintStart_toEndOf="@+id/layout_x_edit_text"
+                    app:layout_constraintTop_toTopOf="@+id/layout_x" />
 
                 <TextView
                     android:id="@+id/layout_y"
@@ -196,18 +197,18 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:text="@string/layout_y"
-                    app:layout_constraintTop_toTopOf="@+id/layout_x"
                     app:layout_constraintBottom_toBottomOf="@id/layout_x"
-                    app:layout_constraintStart_toStartOf="@+id/control_view_guideline" />
+                    app:layout_constraintStart_toStartOf="@+id/control_view_guideline"
+                    app:layout_constraintTop_toTopOf="@+id/layout_x" />
 
                 <EditText
                     android:id="@+id/layout_y_edit_text"
                     android:layout_width="64dp"
                     android:layout_height="wrap_content"
-                    android:padding="2dp"
                     android:background="@drawable/white_round_rect_background"
                     android:gravity="center"
                     android:inputType="number"
+                    android:padding="2dp"
                     android:text="0"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_y"
@@ -220,8 +221,8 @@
                     android:layout_margin="8dp"
                     android:text="@string/px"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_y"
-                    app:layout_constraintTop_toTopOf="@+id/layout_y"
-                    app:layout_constraintStart_toEndOf="@+id/layout_y_edit_text" />
+                    app:layout_constraintStart_toEndOf="@+id/layout_y_edit_text"
+                    app:layout_constraintTop_toTopOf="@+id/layout_y" />
 
                 <TextView
                     android:id="@+id/layout_width"
@@ -229,20 +230,20 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/layout_width"
-                    app:layout_constraintTop_toBottomOf="@+id/layout_x"
-                    app:layout_constraintStart_toStartOf="@+id/layout_x" />
+                    app:layout_constraintStart_toStartOf="@+id/layout_x"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_x" />
 
                 <EditText
                     android:id="@+id/layout_width_edit_text"
                     android:layout_width="64dp"
                     android:layout_height="wrap_content"
-                    android:padding="2dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/white_round_rect_background"
+                    android:gravity="center"
                     android:inputType="number"
+                    android:padding="2dp"
                     android:text="720"
                     android:textSize="12sp"
-                    android:layout_marginStart="8dp"
-                    android:gravity="center"
-                    android:background="@drawable/white_round_rect_background"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_width"
                     app:layout_constraintStart_toEndOf="@+id/layout_width"
                     app:layout_constraintTop_toTopOf="@+id/layout_width" />
@@ -253,8 +254,8 @@
                     android:layout_margin="8dp"
                     android:text="@string/px"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_width"
-                    app:layout_constraintTop_toTopOf="@+id/layout_width"
-                    app:layout_constraintStart_toEndOf="@+id/layout_width_edit_text" />
+                    app:layout_constraintStart_toEndOf="@+id/layout_width_edit_text"
+                    app:layout_constraintTop_toTopOf="@+id/layout_width" />
 
                 <TextView
                     android:id="@+id/layout_height"
@@ -262,21 +263,21 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:text="@string/layout_height"
-                    app:layout_constraintTop_toTopOf="@+id/layout_width"
                     app:layout_constraintBottom_toBottomOf="@id/layout_width"
-                    app:layout_constraintStart_toStartOf="@+id/control_view_guideline" />
+                    app:layout_constraintStart_toStartOf="@+id/control_view_guideline"
+                    app:layout_constraintTop_toTopOf="@+id/layout_width" />
 
                 <EditText
                     android:id="@+id/layout_height_edit_text"
                     android:layout_width="64dp"
                     android:layout_height="wrap_content"
-                    android:padding="2dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/white_round_rect_background"
+                    android:gravity="center"
                     android:inputType="number"
+                    android:padding="2dp"
                     android:text="1280"
                     android:textSize="12sp"
-                    android:layout_marginStart="8dp"
-                    android:gravity="center"
-                    android:background="@drawable/white_round_rect_background"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_height"
                     app:layout_constraintStart_toEndOf="@+id/layout_height"
                     app:layout_constraintTop_toTopOf="@+id/layout_height" />
@@ -287,8 +288,8 @@
                     android:layout_margin="8dp"
                     android:text="@string/px"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_height"
-                    app:layout_constraintTop_toTopOf="@+id/layout_height"
-                    app:layout_constraintStart_toEndOf="@+id/layout_height_edit_text" />
+                    app:layout_constraintStart_toEndOf="@+id/layout_height_edit_text"
+                    app:layout_constraintTop_toTopOf="@+id/layout_height" />
 
                 <TextView
                     android:id="@+id/layout_z_order"
@@ -296,20 +297,20 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/layout_z_order"
-                    app:layout_constraintTop_toBottomOf="@+id/layout_width"
-                    app:layout_constraintStart_toStartOf="@+id/layout_x" />
+                    app:layout_constraintStart_toStartOf="@+id/layout_x"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_width" />
 
                 <EditText
                     android:id="@+id/layout_z_order_edit_text"
                     android:layout_width="64dp"
                     android:layout_height="wrap_content"
-                    android:padding="2dp"
+                    android:layout_marginStart="16dp"
+                    android:background="@drawable/white_round_rect_background"
+                    android:gravity="center"
                     android:inputType="number"
+                    android:padding="2dp"
                     android:text="0"
                     android:textSize="12sp"
-                    android:layout_marginStart="16dp"
-                    android:gravity="center"
-                    android:background="@drawable/white_round_rect_background"
                     app:layout_constraintBottom_toBottomOf="@+id/layout_z_order"
                     app:layout_constraintStart_toEndOf="@+id/layout_z_order"
                     app:layout_constraintTop_toTopOf="@+id/layout_z_order" />
@@ -340,54 +341,56 @@
                     android:id="@+id/audio_transcoding_track_setting_tips"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:textSize="12sp"
                     android:text="@string/audio_track_layout_tips"
-                    app:layout_constraintTop_toBottomOf="@id/audio_transcoding_track_setting"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/audio_transcoding_track_setting"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/audio_transcoding_track_setting" />
 
                 <Button
                     android:id="@+id/add_transcoding_layout_button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="32dp"
+                    android:onClick="onClickAddTranscodingTracks"
                     android:padding="1dp"
                     android:text="@string/add_transcoding_layout"
-                    android:onClick="onClickAddTranscodingTracks"
-                    app:layout_constraintTop_toBottomOf="@id/audio_transcoding_track_setting_tips"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/audio_transcoding_track_setting_tips" />
 
                 <Button
+                    android:id="@+id/remove_transcoding_layout_button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="1dp"
                     android:layout_marginTop="8dp"
-                    android:text="@string/remove_transcoding_layout"
                     android:onClick="onClickRemoveTranscodingTracks"
-                    app:layout_constraintTop_toBottomOf="@id/add_transcoding_layout_button"
+                    android:padding="1dp"
+                    android:text="@string/remove_transcoding_layout"
+                    app:layout_constraintEnd_toEndOf="@id/add_transcoding_layout_button"
                     app:layout_constraintStart_toStartOf="@id/add_transcoding_layout_button"
-                    app:layout_constraintEnd_toEndOf="@id/add_transcoding_layout_button" />
+                    app:layout_constraintTop_toBottomOf="@id/add_transcoding_layout_button" />
+
+                <TextView
+                    android:id="@+id/default_transcoding_live_streaming_scene_tips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/default_transcoding_live_streaming_scene_tips"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/remove_transcoding_layout_button" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
     </ScrollView>
-
-    <TextView
-        android:id="@+id/default_transcoding_live_streaming_scene_tips"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="8dp"
-        android:text="@string/default_transcoding_live_streaming_scene_tips"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

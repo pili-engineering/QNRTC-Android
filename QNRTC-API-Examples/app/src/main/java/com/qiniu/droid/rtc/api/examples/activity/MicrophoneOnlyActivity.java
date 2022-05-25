@@ -26,7 +26,10 @@ import com.qiniu.droid.rtc.api.examples.utils.Config;
 import com.qiniu.droid.rtc.api.examples.utils.ToastUtils;
 import com.qiniu.droid.rtc.model.QNAudioDevice;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,11 +55,18 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 public class MicrophoneOnlyActivity extends AppCompatActivity {
     private static final String TAG = "MicrophoneOnlyActivity";
+    private static final int GET_VOLUME_LEVEL_PERIOD = 500;
     private QNRTCClient mClient;
     private QNMicrophoneAudioTrack mMicrophoneAudioTrack;
     private QNRemoteAudioTrack mRemoteAudioTrack;
 
+    // 定时器，用来周期性获取当前本地和远端的说话音量
+    private Timer mAudioVolumeTimer;
+    private NumberFormat mAudioVolumeFormat;
+
     private TextView mRemoteTrackTipsView;
+    private TextView mLocalAudioVolumeTextView;
+    private TextView mRemoteAudioVolumeTextView;
     private SeekBar mRemoteAudioVolumeSeekBar;
     private String mFirstRemoteUserID = null;
 
@@ -65,6 +75,9 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_microphone_audio_only);
+
+        mAudioVolumeFormat = NumberFormat.getNumberInstance() ;
+        mAudioVolumeFormat.setMaximumFractionDigits(2);
 
         // 1. 初始化视图
         initView();
@@ -92,6 +105,7 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopAudioVolumeScheduler();
         // 9. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -102,6 +116,10 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
     private void initView() {
         // 初始化远端音频提示视图
         mRemoteTrackTipsView = findViewById(R.id.remote_window_tips_view);
+        // 本地音频音量显示视图
+        mLocalAudioVolumeTextView = findViewById(R.id.local_audio_volume);
+        // 远端音频音量显示视图
+        mRemoteAudioVolumeTextView = findViewById(R.id.remote_audio_volume);
 
         // 初始化本地音频采集音量设置控件
         SeekBar localAudioVolumeSeekBar = findViewById(R.id.local_audio_volume_seek_bar);
@@ -157,9 +175,44 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
     private void initLocalTracks() {
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.HIGH_STEREO) // 设置音频参数
+                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数
                 .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
+    }
+
+    /**
+     * 获取本地和远端的音频音量
+     *
+     * 在安静的环境下，获取到 0.0x 大小的数值为环境音的音量，属于预期现象，您可根据您的需求自行决定判断的阈值
+     */
+    private void startAudioVolumeScheduler() {
+        if (mAudioVolumeTimer != null) {
+            return;
+        }
+        mAudioVolumeTimer = new Timer();
+        mAudioVolumeTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(() -> {
+                    if (mMicrophoneAudioTrack != null) {
+                        mLocalAudioVolumeTextView.setText(mAudioVolumeFormat.format(mMicrophoneAudioTrack.getVolumeLevel()));
+                    }
+                    if (mRemoteAudioTrack != null) {
+                        mRemoteAudioVolumeTextView.setText(mAudioVolumeFormat.format(mRemoteAudioTrack.getVolumeLevel()));
+                    }
+                });
+            }
+        }, 0, GET_VOLUME_LEVEL_PERIOD);
+    }
+
+    /**
+     * 停止获取本地和远端的音频音量
+     */
+    private void stopAudioVolumeScheduler() {
+        if (mAudioVolumeTimer != null) {
+            mAudioVolumeTimer.cancel();
+            mAudioVolumeTimer = null;
+        }
     }
 
     private final QNRTCEventListener mRTCEventListener = new QNRTCEventListener() {
@@ -192,6 +245,7 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
                     public void onPublished() { // 发布成功
                         ToastUtils.showShortToast(MicrophoneOnlyActivity.this,
                                 getString(R.string.publish_success));
+                        startAudioVolumeScheduler(); // 开启获取音频音量的定时器
                     }
 
                     @Override
@@ -200,6 +254,8 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
                                 String.format(getString(R.string.publish_failed), errorCode, errorMessage));
                     }
                 }, mMicrophoneAudioTrack);
+            } else if (state == QNConnectionState.DISCONNECTED) {
+                stopAudioVolumeScheduler();
             }
         }
 
@@ -283,6 +339,7 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
                 mRemoteTrackTipsView.setVisibility(View.INVISIBLE);
                 mRemoteAudioVolumeSeekBar.setProgress(10);
                 mRemoteAudioVolumeSeekBar.setEnabled(false);
+                mRemoteAudioVolumeTextView.setVisibility(View.INVISIBLE);
             }
         }
 
@@ -300,6 +357,10 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
                 mRemoteAudioTrack = remoteAudioTracks.get(0);
                 mRemoteAudioVolumeSeekBar.setEnabled(true);
                 mRemoteTrackTipsView.setVisibility(View.VISIBLE);
+
+                // 开启获取音频音量的定时器
+                startAudioVolumeScheduler();
+                mRemoteAudioVolumeTextView.setVisibility(View.VISIBLE);
             }
         }
 

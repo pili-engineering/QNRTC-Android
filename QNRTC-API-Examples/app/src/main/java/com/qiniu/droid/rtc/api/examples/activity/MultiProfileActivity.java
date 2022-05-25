@@ -188,7 +188,7 @@ public class MultiProfileActivity extends AppCompatActivity {
 
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.HIGH_STEREO) // 设置音频参数
+                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数
                 .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
     }

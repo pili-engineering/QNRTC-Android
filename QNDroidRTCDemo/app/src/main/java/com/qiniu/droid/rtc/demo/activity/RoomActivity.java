@@ -1,5 +1,9 @@
 package com.qiniu.droid.rtc.demo.activity;
 
+import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_FPS;
+import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_RESOLUTION;
+import static com.qiniu.droid.rtc.demo.utils.Utils.getSystemUiVisibility;
+
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,8 +16,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -98,10 +102,6 @@ import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_FPS;
-import static com.qiniu.droid.rtc.demo.utils.Config.DEFAULT_RESOLUTION;
-import static com.qiniu.droid.rtc.demo.utils.Utils.getSystemUiVisibility;
-
 public class RoomActivity extends FragmentActivity implements ControlFragment.OnCallEvents {
     private static final String TAG = "RoomActivity";
 
@@ -135,6 +135,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
     private boolean mBeautyEnabled = false;
     private boolean mVideoEnabled = true;
     private boolean mSpeakerEnabled = true;
+    private boolean mIsError = false;
     private boolean mIsAdmin = false;
     private boolean mIsJoinedRoom = false;
     private ControlFragment mControlFragment;
@@ -196,12 +197,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
      * 2. 在两种推流切换的场景下，合流转推务必使用自定义合流配置，并指定推流地址的 serialnum
      */
     private int mSerialNum = 0;
-
-    /**
-     * {@link QNRTC#init} 和 {@link QNRTC#deinit()} 为静态方法，需要对称调用；
-     * 为了避免在页面退出进入时存在顺序问题，建议保存是否初始化状态
-     */
-    private static boolean mInitRTC;
 
     private final Semaphore mCaptureStoppedSem = new Semaphore(1);
 
@@ -272,26 +267,20 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
                 return;
             }
         }
+        // 初始化 Client 和本地 Track 列表
+        initClient();
+        // 初始化本地音视频 track
+        initLocalTracks();
+        // 初始化合流相关配置
+        initMergeLayoutConfig();
 
-        if (mInitRTC) {
-            ToastUtils.showShortToast(RoomActivity.this, "RTC 未释放完成，当前页面不可用，请退出后重试！");
-        } else {
-            // 初始化 Client 和本地 Track 列表
-            initClient();
-            // 初始化本地音视频 track
-            initLocalTracks();
-            // 初始化合流相关配置
-            initMergeLayoutConfig();
+        // 多人显示窗口管理类
+        mTrackWindowManager = new TrackWindowManager(mUserId, screenWidth, screenHeight, outMetrics.density, mClient, mTrackWindowFullScreen, mTrackWindowsList);
 
-            // 多人显示窗口管理类
-            mTrackWindowManager = new TrackWindowManager(mUserId, screenWidth, screenHeight, outMetrics.density, mClient, mTrackWindowFullScreen, mTrackWindowsList);
-
-            List<QNTrack> localTrackListExcludeScreenTrack = new ArrayList<>(mLocalTrackList);
-            localTrackListExcludeScreenTrack.remove(mLocalScreenTrack);
-            mTrackWindowManager.addTrack(mUserId, localTrackListExcludeScreenTrack);
-            new Timer().schedule(mUpdateNetWorkQualityInfoTask, 5000, 10000);
-            mInitRTC = true;
-        }
+        List<QNTrack> localTrackListExcludeScreenTrack = new ArrayList<>(mLocalTrackList);
+        localTrackListExcludeScreenTrack.remove(mLocalScreenTrack);
+        mTrackWindowManager.addTrack(mUserId, localTrackListExcludeScreenTrack);
+        new Timer().schedule(mUpdateNetWorkQualityInfoTask, 5000, 10000);
     }
 
     @Override
@@ -299,7 +288,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
         super.onResume();
         // 开始视频采集
         startCaptureAfterAcquire();
-        if (!mIsJoinedRoom && mClient != null) {
+        if (!mIsJoinedRoom) {
             // 加入房间
             mClient.join(mRoomToken);
         }
@@ -332,24 +321,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        releaseClient();
-        if (mInitRTC) {
-            // 反初始化
-            QNRTC.deinit();
-            mInitRTC = false;
-        }
-        if (mTrackWindowFullScreen != null) {
-            mTrackWindowFullScreen.dispose();
-        }
-        for (UserTrackView item : mTrackWindowsList) {
-            item.dispose();
-        }
-        mTrackWindowsList.clear();
-        mPopWindow = null;
-    }
-
-    private void releaseClient() {
-        mUpdateNetWorkQualityInfoTask.cancel();
         if (mClient != null) {
             if (mIsAdmin && mIsMergeStreaming) {
                 // 如果当前正在合流，则停止
@@ -365,6 +336,18 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
             mClient.leave();
             mClient = null;
         }
+        // 反初始化
+        QNRTC.deinit();
+
+        mUpdateNetWorkQualityInfoTask.cancel();
+        if (mTrackWindowFullScreen != null) {
+            mTrackWindowFullScreen.dispose();
+        }
+        for (UserTrackView item : mTrackWindowsList) {
+            item.dispose();
+        }
+        mTrackWindowsList.clear();
+        mPopWindow = null;
     }
 
     /**
@@ -539,7 +522,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
                 }
             } else {
                 // 更新合流布局到默认合流配置
-                mCurrentMergeConfig = new QNTranscodingLiveStreamingConfig();
                 setMergeStreamLayouts();
             }
             if (mPopWindow != null) {
@@ -570,6 +552,14 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
                 .show();
     }
 
+    private void reportError(final String description) {
+        // TODO: handle error.
+        if (!mIsError) {
+            mIsError = true;
+            disconnectWithErrorMessage(description);
+        }
+    }
+
     private void showKickoutDialog(final String userId) {
         if (mKickOutDialog == null) {
             mKickOutDialog = new AlertDialog.Builder(this)
@@ -596,14 +586,13 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
 
         // video tracks merge layout options.
         List<RTCTrackMergeOption> roomVideoTrackList = mRoomMergeOption.getVideoMergeOptions();
-        boolean isDefaultStreaming = (mCurrentMergeConfig == null || TextUtils.isEmpty(mCurrentMergeConfig.getStreamID()));
         if (!roomVideoTrackList.isEmpty()) {
             List<QNTranscodingLiveStreamingTrack> mergeTrackOptions = SplitUtils.split(
                     roomVideoTrackList.size(),
-                    isDefaultStreaming ?
+                    mCurrentMergeConfig == null ?
                             QNAppServer.STREAMING_WIDTH
                             : mCurrentMergeConfig.getWidth(),
-                    isDefaultStreaming ?
+                    mCurrentMergeConfig == null ?
                             QNAppServer.STREAMING_HEIGHT
                             : mCurrentMergeConfig.getHeight()
             );
@@ -701,7 +690,9 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
 
     @Override
     public void onCallHangUp() {
-        releaseClient();
+        if (mClient != null) {
+            mClient.leave();
+        }
         finish();
     }
 
@@ -740,7 +731,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
             if (mLocalScreenTrack != null) {
                 mLocalScreenTrack.setMuted(!mVideoEnabled);
             }
-            mCameraTrack.setMuted(!mVideoEnabled);
             if (mTrackWindowManager != null) {
                 mTrackWindowManager.onTrackMuted(mUserId);
             }
@@ -831,11 +821,9 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
     private final TimerTask mUpdateNetWorkQualityInfoTask = new TimerTask() {
         @Override
         public void run() {
-            if (mClient != null) {
-                Map<String, QNNetworkQuality> qualityMap = mClient.getUserNetworkQuality();
-                for (Map.Entry<String, QNNetworkQuality> entry : qualityMap.entrySet()) {
-                    Log.i(TAG, "remote user " + entry.getKey() + " " + entry.getValue().toString());
-                }
+            Map<String, QNNetworkQuality> qualityMap = mClient.getUserNetworkQuality();
+            for (Map.Entry<String, QNNetworkQuality> entry : qualityMap.entrySet()) {
+                Log.i(TAG, "remote user " + entry.getKey() + " " + entry.getValue().toString());
             }
         }
     };
@@ -1099,8 +1087,11 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
                 tracks.addAll(remoteAudioTracks);
                 tracks.addAll(remoteVideoTracks);
                 mTrackWindowManager.addTrack(remoteUserID, tracks);
-                for (QNTrack track : tracks) {
-                    ((QNRemoteTrack)track).setTrackInfoChangedListener(new QNTrackInfoChangedListener() {
+                List<QNRemoteTrack> remoteTracks = new ArrayList<>();
+                remoteTracks.addAll(remoteAudioTracks);
+                remoteTracks.addAll(remoteVideoTracks);
+                for (QNRemoteTrack remoteTrack : remoteTracks) {
+                    remoteTrack.setTrackInfoChangedListener(new QNTrackInfoChangedListener() {
                         @Override
                         public void onMuteStateChanged(boolean isMuted) {
                             updateRemoteLogText("onRemoteUserMuted:remoteUserId = " + remoteUserID);
@@ -1211,7 +1202,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
 
     private final QNLiveStreamingListener mLiveStreamingListener = new QNLiveStreamingListener() {
         /**
-         * 当自定义合流任务和直接转推任务开启成功的时候会回调此方法
+         * 当转推成功的时候会回调此方法
          *
          * @param streamID 转推成功的 streamID
          */
@@ -1248,6 +1239,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
 
         @Override
         public void onStopped(String streamID) {
+
         }
 
         @Override
