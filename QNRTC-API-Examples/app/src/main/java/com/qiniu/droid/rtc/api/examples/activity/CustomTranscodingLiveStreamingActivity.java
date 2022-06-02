@@ -150,12 +150,7 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing()) {
-            if (mClient != null) {
-                // 12. 离开房间
-                mClient.leave();
-            }
-        } else {
+        if (!isFinishing()) {
             // 从 Android 9 开始，设备将无法在后台访问相机，本示例不做后台采集的演示
             // 详情可参考 https://developer.qiniu.com/rtc/kb/10074/FAQ-Android?category=kb#3
             if (mCameraVideoTrack != null) {
@@ -167,6 +162,11 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mClient != null) {
+            // 12. 离开房间
+            mClient.leave();
+            mClient = null;
+        }
         // 13. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -205,7 +205,7 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
         mTranscodingLiveStreamingConfig.setRenderMode(mRenderMode);
         if (mWatermarkSwitch.isChecked()) {
             QNTranscodingLiveStreamingImage watermarkImage = new QNTranscodingLiveStreamingImage();
-            watermarkImage.setUrl("http://pili-playback.qnsdk.com/qiniu-logo-110-34.png"); // 设置水印图片地址，仅支持 HTTP 链接
+            watermarkImage.setUrl("https://pili-playback.qnsdk.com/qiniu-logo-110-34.png"); // 设置水印图片地址，仅支持在线图片链接
             watermarkImage.setX(0); // 设置水印位置的 x 坐标，默认为 0
             watermarkImage.setY(0); // 设置水印位置的 y 坐标，默认为 0
             watermarkImage.setWidth(100); // 设置水印的宽度，需自行指定
@@ -214,7 +214,7 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
         }
         if (mBackgroundSwitch.isChecked()) {
             QNTranscodingLiveStreamingImage backgroundImage = new QNTranscodingLiveStreamingImage();
-            backgroundImage.setUrl("http://pili-playback.qnsdk.com/ivs_background_1280x720.png"); // 设置背景图片的地址，仅支持 HTTP 链接
+            backgroundImage.setUrl("https://pili-playback.qnsdk.com/ivs_background_1280x720.png"); // 设置背景图片的地址，仅支持在线图片链接
             backgroundImage.setX(0); // 设置背景图片的 x 坐标，默认为 0
             backgroundImage.setY(0); // 设置背景图片的 y 坐标，默认为 0
             backgroundImage.setWidth(Integer.parseInt(mConfigWidthEditText.getText().toString())); // 设置背景图片的宽度，需自行指定
@@ -398,7 +398,7 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
 
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.HIGH_STEREO) // 设置音频参数
+                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
                 .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
     }
@@ -503,14 +503,15 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
                     @Override
                     public void onPublished() { // 发布成功
                         mIsLocalPublished = true;
-                        ToastUtils.showShortToast(CustomTranscodingLiveStreamingActivity.this,
-                                getString(R.string.publish_success));
+                        runOnUiThread(() -> ToastUtils.showShortToast(CustomTranscodingLiveStreamingActivity.this,
+                                getString(R.string.publish_success)));
+
                     }
 
                     @Override
                     public void onError(int errorCode, String errorMessage) { // 发布失败
-                        ToastUtils.showLongToast(CustomTranscodingLiveStreamingActivity.this,
-                                String.format(getString(R.string.publish_failed), errorCode, errorMessage));
+                        runOnUiThread(() -> ToastUtils.showShortToast(CustomTranscodingLiveStreamingActivity.this,
+                                getString(R.string.publish_success)));
                     }
                 }, mCameraVideoTrack, mMicrophoneAudioTrack);
             }

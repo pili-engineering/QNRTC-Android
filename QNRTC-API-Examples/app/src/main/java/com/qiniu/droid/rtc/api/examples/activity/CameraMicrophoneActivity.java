@@ -1,6 +1,7 @@
 package com.qiniu.droid.rtc.api.examples.activity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.SeekBar;
@@ -8,6 +9,7 @@ import android.widget.Switch;
 
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
 import com.qiniu.droid.rtc.QNBeautySetting;
+import com.qiniu.droid.rtc.QNCameraEventListener;
 import com.qiniu.droid.rtc.QNCameraFacing;
 import com.qiniu.droid.rtc.QNCameraVideoTrack;
 import com.qiniu.droid.rtc.QNCameraVideoTrackConfig;
@@ -32,6 +34,8 @@ import com.qiniu.droid.rtc.api.examples.R;
 import com.qiniu.droid.rtc.api.examples.utils.Config;
 import com.qiniu.droid.rtc.api.examples.utils.ToastUtils;
 import com.qiniu.droid.rtc.model.QNAudioDevice;
+
+import org.webrtc.Size;
 
 import java.util.List;
 
@@ -98,12 +102,7 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing()) {
-            if (mClient != null) {
-                // 8. 离开房间
-                mClient.leave();
-            }
-        } else {
+        if (!isFinishing()) {
             // 从 Android 9 开始，设备将无法在后台访问相机，本示例不做后台采集的演示
             // 详情可参考 https://developer.qiniu.com/rtc/kb/10074/FAQ-Android?category=kb#3
             if (mCameraVideoTrack != null) {
@@ -115,6 +114,10 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mClient != null) {
+            mClient.leave();
+            mClient = null;
+        }
         // 9. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -206,7 +209,7 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
     private void initLocalTracks() {
         // 创建摄像头采集 Track
         QNCameraVideoTrackConfig cameraVideoTrackConfig = new QNCameraVideoTrackConfig(Config.TAG_CAMERA_TRACK)
-                .setVideoCaptureConfig(QNVideoCaptureConfigPreset.CAPTURE_1280x720) // 设置采集参数
+                .setVideoCaptureConfig(QNVideoCaptureConfigPreset.CAPTURE_640x480) // 设置采集参数
                 .setVideoEncoderConfig(new QNVideoEncoderConfig(
                         Config.DEFAULT_WIDTH, Config.DEFAULT_HEIGHT, Config.DEFAULT_FPS, Config.DEFAULT_VIDEO_BITRATE)) // 设置编码参数
                 .setCameraFacing(QNCameraFacing.FRONT) // 设置摄像头方向
@@ -217,10 +220,31 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
         // 初始化并配置美颜
         mBeautySetting = new QNBeautySetting(0.5f, 0.5f, 0.5f);
         mCameraVideoTrack.setBeauty(mBeautySetting);
+        mCameraVideoTrack.setCameraEventListener(new QNCameraEventListener() {
+            @Override
+            public int[] onCameraOpened(List<Size> list, List<Integer> list1) {
+                return new int[]{-1, -1};
+            }
+
+            @Override
+            public void onCaptureStarted() {
+                Log.i(TAG, "onCaptureStarted");
+            }
+
+            @Override
+            public void onCaptureStopped() {
+                Log.i(TAG, "onCaptureStopped");
+            }
+
+            @Override
+            public void onError(int i, String s) {
+                Log.i(TAG, "onError [" + i + ", " + s + "]");
+            }
+        });
 
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.HIGH_STEREO) // 设置音频参数
+                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
                 .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
     }
@@ -253,14 +277,14 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
                 mClient.publish(new QNPublishResultCallback() {
                     @Override
                     public void onPublished() { // 发布成功
-                        ToastUtils.showShortToast(CameraMicrophoneActivity.this,
-                                getString(R.string.publish_success));
+                        runOnUiThread(() -> ToastUtils.showShortToast(CameraMicrophoneActivity.this,
+                                getString(R.string.publish_success)));
                     }
 
                     @Override
                     public void onError(int errorCode, String errorMessage) { // 发布失败
-                        ToastUtils.showLongToast(CameraMicrophoneActivity.this,
-                                String.format(getString(R.string.publish_failed), errorCode, errorMessage));
+                        runOnUiThread(() -> ToastUtils.showLongToast(CameraMicrophoneActivity.this,
+                                String.format(getString(R.string.publish_failed), errorCode, errorMessage)));
                     }
                 }, mCameraVideoTrack, mMicrophoneAudioTrack);
             }

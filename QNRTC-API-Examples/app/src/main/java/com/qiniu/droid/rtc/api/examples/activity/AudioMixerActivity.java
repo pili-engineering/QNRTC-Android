@@ -2,6 +2,8 @@ package com.qiniu.droid.rtc.api.examples.activity;
 
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -12,9 +14,11 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.qiniu.droid.rtc.QNAudioMixer;
 import com.qiniu.droid.rtc.QNAudioMixerListener;
 import com.qiniu.droid.rtc.QNAudioMixerState;
+import com.qiniu.droid.rtc.QNAudioMusicMixer;
+import com.qiniu.droid.rtc.QNAudioMusicMixerListener;
+import com.qiniu.droid.rtc.QNAudioMusicMixerState;
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
 import com.qiniu.droid.rtc.QNClientEventListener;
 import com.qiniu.droid.rtc.QNConnectionDisconnectedInfo;
@@ -71,8 +75,8 @@ public class AudioMixerActivity extends AppCompatActivity {
     private static final String TAG = "AudioMixerActivity";
     private QNRTCClient mClient;
     private QNMicrophoneAudioTrack mMicrophoneAudioTrack;
-    private QNAudioMixer mAudioMixer;
-    private QNAudioMixerState mAudioMixerState = QNAudioMixerState.COMPLETED;
+    private QNAudioMusicMixer mAudioMusicMixer;
+    private QNAudioMusicMixerState mAudioMixerState = QNAudioMusicMixerState.IDLE;
 
     private TextView mRemoteTrackTipsView;
     private EditText mMusicUrlEditText;
@@ -82,21 +86,28 @@ public class AudioMixerActivity extends AppCompatActivity {
     private Switch mEarMonitorOnSwitch;
     private SeekBar mProgressSeekBar;
     private TextView mProgressTextView;
-    private SeekBar mMicrophoneMixVolumeSeekBar;
+    private SeekBar mMicrophoneAudioVolumeSeekBar;
     private SeekBar mMusicMixVolumeSeekBar;
     private SeekBar mMusicPlayVolumeSeekBar;
     private boolean mIsAudioMixerControllable = true;
     private String mFirstRemoteUserID = null;
     private String mMusicPath;
+    private long mMusicDurationMs;
 
-    private float mMicrophoneMixVolume = 1.0f;
+    private float mMicrophoneAudioVolume = 1.0f;
     private float mMusicMixVolume = 1.0f;
+
+    private Handler mSubThreadHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_audio_mixer);
+
+        HandlerThread ht = new HandlerThread(TAG);
+        ht.start();
+        mSubThreadHandler = new Handler(ht.getLooper());
 
         // 检查本地是否存在指定音乐文件
         checkMusicFile();
@@ -126,6 +137,8 @@ public class AudioMixerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mSubThreadHandler.getLooper().quit();
+        mSubThreadHandler = null;
         // 10. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -154,39 +167,38 @@ public class AudioMixerActivity extends AppCompatActivity {
                 ToastUtils.showShortToast(AudioMixerActivity.this, getString(R.string.invalid_loop_times_toast));
                 return;
             }
-            if (mAudioMixerState == QNAudioMixerState.STOPPED || mAudioMixerState == QNAudioMixerState.COMPLETED) {
+            if (mAudioMixerState == QNAudioMusicMixerState.IDLE
+                    || mAudioMixerState == QNAudioMusicMixerState.STOPPED
+                    || mAudioMixerState == QNAudioMusicMixerState.COMPLETED) {
                 // 开始音乐混音
                 startAudioMix(mMusicUrlEditText.getText().toString(),
                         Integer.parseInt(mLoopTimeEditText.getText().toString()), mProgressSeekBar);
-            } else if (mAudioMixerState == QNAudioMixerState.MIXING || mAudioMixerState == QNAudioMixerState.PAUSED) {
-                mAudioMixer.stop();
+            } else if (mAudioMixerState == QNAudioMusicMixerState.MIXING || mAudioMixerState == QNAudioMusicMixerState.PAUSED) {
+                mAudioMusicMixer.stop();
             }
         });
 
         // 初始化暂停、恢复混音控件
         mPauseAudioMixButton = findViewById(R.id.pause_mix_button);
         mPauseAudioMixButton.setOnClickListener(v -> {
-            if (mAudioMixerState == QNAudioMixerState.STOPPED || mAudioMixerState == QNAudioMixerState.COMPLETED) {
+            if (mAudioMixerState == QNAudioMusicMixerState.STOPPED
+                    || mAudioMixerState == QNAudioMusicMixerState.COMPLETED) {
                 ToastUtils.showShortToast(AudioMixerActivity.this, getString(R.string.audio_mix_first_toast));
                 return;
             }
-            if (mAudioMixerState == QNAudioMixerState.MIXING) {
+            if (mAudioMixerState == QNAudioMusicMixerState.MIXING) {
                 // 暂停音乐混音
-                mAudioMixer.pause();
-            } else if (mAudioMixerState == QNAudioMixerState.PAUSED) {
+                mAudioMusicMixer.pause();
+            } else if (mAudioMixerState == QNAudioMusicMixerState.PAUSED) {
                 // 从暂停处开始恢复音乐混音
-                mAudioMixer.resume();
+                mAudioMusicMixer.resume();
             }
         });
 
         mEarMonitorOnSwitch = findViewById(R.id.ear_monitor_on);
         mEarMonitorOnSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (mAudioMixer == null) {
-                ToastUtils.showShortToast(AudioMixerActivity.this, getString(R.string.audio_mix_first_toast));
-                return;
-            }
             // 开启返听，建议在佩戴耳机的场景下使用该接口
-            mAudioMixer.enableEarMonitor(isChecked);
+            mMicrophoneAudioTrack.setEarMonitorEnabled(isChecked);
         });
 
         mProgressSeekBar = findViewById(R.id.audio_mix_progress);
@@ -203,16 +215,16 @@ public class AudioMixerActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if (mAudioMixer != null) {
+                if (mAudioMusicMixer != null) {
                     // 跳到指定位置进行混音，单位为 us
-                    mAudioMixer.seekTo(seekBar.getProgress());
+                    mAudioMusicMixer.seekTo(seekBar.getProgress());
                 }
             }
         });
 
         // 初始化麦克风混音音量设置控件
-        mMicrophoneMixVolumeSeekBar = findViewById(R.id.seek_bar_microphone_volume);
-        mMicrophoneMixVolumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mMicrophoneAudioVolumeSeekBar = findViewById(R.id.seek_bar_microphone_volume);
+        mMicrophoneAudioVolumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
@@ -225,11 +237,9 @@ public class AudioMixerActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if (mAudioMixer != null) {
-                    // 设置麦克风混音音量，【 0.0f - 1.0f 】
-                    mMicrophoneMixVolume = seekBar.getProgress() / 100.0f;
-                    mAudioMixer.setMixingVolume(mMicrophoneMixVolume, mMusicMixVolume);
-                }
+                // 设置麦克风混音音量，【 0.0f - 1.0f 】
+                mMicrophoneAudioVolume = seekBar.getProgress() / 100.0f;
+                mMicrophoneAudioTrack.setVolume(mMicrophoneAudioVolume);
             }
         });
 
@@ -248,10 +258,10 @@ public class AudioMixerActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if (mAudioMixer != null) {
+                if (mAudioMusicMixer != null) {
                     // 设置音乐混音音量，【 0.0f - 1.0f 】
                     mMusicMixVolume = seekBar.getProgress() / 100.0f;
-                    mAudioMixer.setMixingVolume(mMicrophoneMixVolume, mMusicMixVolume);
+                    mAudioMusicMixer.setMixingVolume(mMusicMixVolume);
                 }
             }
         });
@@ -271,10 +281,8 @@ public class AudioMixerActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if (mAudioMixer != null) {
-                    // 设置音乐本地播放音量，【 0.0f - 1.0f 】
-                    mAudioMixer.setPlayingVolume(seekBar.getProgress() / 100.0f);
-                }
+                // 设置音乐本地播放音量，【 0.0f - 1.0f 】
+                mMicrophoneAudioTrack.setPlayingVolume(seekBar.getProgress() / 100.0f);
             }
         });
         setAudioMixerControllable(false);
@@ -286,7 +294,7 @@ public class AudioMixerActivity extends AppCompatActivity {
     private void initLocalTracks() {
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.HIGH_STEREO) // 设置音频参数
+                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
                 .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
     }
@@ -303,61 +311,67 @@ public class AudioMixerActivity extends AppCompatActivity {
             ToastUtils.showShortToast(getApplicationContext(), "请先创建音频轨道");
             return;
         }
-        // 创建混音管理器 QNAudioMixer 实例
-        // 当前仅支持同一时间混一路音频，重复对不同的 QNAudioMixer 执行 start 操作，以后执行 start 的 QNAudioMixer 为准进行混音。
-        mAudioMixer = mMicrophoneAudioTrack.createAudioMixer(filePath, new QNAudioMixerListener() {
-            /**
-             * 混音状态改变时触发
-             *
-             * @param state 当前状态
-             */
-            @Override
-            public void onStateChanged(QNAudioMixerState state) {
-                Log.i(TAG, "混音状态改变 : " + state.name());
-                mAudioMixerState = state;
-                if (state == QNAudioMixerState.MIXING) {
-                    setAudioMixerControllable(true);
-                    mStartAudioMixButton.setText(getString(R.string.stop_audio_mix));
-                    mPauseAudioMixButton.setText(getString(R.string.pause_audio_mix));
+        mSubThreadHandler.post(() -> {
+            // 创建混音管理器 QNAudioMusicMixer 实例
+            // 当前仅支持同一时间混一路背景音乐，若需要切换混音的背景音乐，可通过重新调用 MicrophoneAudioTrack.createAudioMusicMixer
+            // 创建 QNAudioMusicMixer 的方式实现。
+            mAudioMusicMixer = mMicrophoneAudioTrack.createAudioMusicMixer(filePath, new QNAudioMusicMixerListener() {
+                /**
+                 * 混音状态改变时触发
+                 *
+                 * @param state 当前状态
+                 */
+                @Override
+                public void onStateChanged(QNAudioMusicMixerState state) {
+                    Log.i(TAG, "混音状态改变 : " + state.name());
+                    mAudioMixerState = state;
+                    if (state == QNAudioMusicMixerState.MIXING) {
+                        setAudioMixerControllable(true);
+                        mStartAudioMixButton.setText(getString(R.string.stop_audio_mix));
+                        mPauseAudioMixButton.setText(getString(R.string.pause_audio_mix));
+                    }
+                    if (state == QNAudioMusicMixerState.PAUSED) {
+                        mPauseAudioMixButton.setText(getString(R.string.resume_audio_mix));
+                    }
+                    if (state == QNAudioMusicMixerState.STOPPED || state == QNAudioMusicMixerState.COMPLETED) {
+                        durationProgress.setProgress(0);
+                        setAudioMixerControllable(false);
+                        mStartAudioMixButton.setText(getString(R.string.start_audio_mix));
+                        mPauseAudioMixButton.setText(getString(R.string.pause_audio_mix));
+                    }
                 }
-                if (state == QNAudioMixerState.PAUSED) {
-                    mPauseAudioMixButton.setText(getString(R.string.resume_audio_mix));
-                }
-                if (state == QNAudioMixerState.STOPPED || state == QNAudioMixerState.COMPLETED) {
-                    durationProgress.setProgress(0);
-                    setAudioMixerControllable(false);
-                    mStartAudioMixButton.setText(getString(R.string.start_audio_mix));
-                    mPauseAudioMixButton.setText(getString(R.string.pause_audio_mix));
-                }
-            }
 
-            /**
-             * 混音过程中触发
-             *
-             * @param currentTimeUs 当前的混音时间
-             */
-            @Override
-            public void onMixing(long currentTimeUs) {
-                durationProgress.setMax((int) mAudioMixer.getDuration());
-                durationProgress.setProgress((int) currentTimeUs);
-                SimpleDateFormat formatter = new SimpleDateFormat("mm:ss", Locale.CHINA);
-                mProgressTextView.setText(String.format(getString(R.string.audio_mix_progress),
-                        formatter.format(currentTimeUs / 1000), formatter.format(mAudioMixer.getDuration() / 1000)));
-            }
+                /**
+                 * 混音过程中触发
+                 *
+                 * @param position 当前的混音时间，单位：ms
+                 */
+                @Override
+                public void onMixing(long position) {
+                    durationProgress.setProgress((int) position);
+                    SimpleDateFormat formatter = new SimpleDateFormat("mm:ss", Locale.CHINA);
+                    mProgressTextView.setText(String.format(getString(R.string.audio_mix_progress),
+                            formatter.format(position), formatter.format(mMusicDurationMs)));
+                }
 
-            /**
-             * 混音发生错误时触发
-             * 对应错误码可参考 https://developer.qiniu.com/rtc/9904/rtc-error-code-android#4
-             *
-             * @param errorCode 错误码
-             */
-            @Override
-            public void onError(int errorCode) {
-                ToastUtils.showShortToast(AudioMixerActivity.this, String.format(getString(R.string.audio_mix_error), errorCode));
-            }
+                /**
+                 * 混音发生错误时触发
+                 * 对应错误码可参考 https://developer.qiniu.com/rtc/9904/rtc-error-code-android#4
+                 *
+                 * @param errorCode 错误码
+                 */
+                @Override
+                public void onError(int errorCode, String errorMessage) {
+                    ToastUtils.showShortToast(AudioMixerActivity.this,
+                            String.format(getString(R.string.audio_mix_error), errorCode, errorMessage));
+                }
+            });
+            // QNAudioMusicMixer.getDuration 接口为同步方法，在获取在线音乐时长时可能存在耗时，因此，可根据实际需求决定是否要放到子线程执行
+            mMusicDurationMs = QNAudioMusicMixer.getDuration(filePath);
+            durationProgress.setMax((int) mMusicDurationMs);
+            // 开始混音
+            mAudioMusicMixer.start(loopTimes);
         });
-        // 开始混音
-        mAudioMixer.start(loopTimes);
     }
 
     /**
@@ -370,7 +384,7 @@ public class AudioMixerActivity extends AppCompatActivity {
             return;
         }
         mIsAudioMixerControllable = controllable;
-        mMicrophoneMixVolumeSeekBar.setEnabled(mIsAudioMixerControllable);
+        mMicrophoneAudioVolumeSeekBar.setEnabled(mIsAudioMixerControllable);
         mMusicMixVolumeSeekBar.setEnabled(mIsAudioMixerControllable);
         mMusicPlayVolumeSeekBar.setEnabled(mIsAudioMixerControllable);
         mEarMonitorOnSwitch.setEnabled(mIsAudioMixerControllable);
@@ -434,14 +448,14 @@ public class AudioMixerActivity extends AppCompatActivity {
                 mClient.publish(new QNPublishResultCallback() {
                     @Override
                     public void onPublished() { // 发布成功
-                        ToastUtils.showShortToast(AudioMixerActivity.this,
-                                getString(R.string.publish_success));
+                        runOnUiThread(() -> ToastUtils.showShortToast(AudioMixerActivity.this,
+                                getString(R.string.publish_success)));
                     }
 
                     @Override
                     public void onError(int errorCode, String errorMessage) { // 发布失败
-                        ToastUtils.showLongToast(AudioMixerActivity.this,
-                                String.format(getString(R.string.publish_failed), errorCode, errorMessage));
+                        runOnUiThread(() -> ToastUtils.showLongToast(AudioMixerActivity.this,
+                                String.format(getString(R.string.publish_failed), errorCode, errorMessage)));
                     }
                 }, mMicrophoneAudioTrack);
             }

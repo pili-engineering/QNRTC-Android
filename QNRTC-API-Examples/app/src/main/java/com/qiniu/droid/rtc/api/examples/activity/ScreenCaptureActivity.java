@@ -105,17 +105,13 @@ public class ScreenCaptureActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (isFinishing() && mClient != null) {
-            // 10. 离开房间
-            mClient.leave();
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mClient != null) {
+            // 10. 离开房间
+            mClient.leave();
+            mClient = null;
+        }
         // 11. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -147,7 +143,7 @@ public class ScreenCaptureActivity extends AppCompatActivity {
     private void initLocalTracks() {
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.HIGH_STEREO) // 设置音频参数
+                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
                 .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
 
@@ -202,14 +198,14 @@ public class ScreenCaptureActivity extends AppCompatActivity {
                 mClient.publish(new QNPublishResultCallback() {
                     @Override
                     public void onPublished() { // 发布成功
-                        ToastUtils.showShortToast(ScreenCaptureActivity.this,
-                                getString(R.string.publish_success));
+                        runOnUiThread(() -> ToastUtils.showShortToast(ScreenCaptureActivity.this,
+                                getString(R.string.publish_success)));
                     }
 
                     @Override
                     public void onError(int errorCode, String errorMessage) { // 发布失败
-                        ToastUtils.showLongToast(ScreenCaptureActivity.this,
-                                String.format(getString(R.string.publish_failed), errorCode, errorMessage));
+                        runOnUiThread(() -> ToastUtils.showLongToast(ScreenCaptureActivity.this,
+                                String.format(getString(R.string.publish_failed), errorCode, errorMessage)));
                     }
                 }, mScreenVideoTrack, mMicrophoneAudioTrack);
             }
