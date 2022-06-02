@@ -19,13 +19,6 @@ public class ToastUtils {
     }
 
     private static void showToast(Context context, String content, int duration) {
-        Toast toast = new Toast(context.getApplicationContext());
-        View view = LayoutInflater.from(context.getApplicationContext()).inflate(R.layout.toast_message, null);
-        TextView contentView = view.findViewById(R.id.toast_content);
-        contentView.setText(content);
-        toast.setView(view);
-        toast.setDuration(duration);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();
+        Toast.makeText(context, content, duration).show();
     }
 }

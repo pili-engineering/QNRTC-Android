@@ -35,7 +35,7 @@
     <string name="local_audio_window_tips">本地音频 Track</string>
     <string name="remote_audio_window_tips">远端音频 Track</string>
     <string name="microphone_only_scene_tips">Tips：本示例仅展示一对一场景下 SDK 内置麦克风采集音频 Track 的发布和订阅，以及基于音频 Track 的相关功能。</string>
-    <string name="remote_audio_volume_tips">注：远端音频的可调节范围是 0–10，调节过大可能会影响音质和损坏音频设备</string>
+    <string name="remote_audio_volume_tips">注：\n1. 音频音量的可调节范围是 0–10，调节过大可能会影响音质和损坏音频设备\n2. 获取音频音量的接口为主动调用的接口，需要您根据业务需要指定合适的时间来定时获取</string>
     <string name="local_audio_volume">本地音频采集音量</string>
     <string name="remote_audio_volume">远端音频播放音量</string>
     <string name="remote_user_left_toast">远端用户离开房间</string>
@@ -114,7 +114,7 @@
     <string name="invalid_music_url_toast">非法音乐地址</string>
     <string name="invalid_loop_times_toast">非法循环次数</string>
     <string name="prepare_music_tips">准备资源中…</string>
-    <string name="audio_mix_error">混音错误: %1$d</string>
+    <string name="audio_mix_error">混音错误: %1$d, %2$s</string>
     <string name="default_transcoding_live_streaming_scene_tips">Tips：\n1. 本示例仅展示一对一场景下使用默认合流配置创建合流任务的功能。\n2. 使用转推功能需要在七牛后台开启对应 AppId 的转推功能开关。\n3. 默认合流任务使用七牛控制台下该 AppId 的合流配置，无需客户端创建。\n4. 添加布局即可触发合流转推，可以到 AppId 绑定的直播空间下查看活跃流。</string>
     <string name="px">px</string>
     <string name="transcoding_track_layout">合流布局设置:</string>

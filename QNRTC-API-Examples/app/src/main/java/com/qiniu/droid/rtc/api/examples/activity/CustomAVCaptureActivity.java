@@ -110,15 +110,16 @@ public class CustomAVCaptureActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         mExtAudioCapture.stopCapture();
-        if (isFinishing() && mClient != null) {
-            // 8. 离开房间
-            mClient.leave();
-        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mClient != null) {
+            // 8. 离开房间
+            mClient.leave();
+            mClient = null;
+        }
         // 9. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -220,14 +221,14 @@ public class CustomAVCaptureActivity extends AppCompatActivity {
                 mClient.publish(new QNPublishResultCallback() {
                     @Override
                     public void onPublished() { // 发布成功
-                        ToastUtils.showShortToast(CustomAVCaptureActivity.this,
-                                getString(R.string.publish_success));
+                        runOnUiThread(() -> ToastUtils.showShortToast(CustomAVCaptureActivity.this,
+                                getString(R.string.publish_success)));
                     }
 
                     @Override
                     public void onError(int errorCode, String errorMessage) { // 发布失败
-                        ToastUtils.showLongToast(CustomAVCaptureActivity.this,
-                                String.format(getString(R.string.publish_failed), errorCode, errorMessage));
+                        runOnUiThread(() -> ToastUtils.showLongToast(CustomAVCaptureActivity.this,
+                                String.format(getString(R.string.publish_failed), errorCode, errorMessage)));
                     }
                 }, mCustomVideoTrack, mCustomAudioTrack);
             }

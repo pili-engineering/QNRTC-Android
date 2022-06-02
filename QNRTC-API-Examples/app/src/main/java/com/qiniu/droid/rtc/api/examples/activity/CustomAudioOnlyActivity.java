@@ -177,14 +177,14 @@ public class CustomAudioOnlyActivity extends AppCompatActivity {
                 mClient.publish(new QNPublishResultCallback() {
                     @Override
                     public void onPublished() { // 发布成功
-                        ToastUtils.showShortToast(CustomAudioOnlyActivity.this,
-                                getString(R.string.publish_success));
+                        runOnUiThread(() -> ToastUtils.showShortToast(CustomAudioOnlyActivity.this,
+                                getString(R.string.publish_success)));
                     }
 
                     @Override
                     public void onError(int errorCode, String errorMessage) { // 发布失败
-                        ToastUtils.showLongToast(CustomAudioOnlyActivity.this,
-                                String.format(getString(R.string.publish_failed), errorCode, errorMessage));
+                        runOnUiThread(() -> ToastUtils.showLongToast(CustomAudioOnlyActivity.this,
+                                String.format(getString(R.string.publish_failed), errorCode, errorMessage)));
                     }
                 }, mCustomAudioTrack);
             }

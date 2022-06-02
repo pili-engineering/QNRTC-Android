@@ -118,12 +118,7 @@ public class DefaultTranscodingLiveStreamingActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing()) {
-            if (mClient != null) {
-                // 10. 离开房间
-                mClient.leave();
-            }
-        } else {
+        if (!isFinishing()) {
             // 从 Android 9 开始，设备将无法在后台访问相机，本示例不做后台采集的演示
             // 详情可参考 https://developer.qiniu.com/rtc/kb/10074/FAQ-Android?category=kb#3
             if (mCameraVideoTrack != null) {
@@ -135,6 +130,11 @@ public class DefaultTranscodingLiveStreamingActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mClient != null) {
+            // 10. 离开房间
+            mClient.leave();
+            mClient = null;
+        }
         // 11. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -273,7 +273,7 @@ public class DefaultTranscodingLiveStreamingActivity extends AppCompatActivity {
 
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.HIGH_STEREO) // 设置音频参数
+                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
                 .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
     }
@@ -369,14 +369,14 @@ public class DefaultTranscodingLiveStreamingActivity extends AppCompatActivity {
                     @Override
                     public void onPublished() { // 发布成功
                         mIsLocalPublished = true;
-                        ToastUtils.showShortToast(DefaultTranscodingLiveStreamingActivity.this,
-                                getString(R.string.publish_success));
+                        runOnUiThread(() -> ToastUtils.showShortToast(DefaultTranscodingLiveStreamingActivity.this,
+                                getString(R.string.publish_success)));
                     }
 
                     @Override
                     public void onError(int errorCode, String errorMessage) { // 发布失败
-                        ToastUtils.showLongToast(DefaultTranscodingLiveStreamingActivity.this,
-                                String.format(getString(R.string.publish_failed), errorCode, errorMessage));
+                        runOnUiThread(() -> ToastUtils.showLongToast(DefaultTranscodingLiveStreamingActivity.this,
+                                String.format(getString(R.string.publish_failed), errorCode, errorMessage)));
                     }
                 }, mCameraVideoTrack, mMicrophoneAudioTrack);
             }
