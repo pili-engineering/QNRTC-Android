@@ -40,7 +40,7 @@ dependencies {
     implementation 'de.greenrobot:eventbus:2.4.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
-    implementation 'com.qiniu:happy-dns:1.0.0'
+    implementation 'com.qiniu:happy-dns:1.0.1'
 
     // QNDroidRTCLibrary
     if (buildWithQNDroidRTCLibrary) {
