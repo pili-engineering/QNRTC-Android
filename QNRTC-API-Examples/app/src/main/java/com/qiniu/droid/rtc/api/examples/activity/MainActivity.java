@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
             intent = new Intent(this, MediaStatisticsActivity.class);
         } else if (v.getId() == R.id.audio_mixing) {
             intent = new Intent(this, AudioMixerActivity.class);
+        } else if (v.getId() == R.id.audio_effect_mixing) {
+            intent = new Intent(this, AudioEffectsMixingActivity.class);
         } else if (v.getId() == R.id.default_transcoding_streaming) {
             intent = new Intent(this, DefaultTranscodingLiveStreamingActivity.class);
         } else if (v.getId() == R.id.custom_transcoding_streaming) {
