@@ -2,21 +2,24 @@
 
 QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频 SDK，提供了包括音视频通话、美颜、滤镜、水印等多种功能，提供灵活的接口，支持高度定制以及二次开发。
 
+> - **QNDroidRTC 4.x 版本是在 3.x 版本的基础上进行了 API 的重构和优化**，从而使使用者能够更加高效的接入，由于**接口不向下兼容**，所以新接入的用户推荐使用最新版本的 SDK。
+> - 老用户也可以继续使用 [QNDroidRTC 3.x](https://github.com/pili-engineering/QNRTC-Android/tree/v3.x) 版本，我们也会持续在此版本上进行问题修复和版本更迭，但是后续的一些新功能有可能并不会在 3.x 版本上提供。若您决定继续使用 3.x 版本 SDK，则可参考 [3.x 及之前版本的相关文档](https://doc.qnsdk.com/rtn/android/)。
+> - 使用 3.x 或者更低版本的用户若想升级至 4.x 版本，可参考 [4.x 版本迁移指南](https://developer.qiniu.com/rtc/9394/migration-guide-android) 进行升级。
+
 # 2 功能列表
 
 - 基本的音视频通话功能
 - 支持内置音视频采集，带闪光灯、摄像头切换、自动/手动对焦等常见功能
 - 内置美颜功能
 - 支持三方美颜、滤镜、面部特效
-- 支持踢人功能 
-- 支持静音功能 
-- 支持帧率配置 
-- 支持视频码率的配置 
-- 支持视频尺寸配置 
-- 支持自动重连 
-- 支持丰富的消息回调 
-- 支持纯音频互动 
-- 支持视频的大小窗口切换 
+- 支持静音功能
+- 支持帧率配置
+- 支持视频码率的配置
+- 支持视频尺寸配置
+- 支持自动重连
+- 支持丰富的消息回调
+- 支持纯音频互动
+- 支持视频的大小窗口切换
 - 支持获取连麦房间统计信息（帧率、码率等）
 - 支持回调本地/远端音频数据
 - 支持回调本地/远端视频数据
@@ -68,7 +71,7 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
   
 ### 3.2 交互流程
 
-![](http://docs.qnsdk.com/qnrtc-interactive.png)
+![](https://docs.qnsdk.com/qnrtc-interactive.png)
 
 实时通话交互流程如上图所示，因此，App 服务端需要开发的工作如下：
 
@@ -135,7 +138,10 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 - 提供云端存储空间及海量数据的处理能力，提供的高可用的技术和高稳定的平台
 
 # 6 开发文档
-请参考开发文档：[QNDroidRTC 开发文档](https://doc.qnsdk.com/rtn/android)
+
+- 可通过 [开发准备](https://developer.qiniu.com/rtc/8765/prepare-android-development) 和 [实现视频通话](https://developer.qiniu.com/rtc/8766/quick-start-android) 了解如何快速搭建音视频通话应用
+- 可通过 [QNDroidRTC 使用指南](https://developer.qiniu.com/rtc/8727/initialization-android) 了解不同场景的实现方式
+- 可通过 [QNDroidRTC API 概览](https://developer.qiniu.com/rtc/8773/API%20%E6%A6%82%E8%A7%88) 了解 SDK 的接口设计及使用姿势
 
 # 7 反馈及意见
 
@@ -161,4 +167,3 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 ## 8.4 是否有服务端的 SDK 或者 demo 代码可以参考？
 
 有的，请参考： [QNRTC-Server](https://doc.qnsdk.com/rtn/docs/server_sdk)
-
