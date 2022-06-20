@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/audio_mixer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/local_window_tips_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/local_audio_window_tips"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/remote_window_tips_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/remote_audio_window_tips"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.33" />
+
+    <ScrollView
+        android:id="@+id/control_view_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/grey_round_rect_background"
+        app:layout_constraintBottom_toTopOf="@+id/audio_mixer_tips"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/stop_all_button"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/stop_all"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    app:layout_constraintEnd_toStartOf="@+id/pause_all_button"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/ear_monitor_on"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/pause_all_button"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pause_all"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    app:layout_constraintBottom_toBottomOf="@+id/stop_all_button"
+                    app:layout_constraintEnd_toStartOf="@+id/ear_monitor_on"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/stop_all_button"
+                    app:layout_constraintTop_toTopOf="@+id/stop_all_button"
+                    app:layout_constraintVertical_bias="0.0" />
+
+                <Switch
+                    android:id="@+id/ear_monitor_on"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="@string/ear_monitor_on"
+                    app:layout_constraintBottom_toBottomOf="@+id/stop_all_button"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/pause_all_button"
+                    app:layout_constraintTop_toTopOf="@+id/stop_all_button"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <TextView
+                    android:id="@+id/microphone_mix_volume_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/microphone_mix_volume"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/stop_all_button" />
+
+                <SeekBar
+                    android:id="@+id/seek_bar_microphone_volume"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:max="100"
+                    android:progress="100"
+                    app:layout_constraintBottom_toBottomOf="@+id/microphone_mix_volume_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/microphone_mix_volume_text"
+                    app:layout_constraintTop_toTopOf="@+id/microphone_mix_volume_text" />
+
+                <TextView
+                    android:id="@+id/music_play_volume_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/music_play_volume"
+                    app:layout_constraintStart_toStartOf="@+id/microphone_mix_volume_text"
+                    app:layout_constraintTop_toBottomOf="@+id/microphone_mix_volume_text" />
+
+                <SeekBar
+                    android:id="@+id/seek_bar_music_play_volume"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:max="100"
+                    android:progress="100"
+                    app:layout_constraintBottom_toBottomOf="@+id/music_play_volume_text"
+                    app:layout_constraintEnd_toEndOf="@+id/seek_bar_microphone_volume"
+                    app:layout_constraintStart_toStartOf="@+id/seek_bar_microphone_volume"
+                    app:layout_constraintTop_toTopOf="@+id/music_play_volume_text" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/audio_effects_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/music_play_volume_text" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/audio_mixer_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/audio_effects_mixing_scene_tips"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

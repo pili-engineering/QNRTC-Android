@@ -194,6 +194,20 @@
             tools:ignore="TouchTargetSizeCheck" />
 
         <TextView
+            android:id="@+id/audio_effect_mixing"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:onClick="onClickScenes"
+            android:text="@string/audio_effect_mixing_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/audio_mixing" />
+
+        <TextView
             android:id="@+id/custom_message"
             android:layout_width="0dp"
             android:layout_height="42dp"
@@ -205,7 +219,7 @@
             android:textSize="17sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/audio_mixing"
+            app:layout_constraintTop_toBottomOf="@+id/audio_effect_mixing"
             tools:ignore="TouchTargetSizeCheck" />
 
         <TextView

@@ -29,11 +29,7 @@ android {
 }
 
 dependencies {
-    if (buildWithQNDroidRTCLibrary) {
-        implementation project(':library')
-    } else {
-        implementation fileTree(include: ['*.jar'], dir: 'libs')
-    }
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'

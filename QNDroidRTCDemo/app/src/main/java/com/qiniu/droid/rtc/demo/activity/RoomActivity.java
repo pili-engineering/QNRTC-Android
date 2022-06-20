@@ -372,7 +372,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
      */
     private void initClient() {
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-        boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.HW) == Config.HW;
+        boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.SW) == Config.HW;
         /**
          * 默认情况下，网络波动时 SDK 内部会降低帧率或者分辨率来保证带宽变化下的视频质量；
          * 如果打开分辨率保持开关，则只会调整帧率来适应网络波动。

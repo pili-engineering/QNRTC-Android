@@ -104,7 +104,7 @@ public class SettingActivity extends AppCompatActivity {
         mSelectPos = preferences.getInt(Config.CONFIG_POS, 1);
         mConfigTextView.setText(mDefaultConfiguration.get(mSelectPos));
 
-        int codecMode = preferences.getInt(Config.CODEC_MODE, Config.HW);
+        int codecMode = preferences.getInt(Config.CODEC_MODE, Config.SW);
         if (codecMode == Config.HW) {
             hwCodecMode.setChecked(true);
         } else {
