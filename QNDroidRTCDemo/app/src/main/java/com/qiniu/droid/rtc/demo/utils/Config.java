@@ -59,7 +59,7 @@ public class Config {
 
     public static int[] DEFAULT_BITRATE = {
             600,  // (500 - 600kbps)
-            1000,  // (900 - 1200kbps)
+            1000, // (900 - 1200kbps)
             1500, // (1400 - 1500kbps)
             2000  // (1800 - 2000kbps)
     };
