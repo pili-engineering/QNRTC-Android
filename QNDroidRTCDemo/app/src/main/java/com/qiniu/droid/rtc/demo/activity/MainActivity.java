@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
+        setContentView(R.layout.activity_main);
         Bugsnag.init(this);
         EventBus.getDefault().registerSticky(this);
 
@@ -184,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        setContentView(R.layout.activity_main);
         mRoomEditText = findViewById(R.id.room_edit_text);
         RadioGroupFlow captureModeRadioGroup = findViewById(R.id.capture_mode_button);
         captureModeRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
