@@ -21,6 +21,9 @@
     <string name="codec_sw">软编</string>
     <string name="low_sample_rate_string">16K</string>
     <string name="high_sample_rate_string">48K</string>
+    <string name="default_audio_scene">默认</string>
+    <string name="voice_chat_audio_scene">清晰语聊</string>
+    <string name="sound_equalize_audio_scene">音质均衡</string>
     <string name="maintain_resolution_yes">分辨率固定</string>
     <string name="maintain_resolution_no">分辨率自适应</string>
     <string name="kicked_by_admin">您被管理员踢出房间！！！</string>

@@ -45,6 +45,7 @@ public class SettingActivity extends AppCompatActivity {
     private String mUserName;
     private int mEncodeMode = 0;
     private int mSampleRatePos = 0;
+    private int mAudioScenePos = 0;
     private boolean mMaintainResolution = false;
     private boolean mIsAec3Enabled = false;
     private final List<String> mDefaultConfiguration = new ArrayList<>();
@@ -73,6 +74,11 @@ public class SettingActivity extends AppCompatActivity {
         audioSampleRateRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
         RadioButton lowSampleRateBtn = findViewById(R.id.low_sample_rate_button);
         RadioButton highSampleRateBtn = findViewById(R.id.high_sample_rate_button);
+        RadioGroup audioSceneRadioGroup = findViewById(R.id.audio_scene_button);
+        audioSceneRadioGroup.setOnCheckedChangeListener(mOnCheckedChangeListener);
+        RadioButton defaultAudioSceneBtn = findViewById(R.id.default_audio_scene);
+        RadioButton voiceChatAudioSceneBtn = findViewById(R.id.voice_chat_audio_scene);
+        RadioButton soundEqualizeAudioSceneBtn = findViewById(R.id.sound_equalize_audio_scene);
 
         RadioGroup maintainResRadioGroup = findViewById(R.id.maintain_resolution_button);
         maintainResRadioGroup.setOnCheckedChangeListener(mOnMaintainResCheckedChangeListener);
@@ -116,6 +122,15 @@ public class SettingActivity extends AppCompatActivity {
             lowSampleRateBtn.setChecked(true);
         } else {
             highSampleRateBtn.setChecked(true);
+        }
+
+        int audioScenePos = preferences.getInt(Config.AUDIO_SCENE, Config.DEFAULT_AUDIO_SCENE);
+        if (audioScenePos == Config.DEFAULT_AUDIO_SCENE) {
+            defaultAudioSceneBtn.setChecked(true);
+        } else if (audioScenePos == Config.VOICE_CHAT_AUDIO_SCENE) {
+            voiceChatAudioSceneBtn.setChecked(true);
+        } else {
+            soundEqualizeAudioSceneBtn.setChecked(true);
         }
 
         mMaintainResolution = preferences.getBoolean(Config.MAINTAIN_RES, false);
@@ -167,6 +182,7 @@ public class SettingActivity extends AppCompatActivity {
         editor.putInt(Config.CONFIG_POS, mSelectPos);
         editor.putInt(Config.CODEC_MODE, mEncodeMode);
         editor.putInt(Config.SAMPLE_RATE, mSampleRatePos);
+        editor.putInt(Config.AUDIO_SCENE, mAudioScenePos);
         editor.putBoolean(Config.MAINTAIN_RES, mMaintainResolution);
         editor.putBoolean(Config.AEC3_ENABLE, mIsAec3Enabled);
 
@@ -294,6 +310,15 @@ public class SettingActivity extends AppCompatActivity {
                 break;
             case R.id.high_sample_rate_button:
                 mSampleRatePos = Config.HIGH_SAMPLE_RATE;
+                break;
+            case R.id.default_audio_scene:
+                mAudioScenePos = Config.DEFAULT_AUDIO_SCENE;
+                break;
+            case R.id.voice_chat_audio_scene:
+                mAudioScenePos = Config.VOICE_CHAT_AUDIO_SCENE;
+                break;
+            case R.id.sound_equalize_audio_scene:
+                mAudioScenePos = Config.SOUND_EQUALIZE_AUDIO_SCENE;
                 break;
             default:
                 break;

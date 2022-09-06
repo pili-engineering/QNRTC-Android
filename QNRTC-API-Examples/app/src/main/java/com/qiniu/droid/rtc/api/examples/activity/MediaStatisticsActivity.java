@@ -74,6 +74,7 @@ public class MediaStatisticsActivity extends AppCompatActivity {
     private QNMicrophoneAudioTrack mMicrophoneAudioTrack;
 
     private String mFirstRemoteUserID = null;
+    private boolean mMicrophoneError;
 
     private Timer mStatsTimer;
     private TextView mLocalUplinkNetworkQualityText;
@@ -125,6 +126,19 @@ public class MediaStatisticsActivity extends AppCompatActivity {
         super.onResume();
         // 退后台会关闭采集，回到前台重新开启采集
         mCameraVideoTrack.startCapture();
+        if (mMicrophoneError && mClient != null && mMicrophoneAudioTrack != null) {
+            mClient.unpublish(mMicrophoneAudioTrack);
+            mClient.publish(new QNPublishResultCallback() {
+                @Override
+                public void onPublished() {
+                }
+                @Override
+                public void onError(int errorCode, String errorMessage) {
+
+                }
+            }, mMicrophoneAudioTrack);
+            mMicrophoneError = false;
+        }
     }
 
     @Override
@@ -147,6 +161,7 @@ public class MediaStatisticsActivity extends AppCompatActivity {
             mClient.leave();
             mClient = null;
         }
+        destroyLocalTracks();
         // 10. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -214,9 +229,23 @@ public class MediaStatisticsActivity extends AppCompatActivity {
 
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
-                .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
+                .setAudioQuality(QNAudioQualityPreset.STANDARD); // 设置音频参数，建议实时音视频通话场景使用默认值即可
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
+        mMicrophoneAudioTrack.setMicrophoneEventListener((errorCode, errorMessage) -> mMicrophoneError = true);
+    }
+
+    /**
+     * 销毁本地 Tracks
+     */
+    private void destroyLocalTracks() {
+        if (mCameraVideoTrack != null) {
+            mCameraVideoTrack.destroy();
+            mCameraVideoTrack = null;
+        }
+        if (mMicrophoneAudioTrack != null) {
+            mMicrophoneAudioTrack.destroy();
+            mMicrophoneAudioTrack = null;
+        }
     }
 
     /**

@@ -92,6 +92,7 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
     private float mMicrophoneAudioVolume = 1.0f;
 
     private Handler mSubThreadHandler;
+    private boolean mMicrophoneError;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -120,6 +121,24 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (mMicrophoneError && mClient != null && mMicrophoneAudioTrack != null) {
+            mClient.unpublish(mMicrophoneAudioTrack);
+            mClient.publish(new QNPublishResultCallback() {
+                @Override
+                public void onPublished() {
+                }
+                @Override
+                public void onError(int errorCode, String errorMessage) {
+
+                }
+            }, mMicrophoneAudioTrack);
+            mMicrophoneError = false;
+        }
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if (isFinishing() && mClient != null) {
@@ -133,6 +152,10 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
         super.onDestroy();
         mSubThreadHandler.getLooper().quit();
         mSubThreadHandler = null;
+        if (mMicrophoneAudioTrack != null) {
+            mMicrophoneAudioTrack.destroy();
+            mMicrophoneAudioTrack = null;
+        }
         // 10. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -203,9 +226,9 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
     private void initLocalTracks() {
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
-                .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
+                .setAudioQuality(QNAudioQualityPreset.STANDARD); // 设置音频参数，建议实时音视频通话场景使用默认值即可
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
+        mMicrophoneAudioTrack.setMicrophoneEventListener((errorCode, errorMessage) -> mMicrophoneError = true);
     }
 
     /**
@@ -270,7 +293,7 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
      */
     private void initEffectsView() {
         AudioEffectAdapter audioEffectAdapter = new AudioEffectAdapter();
-        if (mAudioEffectMixer == null) {
+        if (mAudioEffectMixer == null && mMicrophoneAudioTrack != null) {
             // 创建音效混音控制器，仅需创建一次即可
             mAudioEffectMixer = mMicrophoneAudioTrack.createAudioEffectMixer(new QNAudioEffectMixerListener() {
                 @Override

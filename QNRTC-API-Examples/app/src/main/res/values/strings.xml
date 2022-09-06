@@ -154,4 +154,7 @@
     <string name="start_transcoding_live_streaming">开启合流转推</string>
     <string name="stop_transcoding_live_streaming">停止合流转推</string>
     <string name="scan_qr_code">扫描</string>
+    <string name="default_audio_scene">默认</string>
+    <string name="voice_chat_audio_scene">清晰语聊</string>
+    <string name="sound_equalize_audio_scene">音质均衡</string>
 </resources>

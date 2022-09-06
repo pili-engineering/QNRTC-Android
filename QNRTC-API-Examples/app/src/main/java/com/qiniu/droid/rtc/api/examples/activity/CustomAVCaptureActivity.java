@@ -120,6 +120,7 @@ public class CustomAVCaptureActivity extends AppCompatActivity {
             mClient.leave();
             mClient = null;
         }
+        destroyLocalTracks();
         // 9. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -148,6 +149,20 @@ public class CustomAVCaptureActivity extends AppCompatActivity {
         QNCustomAudioTrackConfig customAudioTrackConfig = new QNCustomAudioTrackConfig(Config.TAG_CUSTOM_AUDIO_TRACK)
             .setAudioQuality(new QNAudioQuality(Config.DEFAULT_AUDIO_SAMPLE_RATE, Config.DEFAULT_AUDIO_CHANNEL_COUNT, 16, Config.DEFAULT_AUDIO_BITRATE));
         mCustomAudioTrack = QNRTC.createCustomAudioTrack(customAudioTrackConfig);
+    }
+
+    /**
+     * 销毁本地 Tracks
+     */
+    private void destroyLocalTracks() {
+        if (mCustomAudioTrack != null) {
+            mCustomAudioTrack.destroy();
+            mCustomAudioTrack = null;
+        }
+        if (mCustomVideoTrack != null) {
+            mCustomVideoTrack.destroy();
+            mCustomVideoTrack = null;
+        }
     }
 
     /**

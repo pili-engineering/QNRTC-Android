@@ -3,10 +3,13 @@ package com.qiniu.droid.rtc.api.examples.activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
+import com.qiniu.droid.rtc.QNAudioScene;
 import com.qiniu.droid.rtc.QNClientEventListener;
 import com.qiniu.droid.rtc.QNConnectionDisconnectedInfo;
 import com.qiniu.droid.rtc.QNConnectionState;
@@ -18,6 +21,7 @@ import com.qiniu.droid.rtc.QNPublishResultCallback;
 import com.qiniu.droid.rtc.QNRTC;
 import com.qiniu.droid.rtc.QNRTCClient;
 import com.qiniu.droid.rtc.QNRTCEventListener;
+import com.qiniu.droid.rtc.QNRTCSetting;
 import com.qiniu.droid.rtc.QNRemoteAudioTrack;
 import com.qiniu.droid.rtc.QNRemoteTrack;
 import com.qiniu.droid.rtc.QNRemoteVideoTrack;
@@ -69,6 +73,7 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
     private TextView mRemoteAudioVolumeTextView;
     private SeekBar mRemoteAudioVolumeSeekBar;
     private String mFirstRemoteUserID = null;
+    private boolean mMicrophoneError;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,6 +99,24 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (mMicrophoneError && mClient != null && mMicrophoneAudioTrack != null) {
+            mClient.unpublish(mMicrophoneAudioTrack);
+            mClient.publish(new QNPublishResultCallback() {
+                @Override
+                public void onPublished() {
+                }
+                @Override
+                public void onError(int errorCode, String errorMessage) {
+
+                }
+            }, mMicrophoneAudioTrack);
+            mMicrophoneError = false;
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         stopAudioVolumeScheduler();
@@ -101,6 +124,10 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
             // 8. 离开房间
             mClient.leave();
             mClient = null;
+        }
+        if (mMicrophoneAudioTrack != null) {
+            mMicrophoneAudioTrack.destroy();
+            mMicrophoneAudioTrack = null;
         }
         // 9. 反初始化 RTC 释放资源
         QNRTC.deinit();
@@ -135,7 +162,9 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
                 // 设置音频采集后的音量，该接口可用于适度对采集音量做放大或者缩小
                 // 音量值在 0.0 - 1.0f 之间为软件缩小；1.0f 为原始音量播放；大于 1.0f 且小于 10.0f 为软件放大,
                 // 在需要放大时，应从 1.x 开始设置用最小的放大值来取得合适的播放效果，过大将可能出现音频失真的现象
-                mMicrophoneAudioTrack.setVolume((double) seekBar.getProgress() / 10.0);
+                if (mMicrophoneAudioTrack != null) {
+                    mMicrophoneAudioTrack.setVolume((double) seekBar.getProgress() / 10.0);
+                }
             }
         });
 
@@ -163,6 +192,21 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
             }
         });
         mRemoteAudioVolumeSeekBar.setEnabled(false);
+
+        // 设置音频场景，不同场景使用不同的音频模式，对应调整的设备音量也存在差异
+        RadioGroup audioSceneRadioGroup = findViewById(R.id.audio_scene_button);
+        audioSceneRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.default_audio_scene) {
+                // 默认场景，仅发布或仅订阅时，SDK 使用媒体模式；同时发布和订阅时，SDK 自动切换到通话模式
+                QNRTC.setAudioScene(QNAudioScene.DEFAULT);
+            } else if (checkedId == R.id.voice_chat_audio_scene) {
+                // 清晰语聊场景，使用通话模式，调节音量为通话音量；为了人声清晰，环境音和音乐声会有一定抑制
+                QNRTC.setAudioScene(QNAudioScene.VOICE_CHAT);
+            } else {
+                // 音质均衡场景，使用媒体模式，调节音量为媒体音量；平衡音质，对环境音和音乐声的还原性更优
+                QNRTC.setAudioScene(QNAudioScene.SOUND_EQUALIZE);
+            }
+        });
     }
 
     /**
@@ -171,9 +215,9 @@ public class MicrophoneOnlyActivity extends AppCompatActivity {
     private void initLocalTracks() {
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
-                .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
+                .setAudioQuality(QNAudioQualityPreset.STANDARD); // 设置音频参数，建议实时音视频通话场景使用默认值即可
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
+        mMicrophoneAudioTrack.setMicrophoneEventListener((errorCode, errorMessage) -> mMicrophoneError = true);
     }
 
     /**

@@ -98,6 +98,7 @@ public class AudioMixerActivity extends AppCompatActivity {
     private float mMusicMixVolume = 1.0f;
 
     private Handler mSubThreadHandler;
+    private boolean mMicrophoneError;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -126,6 +127,24 @@ public class AudioMixerActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (mMicrophoneError && mClient != null && mMicrophoneAudioTrack != null) {
+            mClient.unpublish(mMicrophoneAudioTrack);
+            mClient.publish(new QNPublishResultCallback() {
+                @Override
+                public void onPublished() {
+                }
+                @Override
+                public void onError(int errorCode, String errorMessage) {
+
+                }
+            }, mMicrophoneAudioTrack);
+            mMicrophoneError = false;
+        }
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if (isFinishing() && mClient != null) {
@@ -139,6 +158,10 @@ public class AudioMixerActivity extends AppCompatActivity {
         super.onDestroy();
         mSubThreadHandler.getLooper().quit();
         mSubThreadHandler = null;
+        if (mMicrophoneAudioTrack != null) {
+            mMicrophoneAudioTrack.destroy();
+            mMicrophoneAudioTrack = null;
+        }
         // 10. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -198,7 +221,9 @@ public class AudioMixerActivity extends AppCompatActivity {
         mEarMonitorOnSwitch = findViewById(R.id.ear_monitor_on);
         mEarMonitorOnSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // 开启返听，建议在佩戴耳机的场景下使用该接口
-            mMicrophoneAudioTrack.setEarMonitorEnabled(isChecked);
+            if (mMicrophoneAudioTrack != null) {
+                mMicrophoneAudioTrack.setEarMonitorEnabled(isChecked);
+            }
         });
 
         mProgressSeekBar = findViewById(R.id.audio_mix_progress);
@@ -238,8 +263,10 @@ public class AudioMixerActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // 设置麦克风混音音量，【 0.0f - 1.0f 】
-                mMicrophoneAudioVolume = seekBar.getProgress() / 100.0f;
-                mMicrophoneAudioTrack.setVolume(mMicrophoneAudioVolume);
+                if (mMicrophoneAudioTrack != null) {
+                    mMicrophoneAudioVolume = seekBar.getProgress() / 100.0f;
+                    mMicrophoneAudioTrack.setVolume(mMicrophoneAudioVolume);
+                }
             }
         });
 
@@ -282,7 +309,9 @@ public class AudioMixerActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // 设置音乐本地播放音量，【 0.0f - 1.0f 】
-                mMicrophoneAudioTrack.setPlayingVolume(seekBar.getProgress() / 100.0f);
+                if (mMicrophoneAudioTrack != null) {
+                    mMicrophoneAudioTrack.setPlayingVolume(seekBar.getProgress() / 100.0f);
+                }
             }
         });
         setAudioMixerControllable(false);
@@ -294,9 +323,9 @@ public class AudioMixerActivity extends AppCompatActivity {
     private void initLocalTracks() {
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
-                .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
+                .setAudioQuality(QNAudioQualityPreset.STANDARD); // 设置音频参数，建议实时音视频通话场景使用默认值即可
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
+        mMicrophoneAudioTrack.setMicrophoneEventListener((errorCode, errorMessage) -> mMicrophoneError = true);
     }
 
     /**
