@@ -32,6 +32,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
+import com.qiniu.droid.rtc.QNAudioScene;
 import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCameraEventListener;
 import com.qiniu.droid.rtc.QNCameraFacing;
@@ -50,6 +51,7 @@ import com.qiniu.droid.rtc.QNLocalTrack;
 import com.qiniu.droid.rtc.QNMediaRelayState;
 import com.qiniu.droid.rtc.QNMicrophoneAudioTrack;
 import com.qiniu.droid.rtc.QNMicrophoneAudioTrackConfig;
+import com.qiniu.droid.rtc.QNMicrophoneEventListener;
 import com.qiniu.droid.rtc.QNNetworkQuality;
 import com.qiniu.droid.rtc.QNNetworkQualityListener;
 import com.qiniu.droid.rtc.QNPublishResultCallback;
@@ -205,6 +207,9 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
 
     private final Semaphore mCaptureStoppedSem = new Semaphore(1);
 
+    // 麦克风错误标志
+    private boolean mMicrophoneError;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -303,6 +308,19 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
             // 加入房间
             mClient.join(mRoomToken);
         }
+        if (mMicrophoneError && mClient != null && mMicrophoneTrack != null) {
+            mClient.unpublish(mMicrophoneTrack);
+            mClient.publish(new QNPublishResultCallback() {
+                @Override
+                public void onPublished() {
+                }
+                @Override
+                public void onError(int errorCode, String errorMessage) {
+
+                }
+            }, mMicrophoneTrack);
+            mMicrophoneError = false;
+        }
     }
 
     private void startCaptureAfterAcquire() {
@@ -333,6 +351,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
     protected void onDestroy() {
         super.onDestroy();
         releaseClient();
+        destroyLocalTracks();
         if (mInitRTC) {
             // 反初始化
             QNRTC.deinit();
@@ -346,6 +365,16 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
         }
         mTrackWindowsList.clear();
         mPopWindow = null;
+    }
+
+    private void destroyLocalTracks() {
+        for (QNLocalTrack localTrack : mLocalTrackList) {
+            localTrack.destroy();
+        }
+        mLocalTrackList.clear();
+        mCameraTrack = null;
+        mLocalScreenTrack = null;
+        mMicrophoneTrack = null;
     }
 
     private void releaseClient() {
@@ -383,11 +412,25 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
          * 如果您的使用场景需要双讲，建议 QNRTCSetting#setAEC3Enabled 为 true 以防止出现对讲回声
          */
         boolean isAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, true);
+        /**
+         * 设置音频场景，不同的音频场景，系统音量模式是不一样的
+         */
+        int audioScenePos = preferences.getInt(Config.AUDIO_SCENE, Config.DEFAULT_AUDIO_SCENE);
+        QNAudioScene audioScene;
+        if (audioScenePos == Config.DEFAULT_AUDIO_SCENE) {
+            audioScene = QNAudioScene.DEFAULT;
+        } else if (audioScenePos == Config.VOICE_CHAT_AUDIO_SCENE) {
+            audioScene = QNAudioScene.VOICE_CHAT;
+        } else {
+            audioScene = QNAudioScene.SOUND_EQUALIZE;
+        }
         mCaptureMode = preferences.getInt(Config.CAPTURE_MODE, Config.CAMERA_CAPTURE);
 
         QNRTCSetting setting = new QNRTCSetting();
-        setting.setHWCodecEnabled(isHwCodec).setMaintainResolution(isMaintainRes)
-                .setAEC3Enabled(isAec3Enabled);
+        setting.setHWCodecEnabled(isHwCodec)
+                .setMaintainResolution(isMaintainRes)
+                .setAEC3Enabled(isAec3Enabled)
+                .setAudioScene(audioScene);
         QNRTC.init(this, setting, mRTCEventListener);
         mClient = QNRTC.createClient(mClientEventListener);
         mClient.setLiveStreamingListener(mLiveStreamingListener);
@@ -402,8 +445,8 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
         mLocalTrackList = new ArrayList<>();
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(TRACK_TAG_MIC);
         microphoneAudioTrackConfig.setAudioQuality(QNAudioQualityPreset.STANDARD);
-        microphoneAudioTrackConfig.setCommunicationModeOn(true);
         mMicrophoneTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
+        mMicrophoneTrack.setMicrophoneEventListener((errorCode, errorMessage) -> mMicrophoneError = true);
 
         mLocalTrackList.add(mMicrophoneTrack);
 

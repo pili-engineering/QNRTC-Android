@@ -71,6 +71,7 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
     private QNBeautySetting mBeautySetting;
 
     private String mFirstRemoteUserID = null;
+    private boolean mMicrophoneError;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,6 +98,19 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
         super.onResume();
         // 退后台会关闭采集，回到前台重新开启采集
         mCameraVideoTrack.startCapture();
+        if (mMicrophoneError && mClient != null && mMicrophoneAudioTrack != null) {
+            mClient.unpublish(mMicrophoneAudioTrack);
+            mClient.publish(new QNPublishResultCallback() {
+                @Override
+                public void onPublished() {
+                }
+                @Override
+                public void onError(int errorCode, String errorMessage) {
+
+                }
+            }, mMicrophoneAudioTrack);
+            mMicrophoneError = false;
+        }
     }
 
     @Override
@@ -118,6 +132,7 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
             mClient.leave();
             mClient = null;
         }
+        destroyLocalTracks();
         // 9. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
@@ -133,8 +148,10 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
         SwitchCompat beautyOnSwitch = findViewById(R.id.switch_beauty_on);
         beautyOnSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // 控制美颜的开关
-            mBeautySetting.setEnable(isChecked);
-            mCameraVideoTrack.setBeauty(mBeautySetting);
+            if (mCameraVideoTrack != null) {
+                mBeautySetting.setEnable(isChecked);
+                mCameraVideoTrack.setBeauty(mBeautySetting);
+            }
         });
 
         SeekBar beautyStrengthSeekBar = findViewById(R.id.seek_bar_beauty_strength);
@@ -151,8 +168,10 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mBeautySetting.setSmoothLevel(seekBar.getProgress() / 100.0f);
-                mCameraVideoTrack.setBeauty(mBeautySetting);
+                if (mCameraVideoTrack != null) {
+                    mBeautySetting.setSmoothLevel(seekBar.getProgress() / 100.0f);
+                    mCameraVideoTrack.setBeauty(mBeautySetting);
+                }
             }
         });
 
@@ -170,8 +189,10 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mBeautySetting.setRedden(seekBar.getProgress() / 100.0f);
-                mCameraVideoTrack.setBeauty(mBeautySetting);
+                if (mCameraVideoTrack != null) {
+                    mBeautySetting.setRedden(seekBar.getProgress() / 100.0f);
+                    mCameraVideoTrack.setBeauty(mBeautySetting);
+                }
             }
         });
 
@@ -189,8 +210,10 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mBeautySetting.setWhiten(seekBar.getProgress() / 100.0f);
-                mCameraVideoTrack.setBeauty(mBeautySetting);
+                if (mCameraVideoTrack != null) {
+                    mBeautySetting.setWhiten(seekBar.getProgress() / 100.0f);
+                    mCameraVideoTrack.setBeauty(mBeautySetting);
+                }
             }
         });
     }
@@ -244,9 +267,23 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
 
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)
-                .setAudioQuality(QNAudioQualityPreset.STANDARD) // 设置音频参数，建议实时音视频通话场景使用默认值即可
-                .setCommunicationModeOn(true); // 设置是否开启通话模式，开启后会启用硬件回声消除等处理
+                .setAudioQuality(QNAudioQualityPreset.STANDARD); // 设置音频参数，建议实时音视频通话场景使用默认值即可
         mMicrophoneAudioTrack = QNRTC.createMicrophoneAudioTrack(microphoneAudioTrackConfig);
+        mMicrophoneAudioTrack.setMicrophoneEventListener((errorCode, errorMessage) -> mMicrophoneError = true);
+    }
+
+    /**
+     * 销毁本地 Tracks
+     */
+    private void destroyLocalTracks() {
+        if (mCameraVideoTrack != null) {
+            mCameraVideoTrack.destroy();
+            mCameraVideoTrack = null;
+        }
+        if (mMicrophoneAudioTrack != null) {
+            mMicrophoneAudioTrack.destroy();
+            mMicrophoneAudioTrack = null;
+        }
     }
 
     private final QNRTCEventListener mRTCEventListener = new QNRTCEventListener() {

@@ -191,11 +191,52 @@
                     android:textColor="@color/textColor" />
             </RadioGroup>
 
+            <RadioGroup
+                android:id="@+id/audio_scene_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/sample_rate_button"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="30dp"
+                android:background="@drawable/oval_edit_text_background"
+                android:orientation="horizontal"
+                android:paddingStart="15dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="2dp">
+
+                <RadioButton
+                    android:id="@+id/default_audio_scene"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:shadowColor="@color/blue"
+                    android:text="@string/default_audio_scene"
+                    android:textColor="@color/textColor" />
+
+                <RadioButton
+                    android:id="@+id/voice_chat_audio_scene"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/voice_chat_audio_scene"
+                    android:textColor="@color/textColor" />
+
+                <RadioButton
+                    android:id="@+id/sound_equalize_audio_scene"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/sound_equalize_audio_scene"
+                    android:textColor="@color/textColor" />
+            </RadioGroup>
+
             <TextView
                 android:id="@+id/tips_capture_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/sample_rate_button"
+                android:layout_below="@id/audio_scene_button"
                 android:layout_alignStart="@id/user_name_edit_text"
                 android:layout_alignEnd="@id/user_name_edit_text"
                 android:layout_marginTop="15dp"

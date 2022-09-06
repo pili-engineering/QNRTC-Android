@@ -61,6 +61,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline9" />
 
+    <RadioGroup
+        android:id="@+id/audio_scene_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/control_view_background">
+
+        <RadioButton
+            android:id="@+id/default_audio_scene"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="@string/default_audio_scene" />
+
+        <RadioButton
+            android:id="@+id/voice_chat_audio_scene"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/voice_chat_audio_scene" />
+
+        <RadioButton
+            android:id="@+id/sound_equalize_audio_scene"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/sound_equalize_audio_scene" />
+    </RadioGroup>
+
     <TextView
         android:id="@+id/local_audio_volume_title"
         android:layout_width="wrap_content"
@@ -69,7 +104,7 @@
         android:layout_marginTop="32dp"
         android:text="@string/local_audio_volume"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/control_view_background" />
+        app:layout_constraintTop_toBottomOf="@+id/audio_scene_button" />
 
     <SeekBar
         android:id="@+id/local_audio_volume_seek_bar"

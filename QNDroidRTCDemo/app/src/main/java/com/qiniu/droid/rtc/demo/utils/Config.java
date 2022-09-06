@@ -18,6 +18,7 @@ public class Config {
     public static final String FPS = "fps";
     public static final String CODEC_MODE = "encodeMode";
     public static final String SAMPLE_RATE = "sampleRate";
+    public static final String AUDIO_SCENE = "audioScene";
     public static final String CAPTURE_MODE = "captureMode";
     public static final String BITRATE = "bitrate";
     public static final String MAINTAIN_RES = "maintainRes";
@@ -27,6 +28,9 @@ public class Config {
     public static final int SW = 1;
     public static final int LOW_SAMPLE_RATE = 0;
     public static final int HIGH_SAMPLE_RATE = 1;
+    public static final int DEFAULT_AUDIO_SCENE = 0;
+    public static final int VOICE_CHAT_AUDIO_SCENE = 1;
+    public static final int SOUND_EQUALIZE_AUDIO_SCENE = 2;
     public static final int CAMERA_CAPTURE = 0;
     public static final int SCREEN_CAPTURE = 1;
     public static final int ONLY_AUDIO_CAPTURE = 2;

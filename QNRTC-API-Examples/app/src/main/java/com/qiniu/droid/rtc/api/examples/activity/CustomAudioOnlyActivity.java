@@ -104,6 +104,10 @@ public class CustomAudioOnlyActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mCustomAudioTrack != null) {
+            mCustomAudioTrack.destroy();
+            mCustomAudioTrack = null;
+        }
         // 9. 反初始化 RTC 释放资源
         QNRTC.deinit();
     }
