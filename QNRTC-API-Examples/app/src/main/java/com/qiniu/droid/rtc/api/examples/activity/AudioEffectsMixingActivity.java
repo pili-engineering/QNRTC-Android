@@ -358,6 +358,14 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
                     mAudioEffectMixer.resume(effectID); // 恢复指定音效混音
                 }
             }
+
+            @Override
+            public void onPublishClicked(int effectID, boolean publish) {
+                if (mAudioEffectMixer == null) {
+                    return;
+                }
+                mAudioEffectMixer.setPublishEnabled(effectID, publish);
+            }
         });
         audioEffectRv.setAdapter(audioEffectAdapter);
 

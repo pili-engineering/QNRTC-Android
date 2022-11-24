@@ -6,6 +6,7 @@ public class AudioEffect {
     QNAudioEffect mAudioEffect;
     boolean mIsStarted = false;
     boolean mIsPaused = false;
+    boolean mIsPublish = true;
 
     public AudioEffect(QNAudioEffect audioEffect) {
         mAudioEffect = audioEffect;
@@ -33,5 +34,13 @@ public class AudioEffect {
 
     public void setPaused(boolean paused) {
         mIsPaused = paused;
+    }
+
+    public void setPublish(boolean publish) {
+        mIsPublish = publish;
+    }
+
+    public boolean isPublish() {
+        return mIsPublish;
     }
 }

@@ -351,7 +351,7 @@ public class AudioSourcesMixingActivity extends AppCompatActivity {
                 if (mAudioSourceMixer == null) {
                     return;
                 }
-                mAudioSourceMixer.setPublishEnable(effectID, publish);
+                mAudioSourceMixer.setPublishEnabled(effectID, publish);
             }
 
         });

@@ -6,13 +6,20 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.qiniu.droid.rtc.api.examples.BuildConfig;
 import com.qiniu.droid.rtc.api.examples.R;
 import com.qiniu.droid.rtc.api.examples.utils.Config;
 import com.qiniu.droid.rtc.api.examples.utils.PermissionChecker;
 import com.qiniu.droid.rtc.api.examples.utils.ToastUtils;
 import com.qiniu.droid.rtc.api.examples.utils.Utils;
+
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,6 +27,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        TextView appInfo = findViewById(R.id.app_info);
+        JSONObject roomInfo = Utils.parseRoomToken(Config.ROOM_TOKEN);
+        String userID = roomInfo.optString(Config.KEY_USER_ID);
+        String roomName = roomInfo.optString(Config.KEY_ROOM_NAME);
+        appInfo.setText(String.format(getString(R.string.app_info), userID, roomName, getSdkVersion(), getBuildTimeDescription()));
     }
 
     public void onClickScenes(View v) {
@@ -53,10 +66,14 @@ public class MainActivity extends AppCompatActivity {
             intent = new Intent(this, AudioMixerActivity.class);
         } else if (v.getId() == R.id.audio_effect_mixing) {
             intent = new Intent(this, AudioEffectsMixingActivity.class);
+        } else if (v.getId() == R.id.audio_source_mixing) {
+            intent = new Intent(this, AudioSourcesMixingActivity.class);
         } else if (v.getId() == R.id.default_transcoding_streaming) {
             intent = new Intent(this, DefaultTranscodingLiveStreamingActivity.class);
         } else if (v.getId() == R.id.custom_transcoding_streaming) {
             intent = new Intent(this, CustomTranscodingLiveStreamingActivity.class);
+        } else if (v.getId() == R.id.media_relay) {
+            intent = new Intent(this, MediaRelayActivity.class);
         }
         if (intent != null) {
             startActivity(intent);
@@ -70,5 +87,13 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Some permissions is not approved !!!", Toast.LENGTH_SHORT).show();
         }
         return isPermissionOK;
+    }
+
+    private String getBuildTimeDescription() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(BuildConfig.BUILD_TIMESTAMP);
+    }
+
+    private String getSdkVersion() {
+        return com.qiniu.droid.rtc.BuildConfig.VERSION_NAME + "-" + com.qiniu.droid.rtc.BuildConfig.GIT_HASH;
     }
 }

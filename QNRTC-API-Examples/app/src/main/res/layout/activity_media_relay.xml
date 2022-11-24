@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/camera_microphone_layout"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.qiniu.droid.rtc.QNSurfaceView
+        android:id="@+id/local_render_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/local_render_view_tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/local_window_tips"
+        app:layout_constraintBottom_toBottomOf="@+id/local_render_view"
+        app:layout_constraintEnd_toEndOf="@+id/local_render_view"
+        app:layout_constraintStart_toStartOf="@+id/local_render_view"
+        app:layout_constraintTop_toTopOf="@+id/local_render_view" />
+
+    <com.qiniu.droid.rtc.QNSurfaceView
+        android:id="@+id/remote_render_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/remote_render_view_tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/remote_window_tips"
+        app:layout_constraintBottom_toBottomOf="@+id/remote_render_view"
+        app:layout_constraintEnd_toEndOf="@id/remote_render_view"
+        app:layout_constraintStart_toStartOf="@+id/remote_render_view"
+        app:layout_constraintTop_toTopOf="@+id/remote_render_view" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.33" />
+
+    <View
+        android:id="@+id/control_view_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/grey_round_rect_background"
+        app:layout_constraintBottom_toTopOf="@+id/media_relay_tips"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline3" />
+
+    <TextView
+        android:id="@+id/target_room_token"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/target_room_token"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/control_view_background" />
+
+    <EditText
+        android:id="@+id/room_token_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:background="@drawable/white_round_rect_background"
+        android:hint="@string/target_room_token_hint"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:singleLine="true"
+        android:text=""
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/control_view_background"
+        app:layout_constraintStart_toStartOf="@+id/target_room_token"
+        app:layout_constraintTop_toBottomOf="@+id/target_room_token" />
+
+    <ImageView
+        android:id="@+id/scanner_btn"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="18dp"
+        android:onClick="onClickScanQRCode"
+        android:src="@drawable/ic_scanner"
+        app:layout_constraintBottom_toBottomOf="@+id/target_room_token"
+        app:layout_constraintStart_toEndOf="@+id/target_room_token"
+        app:layout_constraintTop_toTopOf="@+id/target_room_token" />
+
+    <TextView
+        android:id="@+id/target_room_info_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/start_media_relay_button"
+        app:layout_constraintEnd_toEndOf="@+id/room_token_edit_text"
+        app:layout_constraintStart_toStartOf="@+id/room_token_edit_text"
+        app:layout_constraintTop_toBottomOf="@+id/room_token_edit_text" />
+
+    <Button
+        android:id="@+id/start_media_relay_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_marginBottom="8dp"
+        android:padding="1dp"
+        android:text="@string/start_media_relay"
+        app:layout_constraintBottom_toTopOf="@+id/stop_media_relay_button"
+        app:layout_constraintEnd_toEndOf="@+id/room_token_edit_text"
+        app:layout_constraintStart_toStartOf="@+id/room_token_edit_text" />
+
+    <Button
+        android:id="@+id/stop_media_relay_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:padding="1dp"
+        android:text="@string/stop_media_relay"
+        app:layout_constraintBottom_toBottomOf="@+id/control_view_background"
+        app:layout_constraintEnd_toEndOf="@+id/start_media_relay_button"
+        app:layout_constraintStart_toStartOf="@+id/start_media_relay_button" />
+
+    <TextView
+        android:id="@+id/media_relay_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/media_relay_tips"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

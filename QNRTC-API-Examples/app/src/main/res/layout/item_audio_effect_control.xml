@@ -2,34 +2,48 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/effect_name_text"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="5"
         android:maxLines="1"
         android:padding="8dp" />
 
-    <Button
-        android:id="@+id/start_audio_mix_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:layout_marginEnd="8dp"
-        android:maxLines="1"
-        android:text="@string/start_audio_mix"
-        android:textSize="10sp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/start_audio_mix_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:maxLines="1"
+            android:text="@string/start_audio_mix"
+            android:textSize="10sp" />
 
-    <Button
-        android:id="@+id/pause_audio_mix_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:layout_marginEnd="8dp"
-        android:maxLines="1"
-        android:text="@string/pause_audio_mix"
-        android:textSize="10sp" />
+        <Button
+            android:id="@+id/pause_audio_mix_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:maxLines="1"
+            android:text="@string/pause_audio_mix"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/publish_audio_mix_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:maxLines="1"
+            android:text="@string/no_publish_audio_mix"
+            android:textSize="10sp" />
+    </LinearLayout>
+
 
 </LinearLayout>

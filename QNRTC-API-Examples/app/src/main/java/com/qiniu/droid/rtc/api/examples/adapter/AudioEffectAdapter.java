@@ -17,13 +17,14 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class AudioEffectAdapter extends RecyclerView.Adapter<AudioEffectAdapter.holder> {
+public class AudioEffectAdapter extends RecyclerView.Adapter<AudioEffectAdapter.Holder> {
     private List<AudioEffect> mAudioEffects;
     private OnAudioEffectClickListener mAudioEffectClickListener;
 
     public interface OnAudioEffectClickListener {
         void onStartClicked(int effectID, boolean start);
         void onPauseClicked(int effectID, boolean pause);
+        void onPublishClicked(int effectID, boolean publish);
     }
 
     public void init(List<AudioEffect> audioEffects, OnAudioEffectClickListener audioEffectClickListener) {
@@ -71,14 +72,14 @@ public class AudioEffectAdapter extends RecyclerView.Adapter<AudioEffectAdapter.
     @NonNull
     @NotNull
     @Override
-    public holder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+    public Holder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_audio_effect_control, parent, false);
-        return new holder(view);
+        return new Holder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull @NotNull holder holder, int position) {
+    public void onBindViewHolder(@NonNull @NotNull Holder holder, int position) {
         AudioEffect audioEffect = mAudioEffects.get(position);
         holder.mEffectNameText.setText(new File(audioEffect.getAudioEffect().getFilePath()).getName());
         holder.mStartButton.setText(audioEffect.isStarted() ? R.string.stop_audio_mix : R.string.start_audio_mix);
@@ -104,6 +105,13 @@ public class AudioEffectAdapter extends RecyclerView.Adapter<AudioEffectAdapter.
                 mAudioEffectClickListener.onPauseClicked(audioEffect.getAudioEffect().getID(), audioEffect.isPaused());
             }
         });
+        holder.mPublishButton.setOnClickListener(view -> {
+            if (mAudioEffectClickListener != null) {
+                audioEffect.setPublish(!audioEffect.isPublish());
+                holder.mPublishButton.setText(audioEffect.isPublish() ? R.string.no_publish_audio_mix : R.string.publish_audio_mix);
+                mAudioEffectClickListener.onPublishClicked(audioEffect.getAudioEffect().getID(), audioEffect.isPublish());
+            }
+        });
     }
 
     @Override
@@ -111,16 +119,18 @@ public class AudioEffectAdapter extends RecyclerView.Adapter<AudioEffectAdapter.
         return mAudioEffects.size();
     }
 
-    public static class holder extends RecyclerView.ViewHolder {
+    public static class Holder extends RecyclerView.ViewHolder {
         public TextView mEffectNameText;
         public Button mStartButton;
         public Button mPauseButton;
+        public Button mPublishButton;
 
-        public holder(View view) {
+        public Holder(View view) {
             super(view);
             mEffectNameText = view.findViewById(R.id.effect_name_text);
             mStartButton = view.findViewById(R.id.start_audio_mix_button);
             mPauseButton = view.findViewById(R.id.pause_audio_mix_button);
+            mPublishButton = view.findViewById(R.id.publish_audio_mix_button);
         }
     }
 }
