@@ -199,14 +199,28 @@
             android:layout_width="0dp"
             android:layout_height="42dp"
             android:gravity="center_vertical"
-            android:paddingStart="16dp"
             android:onClick="onClickScenes"
+            android:paddingStart="16dp"
             android:text="@string/audio_effect_mixing_scene"
             android:textColor="#000000"
             android:textSize="17sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/audio_mixing" />
+
+        <TextView
+            android:id="@+id/audio_source_mixing"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/audio_source_mixing_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/audio_effect_mixing" />
 
         <TextView
             android:id="@+id/custom_message"
@@ -220,7 +234,7 @@
             android:textSize="17sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/audio_effect_mixing"
+            app:layout_constraintTop_toBottomOf="@+id/audio_source_mixing"
             tools:ignore="TouchTargetSizeCheck" />
 
         <TextView
@@ -252,5 +266,34 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/multi_profile"
             tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/media_relay"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/media_relay_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/media_statistics"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/app_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/title_grey"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/media_relay" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

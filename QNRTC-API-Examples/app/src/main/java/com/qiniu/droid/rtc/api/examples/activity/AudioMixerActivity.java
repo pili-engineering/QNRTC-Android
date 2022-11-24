@@ -83,6 +83,7 @@ public class AudioMixerActivity extends AppCompatActivity {
     private EditText mLoopTimeEditText;
     private Button mStartAudioMixButton;
     private Button mPauseAudioMixButton;
+    private Button mPublishAudioMixButton;
     private Switch mEarMonitorOnSwitch;
     private SeekBar mProgressSeekBar;
     private TextView mProgressTextView;
@@ -218,6 +219,16 @@ public class AudioMixerActivity extends AppCompatActivity {
             }
         });
 
+        // 控制音乐是否推送到远端
+        mPublishAudioMixButton = findViewById(R.id.publish_mix_button);
+        mPublishAudioMixButton.setOnClickListener(view -> {
+            if (mAudioMusicMixer != null) {
+                boolean publish = mAudioMusicMixer.isPublishEnabled();
+                mPublishAudioMixButton.setText(!publish ? getString(R.string.no_publish_audio_mix) : getString(R.string.publish_audio_mix));
+                mAudioMusicMixer.setPublishEnabled(!publish);
+            }
+        });
+
         mEarMonitorOnSwitch = findViewById(R.id.ear_monitor_on);
         mEarMonitorOnSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // 开启返听，建议在佩戴耳机的场景下使用该接口
@@ -288,7 +299,7 @@ public class AudioMixerActivity extends AppCompatActivity {
                 if (mAudioMusicMixer != null) {
                     // 设置音乐混音音量，【 0.0f - 1.0f 】
                     mMusicMixVolume = seekBar.getProgress() / 100.0f;
-                    mAudioMusicMixer.setMixingVolume(mMusicMixVolume);
+                    mAudioMusicMixer.setMusicVolume(mMusicMixVolume);
                 }
             }
         });

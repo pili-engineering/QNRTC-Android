@@ -122,26 +122,36 @@
 
     <Button
         android:id="@+id/start_mix_button"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="@string/start_audio_mix"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/pause_mix_button"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/ear_monitor_on"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/control_view_background" />
 
     <Button
         android:id="@+id/pause_mix_button"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/pause_audio_mix"
         app:layout_constraintBottom_toBottomOf="@+id/start_mix_button"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/start_mix_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/start_mix_button" />
+
+    <Button
+        android:id="@+id/publish_mix_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_publish_audio_mix"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintBottom_toBottomOf="@+id/start_mix_button"
+        app:layout_constraintStart_toEndOf="@+id/pause_mix_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/start_mix_button"/>
 
     <TextView
         android:id="@+id/ear_monitor_on_text"
