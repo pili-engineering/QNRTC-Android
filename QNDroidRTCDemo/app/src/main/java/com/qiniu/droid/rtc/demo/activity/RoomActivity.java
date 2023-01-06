@@ -368,10 +368,12 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
     }
 
     private void destroyLocalTracks() {
-        for (QNLocalTrack localTrack : mLocalTrackList) {
-            localTrack.destroy();
+        if (mLocalTrackList != null) {
+            for (QNLocalTrack localTrack : mLocalTrackList) {
+                localTrack.destroy();
+            }
+            mLocalTrackList.clear();
         }
-        mLocalTrackList.clear();
         mCameraTrack = null;
         mLocalScreenTrack = null;
         mMicrophoneTrack = null;
@@ -493,7 +495,8 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
                     .setVideoEncoderConfig(new QNVideoEncoderConfig(mVideoWidth, mVideoHeight, mVideoFps, mVideoBitrate));
             mLocalScreenTrack = QNRTC.createScreenVideoTrack(screenVideoTrackConfig);
             mLocalTrackList.add(mLocalScreenTrack);
-            if (mClient.getConnectionState() == QNConnectionState.CONNECTED || mClient.getConnectionState() == QNConnectionState.RECONNECTED) {
+            if (mClient != null && (mClient.getConnectionState() == QNConnectionState.CONNECTED
+                                   || mClient.getConnectionState() == QNConnectionState.RECONNECTED)) {
                 mClient.publish(mPublishResultCallback, Collections.singletonList(mLocalScreenTrack));
             }
         }
@@ -621,7 +624,9 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
         }
         mKickOutDialog.setMessage(getString(R.string.kickout_tips, userId));
         mKickOutDialog.setButton(DialogInterface.BUTTON_POSITIVE, getResources().getString(R.string.positive_dialog_tips), (dialog, which) -> {
-            mClient.sendMessage(Collections.singletonList(userId),CUSTOM_MESSAGE_KICKOUT,CUSTOM_MESSAGE_KICKOUT);
+            if (mClient != null) {
+                mClient.sendMessage(Collections.singletonList(userId),CUSTOM_MESSAGE_KICKOUT,CUSTOM_MESSAGE_KICKOUT);
+            }
         });
         mKickOutDialog.show();
     }
@@ -862,12 +867,16 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
                 }
             }
             mCurrentDirectConfig.setUrl(String.format(getResources().getString(R.string.publish_url), mRoomId, mSerialNum));
-            mClient.startLiveStreaming(mCurrentDirectConfig);
+            if (mClient != null) {
+              mClient.startLiveStreaming(mCurrentDirectConfig);
+            }
         } else {
-            mClient.stopLiveStreaming(mCurrentDirectConfig);
-            mIsDirectStreaming = false;
-            mControlFragment.updateDirectText(getString(R.string.direct_btn_text));
-            ToastUtils.showShortToast(RoomActivity.this, "已停止 id=" + mCurrentDirectConfig.getStreamID() + " 的单流转推！！！");
+            if (mClient != null) {
+              mClient.stopLiveStreaming(mCurrentDirectConfig);
+              mIsDirectStreaming = false;
+              mControlFragment.updateDirectText(getString(R.string.direct_btn_text));
+              ToastUtils.showShortToast(RoomActivity.this, "已停止 id=" + mCurrentDirectConfig.getStreamID() + " 的单流转推！！！");
+            }
         }
     }
 

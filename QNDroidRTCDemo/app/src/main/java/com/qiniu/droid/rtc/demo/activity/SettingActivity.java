@@ -253,6 +253,7 @@ public class SettingActivity extends AppCompatActivity {
                 }
             });
         }
+        QNFileLogHelper.getInstance().init(this);
         mLogFileNames = QNFileLogHelper.getInstance().getLogFiles();
         if (mLogFileNames == null || mLogFileNames.size() == 0) {
             ToastUtils.showShortToast(SettingActivity.this, "当前无可上报日志");
