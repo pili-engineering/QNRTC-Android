@@ -23,16 +23,25 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
+    private PermissionChecker mChecker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mChecker = new PermissionChecker(this);
         TextView appInfo = findViewById(R.id.app_info);
         JSONObject roomInfo = Utils.parseRoomToken(Config.ROOM_TOKEN);
         String userID = roomInfo.optString(Config.KEY_USER_ID);
         String roomName = roomInfo.optString(Config.KEY_ROOM_NAME);
         appInfo.setText(String.format(getString(R.string.app_info), userID, roomName, getSdkVersion(), getBuildTimeDescription()));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] state) {
+        super.onRequestPermissionsResult(requestCode, permissions, state);
+        mChecker.onRequestPermissionsResult(requestCode, permissions, state);
     }
 
     public void onClickScenes(View v) {
@@ -81,11 +90,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isPermissionOK() {
-        PermissionChecker checker = new PermissionChecker(this);
-        boolean isPermissionOK = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || checker.checkPermission();
-        if (!isPermissionOK) {
-            Toast.makeText(this, "Some permissions is not approved !!!", Toast.LENGTH_SHORT).show();
-        }
+        boolean isPermissionOK = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || mChecker.checkPermission();
         return isPermissionOK;
     }
 

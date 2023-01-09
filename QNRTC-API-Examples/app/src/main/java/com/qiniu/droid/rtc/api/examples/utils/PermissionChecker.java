@@ -106,7 +106,7 @@ public class PermissionChecker {
                 // all permissions granted
             } else {
                 // some permissions denied
-                //ToastUtils.s(mActivity, "some permissions denied");
+                ToastUtils.showShortToast(mActivity, "some permissions denied");
             }
         }
     }

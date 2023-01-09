@@ -37,7 +37,7 @@ public class RTCApplication extends Application {
             return;
         }
         for (File crashFile : crashFiles) {
-            if (crashFile.isFile()) {
+            if (crashFile.isFile() && crashFile.getName().contains("xcrash")) {
                 QNFileLogHelper.getInstance().reportLogFileByPath(crashFile.getPath(), new QNFileLogHelper.LogReportCallback() {
                     @Override
                     public void onReportSuccess(String name) {

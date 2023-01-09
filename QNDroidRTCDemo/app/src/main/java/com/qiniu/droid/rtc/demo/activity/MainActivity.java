@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText mRoomEditText;
     private ProgressDialog mProgressDialog;
+    private PermissionChecker mChecker;
 
     private String mUserName;
     private String mRoomName;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().registerSticky(this);
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mUserName = preferences.getString(Config.USER_NAME, "");
+        mChecker = new PermissionChecker(this);
         if ("".equals(mUserName)) {
             Intent intent = new Intent(this, UserConfigActivity.class);
             startActivityForResult(intent, USERNAME_REQUEST_CODE);
@@ -85,6 +87,12 @@ public class MainActivity extends AppCompatActivity {
                 QNScreenVideoTrack.checkActivityResult(requestCode, resultCode, data)) {
             startConference(mRoomName);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] state) {
+        super.onRequestPermissionsResult(requestCode, permissions, state);
+        mChecker.onRequestPermissionsResult(requestCode, permissions, state);
     }
 
     public void onEvent(ProgressEvent progressEvent) {
@@ -254,11 +262,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isPermissionOK() {
-        PermissionChecker checker = new PermissionChecker(this);
-        boolean isPermissionOK = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || checker.checkPermission();
-        if (!isPermissionOK) {
-            ToastUtils.showLongToast(this, "Some permissions is not approved !!!");
-        }
+        boolean isPermissionOK = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || mChecker.checkPermission();
         return isPermissionOK;
     }
 
