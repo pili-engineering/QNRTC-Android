@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +45,7 @@ import com.qiniu.droid.rtc.QNClientEventListener;
 import com.qiniu.droid.rtc.QNConnectionDisconnectedInfo;
 import com.qiniu.droid.rtc.QNConnectionState;
 import com.qiniu.droid.rtc.QNCustomMessage;
+import com.qiniu.droid.rtc.QNDegradationPreference;
 import com.qiniu.droid.rtc.QNDirectLiveStreamingConfig;
 import com.qiniu.droid.rtc.QNErrorCode;
 import com.qiniu.droid.rtc.QNLiveStreamingErrorInfo;
@@ -180,7 +183,7 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
      * 单路转推相关
      * 注意：
      * 1. 单路转推仅支持配置一路音频和一路视频
-     * 2. 单路转推场景需要在初始化的时候保证配置了 "固定分辨率"{@link QNRTCSetting#setMaintainResolution(boolean)} 选项的开启，否则会出问题！！！
+     * 2. 单路转推场景需要在初始化的时候保证配置了 "固定分辨率"{@link QNDegradationPreference#MAINTAIN_RESOLUTION} 选项的开启，否则会出问题！！！
      * demo 中默认 userId 为 "admin" 的用户可以开启单路转推功能
      */
     private QNDirectLiveStreamingConfig mCurrentDirectConfig;
@@ -404,11 +407,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
     private void initClient() {
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.SW) == Config.HW;
-        /**
-         * 默认情况下，网络波动时 SDK 内部会降低帧率或者分辨率来保证带宽变化下的视频质量；
-         * 如果打开分辨率保持开关，则只会调整帧率来适应网络波动。
-         */
-        boolean isMaintainRes = preferences.getBoolean(Config.MAINTAIN_RES, false);
 
         /**
          * 如果您的使用场景需要双讲，建议 QNRTCSetting#setAEC3Enabled 为 true 以防止出现对讲回声
@@ -430,7 +428,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
 
         QNRTCSetting setting = new QNRTCSetting();
         setting.setHWCodecEnabled(isHwCodec)
-                .setMaintainResolution(isMaintainRes)
                 .setAEC3Enabled(isAec3Enabled)
                 .setAudioScene(audioScene);
         QNRTC.init(this, setting, mRTCEventListener);
@@ -452,13 +449,16 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
 
         mLocalTrackList.add(mMicrophoneTrack);
 
+        SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        int videoDegradation = preferences.getInt(Config.VIDEO_DEGRADATION_POS, Config.DEFAULT_VIDEO_DEGRADATION_POS);
         switch (mCaptureMode) {
             case Config.CAMERA_CAPTURE:
                 // 创建 Camera 采集的视频 Track
                 QNCameraVideoTrackConfig cameraVideoTrackConfig = new QNCameraVideoTrackConfig(TRACK_TAG_CAMERA)
                         .setCameraFacing(QNCameraFacing.FRONT)
                         .setVideoCaptureConfig(new QNVideoCaptureConfig(mVideoWidth, mVideoHeight, mVideoFps))
-                        .setVideoEncoderConfig(new QNVideoEncoderConfig(mVideoWidth, mVideoHeight, mVideoFps, mVideoBitrate));
+                        .setVideoEncoderConfig(new QNVideoEncoderConfig(mVideoWidth, mVideoHeight, mVideoFps, mVideoBitrate,
+                                Config.VIDEO_DEGRADATION_PRESET[videoDegradation]));
                 mCameraTrack = QNRTC.createCameraVideoTrack(cameraVideoTrackConfig);
                 mCameraTrack.setCameraEventListener(mCameraEventListener);
                 mLocalTrackList.add(mCameraTrack);
@@ -477,7 +477,8 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
                 QNCameraVideoTrackConfig videoTrackConfig = new QNCameraVideoTrackConfig(TRACK_TAG_CAMERA)
                         .setCameraFacing(QNCameraFacing.FRONT)
                         .setVideoCaptureConfig(new QNVideoCaptureConfig(mVideoWidth, mVideoHeight, mVideoFps))
-                        .setVideoEncoderConfig(new QNVideoEncoderConfig(mVideoWidth, mVideoHeight, mVideoFps, mVideoBitrate));
+                        .setVideoEncoderConfig(new QNVideoEncoderConfig(mVideoWidth, mVideoHeight, mVideoFps, mVideoBitrate,
+                                Config.VIDEO_DEGRADATION_PRESET[videoDegradation]));
                 mCameraTrack = QNRTC.createCameraVideoTrack(videoTrackConfig);
                 mCameraTrack.setCameraEventListener(mCameraEventListener);
                 mLocalTrackList.add(mCameraTrack);
@@ -487,12 +488,25 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
         }
     }
 
+    // 录屏时建议分辨率和屏幕分辨率比例保存一致，避免录屏画面有黑边或者不清晰
+    private QNVideoEncoderConfig createScreenEncoderConfig() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        int videoDegradation = preferences.getInt(Config.VIDEO_DEGRADATION_POS, Config.DEFAULT_VIDEO_DEGRADATION_POS);
+        int width = (int) (size.x * Config.DEFAULT_SCREEN_VIDEO_TRACK_SIZE_SCALE);
+        int height = (int) (size.y * Config.DEFAULT_SCREEN_VIDEO_TRACK_SIZE_SCALE);
+        int bitrate = (int) (width * height * 1.0f / Config.DEFAULT_RESOLUTION[1][0] /
+                Config.DEFAULT_RESOLUTION[1][1] * Config.DEFAULT_BITRATE[1]);
+        return new QNVideoEncoderConfig(width, height,  Config.DEFAULT_FPS[0], bitrate, Config.VIDEO_DEGRADATION_PRESET[videoDegradation]);
+    }
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             QNScreenVideoTrackConfig screenVideoTrackConfig = new QNScreenVideoTrackConfig(TRACK_TAG_SCREEN)
-                    .setVideoEncoderConfig(new QNVideoEncoderConfig(mVideoWidth, mVideoHeight, mVideoFps, mVideoBitrate));
+                    .setVideoEncoderConfig(createScreenEncoderConfig());
             mLocalScreenTrack = QNRTC.createScreenVideoTrack(screenVideoTrackConfig);
             mLocalTrackList.add(mLocalScreenTrack);
             if (mClient != null && (mClient.getConnectionState() == QNConnectionState.CONNECTED
@@ -515,14 +529,8 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
             bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
             Log.i(TAG, "start service for Q");
         } else {
-            SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-            int videoWidth = preferences.getInt(Config.WIDTH, DEFAULT_RESOLUTION[1][0]);
-            int videoHeight = preferences.getInt(Config.HEIGHT, DEFAULT_RESOLUTION[1][1]);
-            int fps = preferences.getInt(Config.FPS, DEFAULT_FPS[1]);
-            int bitrate = preferences.getInt(Config.BITRATE, Config.DEFAULT_BITRATE[1]);
-
             QNScreenVideoTrackConfig screenVideoTrackConfig = new QNScreenVideoTrackConfig(TRACK_TAG_SCREEN)
-                    .setVideoEncoderConfig(new QNVideoEncoderConfig(videoWidth, videoHeight, fps, bitrate));
+                    .setVideoEncoderConfig(createScreenEncoderConfig());
             mLocalScreenTrack = QNRTC.createScreenVideoTrack(screenVideoTrackConfig);
             mLocalTrackList.add(mLocalScreenTrack);
         }
@@ -1269,7 +1277,8 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
          */
         @Override
         public void onStarted(String streamID) {
-            if (mCurrentMergeConfig != null && mCurrentMergeConfig.getStreamID().equals(streamID)) {
+            if (mCurrentMergeConfig != null && mCurrentMergeConfig.getStreamID() != null &&
+                mCurrentMergeConfig.getStreamID().equals(streamID)) {
                 updateSerialNum();
                 ToastUtils.showShortToast(RoomActivity.this, "合流转推 " + streamID + " 创建成功！");
                 setMergeStreamLayouts();

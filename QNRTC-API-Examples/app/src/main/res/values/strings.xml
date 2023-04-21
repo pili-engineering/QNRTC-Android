@@ -19,7 +19,7 @@
     <string name="multi_profile_scene">大小流</string>
     <string name="media_statistics_scene">通话质量统计</string>
     <string name="media_relay_scene">跨房媒体转发</string>
-    <string name="app_info">用户名：%1$s\n房间号：%2$s\nSDK 版本：%3$s\n编译时间：%4$s</string>
+    <string name="app_info">appID：%1$s\n用户名：%2$s\n房间号：%3$s\nSDK 版本：%4$s\n编译时间：%5$s</string>
     <string name="invalid_token_toast">非法 token</string>
     <string name="beauty_on">美颜开关</string>
     <string name="beauty_strength">美颜强度</string>

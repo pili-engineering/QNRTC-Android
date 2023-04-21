@@ -4,11 +4,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -17,6 +19,7 @@ import com.qiniu.droid.rtc.QNClientEventListener;
 import com.qiniu.droid.rtc.QNConnectionDisconnectedInfo;
 import com.qiniu.droid.rtc.QNConnectionState;
 import com.qiniu.droid.rtc.QNCustomMessage;
+import com.qiniu.droid.rtc.QNDegradationPreference;
 import com.qiniu.droid.rtc.QNMediaRelayState;
 import com.qiniu.droid.rtc.QNMicrophoneAudioTrack;
 import com.qiniu.droid.rtc.QNMicrophoneAudioTrackConfig;
@@ -94,7 +97,6 @@ public class ScreenCaptureActivity extends AppCompatActivity {
         }
         // 3. 初始化 RTC
         QNRTCSetting setting = new QNRTCSetting()
-                .setMaintainResolution(true)  // 设置开启固定分辨率
                 .setHWCodecEnabled(false);  // 为保证编码质量，开启软编
         QNRTC.init(this, setting, mRTCEventListener);
         // 4. 创建 QNRTCClient 对象
@@ -185,6 +187,18 @@ public class ScreenCaptureActivity extends AppCompatActivity {
         }
     }
 
+    // 录屏时建议分辨率和屏幕分辨率比例保存一致，避免录屏画面有黑边或者不清晰
+    private QNVideoEncoderConfig createEncoderConfig() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = (int) (size.x * Config.DEFAULT_SCREEN_VIDEO_TRACK_SIZE_SCALE);
+        int height = (int) (size.y * Config.DEFAULT_SCREEN_VIDEO_TRACK_SIZE_SCALE);
+        int bitrate = (int) (width * height * 1.0f / Config.DEFAULT_WIDTH / Config.DEFAULT_HEIGHT * Config.DEFAULT_VIDEO_BITRATE);
+        return new QNVideoEncoderConfig(width, height, Config.DEFAULT_FPS, bitrate,
+                QNDegradationPreference.MAINTAIN_RESOLUTION); // 设置开启固定分辨率
+    }
+
     // 处理 Build.VERSION_CODES.Q 及以上的兼容问题
     private void createScreenTrack() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -196,9 +210,7 @@ public class ScreenCaptureActivity extends AppCompatActivity {
             // 创建屏幕录制采集 Track
             // 编码分辨率约贴近屏幕分辨率，码率越大，画面越清晰，但是考虑到编码性能，需根据您的场景选择特定的编码分辨率
             QNScreenVideoTrackConfig screenVideoTrackConfig = new QNScreenVideoTrackConfig(Config.TAG_SCREEN_TRACK)
-                    .setVideoEncoderConfig(new QNVideoEncoderConfig(
-                            Config.DEFAULT_SCREEN_VIDEO_TRACK_WIDTH, Config.DEFAULT_SCREEN_VIDEO_TRACK_HEIGHT,
-                            Config.DEFAULT_FPS, Config.DEFAULT_SCREEN_VIDEO_TRACK_BITRATE));
+                    .setVideoEncoderConfig(createEncoderConfig());
             mScreenVideoTrack = QNRTC.createScreenVideoTrack(screenVideoTrackConfig);
         }
     }
@@ -364,10 +376,9 @@ public class ScreenCaptureActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             // 创建屏幕录制采集 Track
             // 编码分辨率约贴近屏幕分辨率，码率越大，画面越清晰，但是考虑到编码性能，需根据您的场景选择特定的编码分辨率
+
             QNScreenVideoTrackConfig screenVideoTrackConfig = new QNScreenVideoTrackConfig(Config.TAG_SCREEN_TRACK)
-                    .setVideoEncoderConfig(new QNVideoEncoderConfig(
-                            Config.DEFAULT_SCREEN_VIDEO_TRACK_WIDTH, Config.DEFAULT_SCREEN_VIDEO_TRACK_HEIGHT,
-                            Config.DEFAULT_FPS, Config.DEFAULT_SCREEN_VIDEO_TRACK_BITRATE));
+                    .setVideoEncoderConfig(createEncoderConfig());
             mScreenVideoTrack = QNRTC.createScreenVideoTrack(screenVideoTrackConfig);
 
             // 7. 加入房间，Android Q 之后屏幕录制需要 foreground service，因此可等待 service 回调后再加入房间
