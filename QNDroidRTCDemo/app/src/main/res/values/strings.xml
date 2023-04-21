@@ -43,6 +43,7 @@
     <string name="capture_tips">屏幕采集要求 Android 5.0+ 以及硬编</string>
     <string name="join_live">观看直播</string>
     <string name="live_tips">只有 admin 才有合流权限</string>
+    <string name="upload_result">%1$s 上传%2$s</string>
 
     <string name="streaming_enable">开启合流转推</string>
     <string name="custom_mergejob">自定义合流任务</string>

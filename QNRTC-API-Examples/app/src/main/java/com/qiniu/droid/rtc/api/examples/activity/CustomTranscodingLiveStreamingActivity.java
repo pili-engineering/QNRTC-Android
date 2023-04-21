@@ -1,14 +1,19 @@
 package com.qiniu.droid.rtc.api.examples.activity;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
 import com.qiniu.droid.rtc.QNBeautySetting;
+import com.qiniu.droid.rtc.QNCameraEventListener;
 import com.qiniu.droid.rtc.QNCameraFacing;
 import com.qiniu.droid.rtc.QNCameraVideoTrack;
 import com.qiniu.droid.rtc.QNCameraVideoTrackConfig;
@@ -40,8 +45,11 @@ import com.qiniu.droid.rtc.api.examples.utils.Config;
 import com.qiniu.droid.rtc.api.examples.utils.ToastUtils;
 import com.qiniu.droid.rtc.api.examples.utils.Utils;
 import com.qiniu.droid.rtc.model.QNAudioDevice;
+import com.uuzuche.lib_zxing.activity.CaptureActivity;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import org.json.JSONObject;
+import org.webrtc.Size;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,6 +83,7 @@ import androidx.appcompat.widget.SwitchCompat;
  */
 public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
     private static final String TAG = "CustomTranscodingLiveStreamingActivity";
+    private static final int REQUEST_CODE_SCAN_PUBLISH_URL = 1000;
 
     private QNRTCClient mClient;
     private QNSurfaceView mLocalRenderView;
@@ -108,6 +117,8 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
     private boolean mIsLocalPublished;
     private volatile LiveStreamingState mCurrentStreamingState = LiveStreamingState.IDLE;
     private boolean mMicrophoneError;
+
+    private boolean mNeedScannerStart;
 
     private enum LiveStreamingState {
         IDLE,
@@ -184,6 +195,34 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
         destroyLocalTracks();
         // 13. 反初始化 RTC 释放资源
         QNRTC.deinit();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_SCAN_PUBLISH_URL) {
+            //处理扫描结果（在界面上显示）
+            if (null != data) {
+                Bundle bundle = data.getExtras();
+                if (bundle == null) {
+                    return;
+                }
+                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
+                    Config.PUBLISH_URL = bundle.getString(CodeUtils.RESULT_STRING);
+                    mPublishUrlEditText.setText(Config.PUBLISH_URL);
+                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
+                    Toast.makeText(CustomTranscodingLiveStreamingActivity.this,
+                            "解析二维码失败", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    public void onClickScanQRCode(View view) {
+        if (mCameraVideoTrack != null) {
+            mNeedScannerStart = true;
+            mCameraVideoTrack.stopCapture();
+        }
     }
 
     /**
@@ -410,6 +449,36 @@ public class CustomTranscodingLiveStreamingActivity extends AppCompatActivity {
         mCameraVideoTrack.play(mLocalRenderView);
         // 初始化并配置美颜
         mCameraVideoTrack.setBeauty(new QNBeautySetting(0.5f, 0.5f, 0.5f));
+        mCameraVideoTrack.setCameraEventListener(new QNCameraEventListener() {
+            @SuppressLint("LongLogTag")
+            @Override
+            public int[] onCameraOpened(List<Size> list, List<Integer> list1) {
+                return new int[]{-1, -1};
+            }
+
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onCaptureStarted() {
+                Log.i(TAG, "onCaptureStarted");
+            }
+
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onCaptureStopped() {
+                Log.i(TAG, "onCaptureStopped");
+                if (mNeedScannerStart) {
+                    mNeedScannerStart = false;
+                    Intent intent = new Intent(CustomTranscodingLiveStreamingActivity.this, CaptureActivity.class);
+                    startActivityForResult(intent, REQUEST_CODE_SCAN_PUBLISH_URL);
+                }
+            }
+
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onError(int i, String s) {
+                Log.i(TAG, "onError [" + i + ", " + s + "]");
+            }
+        });
 
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)

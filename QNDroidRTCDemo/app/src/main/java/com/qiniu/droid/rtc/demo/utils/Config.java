@@ -1,5 +1,7 @@
 package com.qiniu.droid.rtc.demo.utils;
 
+import com.qiniu.droid.rtc.QNDegradationPreference;
+
 public class Config {
     public static final String ROOM_NAME_RULE = "^[a-zA-Z0-9_-]{3,64}$";
     public static final String USER_NAME_RULE = "^[a-zA-Z0-9_-]{3,50}$";
@@ -12,7 +14,8 @@ public class Config {
     public static final String PILI_ROOM = "test";
     public static final String ROOM_NAME = "roomName";
     public static final String USER_NAME = "userName";
-    public static final String CONFIG_POS = "configPos";
+    public static final String VIDEO_CONFIG_POS = "videoConfigPos";
+    public static final String VIDEO_DEGRADATION_POS = "videoDegradationPos";
     public static final String WIDTH = "width";
     public static final String HEIGHT = "height";
     public static final String FPS = "fps";
@@ -21,7 +24,6 @@ public class Config {
     public static final String AUDIO_SCENE = "audioScene";
     public static final String CAPTURE_MODE = "captureMode";
     public static final String BITRATE = "bitrate";
-    public static final String MAINTAIN_RES = "maintainRes";
     public static final String AEC3_ENABLE = "aec3Enable";
 
     public static final int HW = 0;
@@ -35,6 +37,22 @@ public class Config {
     public static final int SCREEN_CAPTURE = 1;
     public static final int ONLY_AUDIO_CAPTURE = 2;
     public static final int MUTI_TRACK_CAPTURE = 3;
+    public static final float DEFAULT_SCREEN_VIDEO_TRACK_SIZE_SCALE = 0.5f;
+    public static final int DEFAULT_VIDEO_DEGRADATION_POS = 0;
+
+    public static final QNDegradationPreference[] VIDEO_DEGRADATION_PRESET = {
+            QNDegradationPreference.MAINTAIN_FRAMERATE,
+            QNDegradationPreference.MAINTAIN_RESOLUTION,
+            QNDegradationPreference.BALANCED,
+            QNDegradationPreference.ADAPT_BITRATE_ONLY,
+    };
+
+    public static final String[] VIDEO_DEGRADATION_TIPS = {
+            "保持帧率, 降低分辨率和适当的码率",
+            "保持分辨率, 降低帧率和适当的码率",
+            "平衡模式, 降低帧率，分辨率和适当的码率",
+            "控制码率, 保持帧率和分辨率"
+    };
 
     /**
      * 视频的分辨率，码率和帧率设置会影响到连麦质量；更高的分辨率和帧率也就意味着需要更大的码率和更好的网络环境。

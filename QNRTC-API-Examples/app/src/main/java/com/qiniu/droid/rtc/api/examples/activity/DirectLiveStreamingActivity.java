@@ -1,14 +1,17 @@
 package com.qiniu.droid.rtc.api.examples.activity;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
 import com.qiniu.droid.rtc.QNBeautySetting;
+import com.qiniu.droid.rtc.QNCameraEventListener;
 import com.qiniu.droid.rtc.QNCameraFacing;
 import com.qiniu.droid.rtc.QNCameraVideoTrack;
 import com.qiniu.droid.rtc.QNCameraVideoTrackConfig;
@@ -16,6 +19,7 @@ import com.qiniu.droid.rtc.QNClientEventListener;
 import com.qiniu.droid.rtc.QNConnectionDisconnectedInfo;
 import com.qiniu.droid.rtc.QNConnectionState;
 import com.qiniu.droid.rtc.QNCustomMessage;
+import com.qiniu.droid.rtc.QNDegradationPreference;
 import com.qiniu.droid.rtc.QNDirectLiveStreamingConfig;
 import com.qiniu.droid.rtc.QNLiveStreamingErrorInfo;
 import com.qiniu.droid.rtc.QNLiveStreamingListener;
@@ -38,8 +42,11 @@ import com.qiniu.droid.rtc.api.examples.utils.Config;
 import com.qiniu.droid.rtc.api.examples.utils.ToastUtils;
 import com.qiniu.droid.rtc.api.examples.utils.Utils;
 import com.qiniu.droid.rtc.model.QNAudioDevice;
+import com.uuzuche.lib_zxing.activity.CaptureActivity;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import org.json.JSONObject;
+import org.webrtc.Size;
 
 import java.util.List;
 
@@ -67,6 +74,7 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 public class DirectLiveStreamingActivity extends AppCompatActivity {
     private static final String TAG = "DirectLiveStreamingActivity";
+    private static final int REQUEST_CODE_SCAN_PUBLISH_URL = 1000;
     private QNRTCClient mClient;
     private QNSurfaceView mLocalRenderView;
     private QNSurfaceView mRemoteRenderView;
@@ -82,6 +90,8 @@ public class DirectLiveStreamingActivity extends AppCompatActivity {
     private boolean mIsLocalPublished;
     private boolean mMicrophoneError;
 
+    private boolean mNeedScannerStart;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,9 +105,7 @@ public class DirectLiveStreamingActivity extends AppCompatActivity {
         // 1. 初始化视图
         initView();
         // 2. 初始化 RTC
-        QNRTCSetting setting = new QNRTCSetting()
-                .setMaintainResolution(true); // 开启固定分辨率，以避免单路转推场景下，动态分辨率造成的非预期问题
-        QNRTC.init(this, setting, mRTCEventListener);
+        QNRTC.init(this, new QNRTCSetting(), mRTCEventListener);
         // 3. 创建 QNRTCClient 对象
         mClient = QNRTC.createClient(mClientEventListener);
         // 本示例仅针对 1v1 连麦场景，因此，关闭自动订阅选项。关于自动订阅的配置，可参考 https://developer.qiniu.com/rtc/8769/publish-and-subscribe-android#3
@@ -155,6 +163,34 @@ public class DirectLiveStreamingActivity extends AppCompatActivity {
         QNRTC.deinit();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_SCAN_PUBLISH_URL) {
+            //处理扫描结果（在界面上显示）
+            if (null != data) {
+                Bundle bundle = data.getExtras();
+                if (bundle == null) {
+                    return;
+                }
+                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
+                    Config.PUBLISH_URL = bundle.getString(CodeUtils.RESULT_STRING);
+                    mPublishUrlEditText.setText(Config.PUBLISH_URL);
+                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
+                    Toast.makeText(DirectLiveStreamingActivity.this,
+                            "解析二维码失败", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    public void onClickScanQRCode(View view) {
+        if (mCameraVideoTrack != null) {
+            mNeedScannerStart = true;
+            mCameraVideoTrack.stopCapture();
+        }
+    }
+
     public void onClickStartLiveStreaming(View view) {
         if ("".equals(mPublishUrlEditText.getText().toString()) || !mPublishUrlEditText.getText().toString().startsWith("rtmp")) {
             ToastUtils.showShortToast(this, getString(R.string.invalid_publish_url_toast));
@@ -207,11 +243,14 @@ public class DirectLiveStreamingActivity extends AppCompatActivity {
      * 2. 通过 QNMicrophoneAudioTrackConfig 对象创建麦克风采集 Track，若使用无参的方法创建则会使用 SDK 默认配置参数（16kHz, 单声道, 24kbps）
      */
     private void initLocalTracks() {
+
         // 创建摄像头采集 Track
         QNCameraVideoTrackConfig cameraVideoTrackConfig = new QNCameraVideoTrackConfig(Config.TAG_CAMERA_TRACK)
                 .setVideoCaptureConfig(QNVideoCaptureConfigPreset.CAPTURE_1280x720) // 设置采集参数
+                // 开启固定分辨率，以避免单路转推场景下，动态分辨率造成的非预期问题
                 .setVideoEncoderConfig(new QNVideoEncoderConfig(
-                        Config.DEFAULT_WIDTH, Config.DEFAULT_HEIGHT, Config.DEFAULT_FPS, Config.DEFAULT_VIDEO_BITRATE)) // 设置编码参数
+                        Config.DEFAULT_WIDTH, Config.DEFAULT_HEIGHT, Config.DEFAULT_FPS, Config.DEFAULT_VIDEO_BITRATE,
+                        QNDegradationPreference.MAINTAIN_RESOLUTION)) // 设置编码参数
                 .setCameraFacing(QNCameraFacing.FRONT) // 设置摄像头方向
                 .setMultiProfileEnabled(false); // 设置是否开启大小流
         mCameraVideoTrack = QNRTC.createCameraVideoTrack(cameraVideoTrackConfig);
@@ -219,6 +258,36 @@ public class DirectLiveStreamingActivity extends AppCompatActivity {
         mCameraVideoTrack.play(mLocalRenderView);
         // 初始化并配置美颜
         mCameraVideoTrack.setBeauty(new QNBeautySetting(0.5f, 0.5f, 0.5f));
+        mCameraVideoTrack.setCameraEventListener(new QNCameraEventListener() {
+            @SuppressLint("LongLogTag")
+            @Override
+            public int[] onCameraOpened(List<Size> list, List<Integer> list1) {
+                return new int[]{-1, -1};
+            }
+
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onCaptureStarted() {
+                Log.i(TAG, "onCaptureStarted");
+            }
+
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onCaptureStopped() {
+                Log.i(TAG, "onCaptureStopped");
+                if (mNeedScannerStart) {
+                    mNeedScannerStart = false;
+                    Intent intent = new Intent(DirectLiveStreamingActivity.this, CaptureActivity.class);
+                    startActivityForResult(intent, REQUEST_CODE_SCAN_PUBLISH_URL);
+                }
+            }
+
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onError(int i, String s) {
+                Log.i(TAG, "onError [" + i + ", " + s + "]");
+            }
+        });
 
         // 创建麦克风采集 Track
         QNMicrophoneAudioTrackConfig microphoneAudioTrackConfig = new QNMicrophoneAudioTrackConfig(Config.TAG_MICROPHONE_TRACK)

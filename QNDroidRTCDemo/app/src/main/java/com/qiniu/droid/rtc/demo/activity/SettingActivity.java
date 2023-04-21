@@ -20,7 +20,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.qiniu.droid.rtc.QNFileLogHelper;
+import com.qiniu.droid.rtc.QNRTC;
 import com.qiniu.droid.rtc.demo.BuildConfig;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.ui.SpinnerPopupWindow;
@@ -37,20 +37,23 @@ import java.util.Locale;
 public class SettingActivity extends AppCompatActivity {
 
     private EditText mUserNameEditText;
-    private TextView mConfigTextView;
+    private TextView mVideoConfigTextView;
+    private TextView mVideoDegradationTextView;
     private TextView mUploadTextView;
     private EditText mAppIdEditText;
 
-    private int mSelectPos = 0;
+    private int mVideoConfigSelectPos = 0;
+    private int mVideoDegradationSelectPos = 0;
     private String mUserName;
     private int mEncodeMode = 0;
     private int mSampleRatePos = 0;
     private int mAudioScenePos = 0;
-    private boolean mMaintainResolution = false;
     private boolean mIsAec3Enabled = false;
-    private final List<String> mDefaultConfiguration = new ArrayList<>();
-    private ArrayAdapter<String> mConfigAdapter;
-    private SpinnerPopupWindow mConfigPopupWindow;
+    private final List<String> mVideoDefaultConfiguration = new ArrayList<>();
+    private ArrayAdapter<String> mVideoConfigAdapter;
+    private SpinnerPopupWindow mVideoConfigPopupWindow;
+    private ArrayAdapter<String> mVideoDegradationAdapter;
+    private SpinnerPopupWindow mVideoDegradationPopupWindow;
     private List<String> mLogFileNames;
     private SpinnerPopupWindow mLogFilePopupWindow;
 
@@ -63,7 +66,8 @@ public class SettingActivity extends AppCompatActivity {
         }
 
         mUserNameEditText = findViewById(R.id.user_name_edit_text);
-        mConfigTextView = findViewById(R.id.config_text_view);
+        mVideoConfigTextView = findViewById(R.id.video_config_tv);
+        mVideoDegradationTextView = findViewById(R.id.video_degradation_tv);
         TextView versionCodeTextView = findViewById(R.id.version_code);
         mUploadTextView = findViewById(R.id.report_log);
         RadioGroup codecModeRadioGroup = findViewById(R.id.codec_mode_button);
@@ -79,11 +83,6 @@ public class SettingActivity extends AppCompatActivity {
         RadioButton defaultAudioSceneBtn = findViewById(R.id.default_audio_scene);
         RadioButton voiceChatAudioSceneBtn = findViewById(R.id.voice_chat_audio_scene);
         RadioButton soundEqualizeAudioSceneBtn = findViewById(R.id.sound_equalize_audio_scene);
-
-        RadioGroup maintainResRadioGroup = findViewById(R.id.maintain_resolution_button);
-        maintainResRadioGroup.setOnCheckedChangeListener(mOnMaintainResCheckedChangeListener);
-        RadioButton maintainResolutionYes = findViewById(R.id.maintain_res_button_yes);
-        RadioButton maintainResolutionNo = findViewById(R.id.maintain_res_button_no);
 
         mAppIdEditText = findViewById(R.id.app_id_edit_text);
         SwitchCompat aec3Switch = findViewById(R.id.webrtc_aec3_enable_btn);
@@ -105,10 +104,13 @@ public class SettingActivity extends AppCompatActivity {
         testModeLayout.setVisibility(isTestMode() ? View.VISIBLE : View.GONE);
 
         String[] configurations = getResources().getStringArray(R.array.conference_configuration);
-        mDefaultConfiguration.addAll(Arrays.asList(configurations));
+        mVideoDefaultConfiguration.addAll(Arrays.asList(configurations));
 
-        mSelectPos = preferences.getInt(Config.CONFIG_POS, 1);
-        mConfigTextView.setText(mDefaultConfiguration.get(mSelectPos));
+        mVideoConfigSelectPos = preferences.getInt(Config.VIDEO_CONFIG_POS, 1);
+        mVideoConfigTextView.setText(mVideoDefaultConfiguration.get(mVideoConfigSelectPos));
+
+        mVideoDegradationSelectPos = preferences.getInt(Config.VIDEO_DEGRADATION_POS, Config.DEFAULT_VIDEO_DEGRADATION_POS);
+        mVideoDegradationTextView.setText(Config.VIDEO_DEGRADATION_TIPS[mVideoDegradationSelectPos]);
 
         int codecMode = preferences.getInt(Config.CODEC_MODE, Config.SW);
         if (codecMode == Config.HW) {
@@ -133,32 +135,53 @@ public class SettingActivity extends AppCompatActivity {
             soundEqualizeAudioSceneBtn.setChecked(true);
         }
 
-        mMaintainResolution = preferences.getBoolean(Config.MAINTAIN_RES, false);
-        if (mMaintainResolution) {
-            maintainResolutionYes.setChecked(true);
-        } else {
-            maintainResolutionNo.setChecked(true);
-        }
-
         mIsAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, true);
         aec3Switch.setChecked(mIsAec3Enabled);
 
-        mConfigPopupWindow = new SpinnerPopupWindow(this);
-        mConfigPopupWindow.setOnSpinnerItemClickListener(mOnSpinnerItemClickListener);
+        mVideoConfigPopupWindow = new SpinnerPopupWindow(this);
+        mVideoConfigPopupWindow.setOnSpinnerItemClickListener(pos -> {
+            mVideoConfigSelectPos = pos;
+            mVideoConfigTextView.setText(mVideoDefaultConfiguration.get(mVideoConfigSelectPos));
+            mVideoConfigPopupWindow.dismiss();
+        });
 
-        mConfigAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, mDefaultConfiguration);
+        mVideoConfigAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, mVideoDefaultConfiguration);
+
+        mVideoDegradationPopupWindow = new SpinnerPopupWindow(this);
+        mVideoDegradationPopupWindow.setOnSpinnerItemClickListener(pos -> {
+            mVideoDegradationSelectPos = pos;
+            mVideoDegradationTextView.setText(Config.VIDEO_DEGRADATION_TIPS[mVideoDegradationSelectPos]);
+            mVideoDegradationPopupWindow.dismiss();
+        });
+
+        mVideoDegradationAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, Config.VIDEO_DEGRADATION_TIPS);
     }
 
     public void onClickBack(View v) {
         finish();
     }
 
-    public void onClickConfigParams(View v) {
-        showConfigPopupWindow();
+    public void onClickVideoConfig(View v) {
+        mVideoConfigPopupWindow.setAdapter(mVideoConfigAdapter);
+        mVideoConfigPopupWindow.setWidth(mVideoConfigTextView.getWidth());
+        mVideoConfigPopupWindow.showAsDropDown(mVideoConfigTextView);
+    }
+
+    public void onClickVideoDegradation(View v) {
+        mVideoDegradationPopupWindow.setAdapter(mVideoDegradationAdapter);
+        mVideoDegradationPopupWindow.setWidth(mVideoDegradationTextView.getWidth());
+        mVideoDegradationPopupWindow.showAsDropDown(mVideoDegradationTextView);
     }
 
     public void onClickUploadLog(View v) {
-        showLogFilePopupWindow();
+        QNRTC.init(this, null);
+        QNRTC.uploadLog((fileName, code, remaining) -> runOnUiThread(() -> {
+            String logName = fileName.substring(fileName.lastIndexOf('/') + 1);
+            ToastUtils.showShortToast(SettingActivity.this,
+                    String.format(getString(R.string.upload_result),
+                            logName, (code == 0 ? "成功" : ("失败：" + code))));
+        }));
+        QNRTC.deinit();
     }
 
     public void onClickSaveConfiguration(View v) {
@@ -179,17 +202,17 @@ public class SettingActivity extends AppCompatActivity {
 
         editor.putString(Config.APP_ID, TextUtils.isEmpty(appId) ? QNAppServer.APP_ID : appId);
 
-        editor.putInt(Config.CONFIG_POS, mSelectPos);
+        editor.putInt(Config.VIDEO_CONFIG_POS, mVideoConfigSelectPos);
+        editor.putInt(Config.VIDEO_DEGRADATION_POS, mVideoDegradationSelectPos);
         editor.putInt(Config.CODEC_MODE, mEncodeMode);
         editor.putInt(Config.SAMPLE_RATE, mSampleRatePos);
         editor.putInt(Config.AUDIO_SCENE, mAudioScenePos);
-        editor.putBoolean(Config.MAINTAIN_RES, mMaintainResolution);
         editor.putBoolean(Config.AEC3_ENABLE, mIsAec3Enabled);
 
-        editor.putInt(Config.WIDTH, Config.DEFAULT_RESOLUTION[mSelectPos][0]);
-        editor.putInt(Config.HEIGHT, Config.DEFAULT_RESOLUTION[mSelectPos][1]);
-        editor.putInt(Config.FPS, Config.DEFAULT_FPS[mSelectPos]);
-        editor.putInt(Config.BITRATE, Config.DEFAULT_BITRATE[mSelectPos]);
+        editor.putInt(Config.WIDTH, Config.DEFAULT_RESOLUTION[mVideoConfigSelectPos][0]);
+        editor.putInt(Config.HEIGHT, Config.DEFAULT_RESOLUTION[mVideoConfigSelectPos][1]);
+        editor.putInt(Config.FPS, Config.DEFAULT_FPS[mVideoConfigSelectPos]);
+        editor.putInt(Config.BITRATE, Config.DEFAULT_BITRATE[mVideoConfigSelectPos]);
 
         if (isTestMode()) {
             saveTestMode(editor);
@@ -226,46 +249,6 @@ public class SettingActivity extends AppCompatActivity {
         }
     }
 
-    private void showConfigPopupWindow() {
-        mConfigPopupWindow.setAdapter(mConfigAdapter);
-        mConfigPopupWindow.setWidth(mConfigTextView.getWidth());
-        mConfigPopupWindow.showAsDropDown(mConfigTextView);
-    }
-
-    private void showLogFilePopupWindow() {
-        if (mLogFilePopupWindow == null) {
-            mLogFilePopupWindow = new SpinnerPopupWindow(this);
-            mLogFilePopupWindow.setOnSpinnerItemClickListener(new SpinnerPopupWindow.OnSpinnerItemClickListener() {
-                @Override
-                public void onItemClick(int pos) {
-                    QNFileLogHelper.getInstance().reportLogFile(mLogFileNames.get(pos), new QNFileLogHelper.LogReportCallback() {
-                        @Override
-                        public void onReportSuccess(String name) {
-                            ToastUtils.showShortToast(SettingActivity.this, "上传成功：" + name);
-                        }
-
-                        @Override
-                        public void onReportError(String name, String errorMsg) {
-                            ToastUtils.showShortToast(SettingActivity.this, "上传失败：" + name + "；" + errorMsg);
-                        }
-                    });
-                    mLogFilePopupWindow.dismiss();
-                }
-            });
-        }
-        QNFileLogHelper.getInstance().init(this);
-        mLogFileNames = QNFileLogHelper.getInstance().getLogFiles();
-        if (mLogFileNames == null || mLogFileNames.size() == 0) {
-            ToastUtils.showShortToast(SettingActivity.this, "当前无可上报日志");
-            return;
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, mLogFileNames);
-        mLogFilePopupWindow.setAdapter(adapter);
-        mLogFilePopupWindow.setWidth(mAppIdEditText.getWidth());
-        mLogFilePopupWindow.showAsDropDown(mUploadTextView);
-    }
-
     private String getVersionDescription() {
         PackageManager packageManager = getPackageManager();
         try {
@@ -289,15 +272,6 @@ public class SettingActivity extends AppCompatActivity {
         return mAppIdEditText.getText().toString().compareTo(QNAppServer.TEST_MODE_APP_ID) == 0;
     }
 
-    private final SpinnerPopupWindow.OnSpinnerItemClickListener mOnSpinnerItemClickListener = new SpinnerPopupWindow.OnSpinnerItemClickListener() {
-        @Override
-        public void onItemClick(int pos) {
-            mSelectPos = pos;
-            mConfigTextView.setText(mDefaultConfiguration.get(mSelectPos));
-            mConfigPopupWindow.dismiss();
-        }
-    };
-
     private final RadioGroup.OnCheckedChangeListener mOnCheckedChangeListener = (group, checkedId) -> {
         switch (group.getCheckedRadioButtonId()) {
             case R.id.hw_radio_button:
@@ -320,19 +294,6 @@ public class SettingActivity extends AppCompatActivity {
                 break;
             case R.id.sound_equalize_audio_scene:
                 mAudioScenePos = Config.SOUND_EQUALIZE_AUDIO_SCENE;
-                break;
-            default:
-                break;
-        }
-    };
-
-    private final RadioGroup.OnCheckedChangeListener mOnMaintainResCheckedChangeListener = (group, checkedId) -> {
-        switch (group.getCheckedRadioButtonId()) {
-            case R.id.maintain_res_button_yes:
-                mMaintainResolution = true;
-                break;
-            case R.id.maintain_res_button_no:
-                mMaintainResolution = false;
                 break;
             default:
                 break;

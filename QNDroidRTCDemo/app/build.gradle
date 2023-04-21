@@ -6,8 +6,8 @@ android {
         applicationId "com.qiniu.droid.rtc.demo"
         minSdkVersion 18
         targetSdkVersion 30
-        versionCode 42
-        versionName "5.2.2"
+        versionCode 43
+        versionName "5.2.3"
         buildConfigField "long", "BUILD_TIMESTAMP", System.currentTimeMillis() + "L"
     }
 
