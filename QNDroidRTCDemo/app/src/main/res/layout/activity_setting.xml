@@ -260,22 +260,11 @@
                 android:textColorHint="@color/textColor"
                 android:textSize="15sp" />
 
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/webrtc_aec3_enable_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/app_id_edit_text"
-                android:layout_marginLeft="45dp"
-                android:layout_marginTop="16dp"
-                android:switchPadding="10dp"
-                android:text="启用 AEC3"
-                android:textColor="@color/textColor" />
-
             <LinearLayout
                 android:id="@+id/test_mode_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/webrtc_aec3_enable_btn"
+                android:layout_below="@id/app_id_edit_text"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginRight="30dp"

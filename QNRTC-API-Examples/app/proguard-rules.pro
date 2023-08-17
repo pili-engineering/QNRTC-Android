@@ -20,6 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class org.webrtc.** {*;}
+-keep class org.qnwebrtc.** {*;}
 -keep class com.qiniu.droid.rtc.**{*;}
 -keep interface com.qiniu.droid.rtc.**{*;}

@@ -22,7 +22,7 @@ import com.qiniu.droid.rtc.QNSurfaceView;
 import com.qiniu.droid.rtc.QNTrack;
 import com.qiniu.droid.rtc.demo.R;
 
-import org.webrtc.RendererCommon;
+import org.qnwebrtc.RendererCommon;
 
 import java.util.ArrayList;
 import java.util.List;

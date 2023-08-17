@@ -173,4 +173,5 @@
     <string name="media_relay_error_code">跨房媒体转发失败：%1$d, %2$s</string>
     <string name="media_relay_state_changed">房间 %1$s 媒体转发状态变更：%2$s</string>
     <string name="media_relay_tips">Tips：\n1. 跨房媒体转发功能仅支持直播场景(QNClientMode.LIVE)，且 QNClientRole 为主播(BROADCASTER)的场景下使用。\n2. 更新跨房媒体转发(updateMediaRelay)功能为全量配置接口，使用时需注意调用姿势</string>
+    <string name="toast_rtc_already_init">RTC 未释放完成，请稍候重试！</string>
 </resources>
