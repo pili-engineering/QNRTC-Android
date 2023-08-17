@@ -24,7 +24,6 @@ public class Config {
     public static final String AUDIO_SCENE = "audioScene";
     public static final String CAPTURE_MODE = "captureMode";
     public static final String BITRATE = "bitrate";
-    public static final String AEC3_ENABLE = "aec3Enable";
 
     public static final int HW = 0;
     public static final int SW = 1;

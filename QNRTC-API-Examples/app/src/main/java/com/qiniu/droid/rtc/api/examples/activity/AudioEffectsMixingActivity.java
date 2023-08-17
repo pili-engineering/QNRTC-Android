@@ -32,6 +32,7 @@ import com.qiniu.droid.rtc.QNRTCEventListener;
 import com.qiniu.droid.rtc.QNRemoteAudioTrack;
 import com.qiniu.droid.rtc.QNRemoteTrack;
 import com.qiniu.droid.rtc.QNRemoteVideoTrack;
+import com.qiniu.droid.rtc.api.examples.APIApplication;
 import com.qiniu.droid.rtc.api.examples.R;
 import com.qiniu.droid.rtc.api.examples.adapter.AudioEffectAdapter;
 import com.qiniu.droid.rtc.api.examples.model.AudioEffect;
@@ -110,6 +111,7 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
         mSubThreadHandler.post(() -> checkAudioEffectFiles(getApplicationContext()));
         // 2. 初始化 RTC
         QNRTC.init(this, mRTCEventListener);
+        APIApplication.mRTCInit = true;
         // 3. 创建 QNRTCClient 对象
         mClient = QNRTC.createClient(mClientEventListener);
         // 本示例仅针对 1v1 连麦场景，因此，关闭自动订阅选项。关于自动订阅的配置，可参考 https://developer.qiniu.com/rtc/8769/publish-and-subscribe-android#3
@@ -156,8 +158,11 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
             mMicrophoneAudioTrack.destroy();
             mMicrophoneAudioTrack = null;
         }
-        // 10. 反初始化 RTC 释放资源
-        QNRTC.deinit();
+        if (APIApplication.mRTCInit) {
+            // 10. 反初始化 RTC 释放资源
+            QNRTC.deinit();
+            APIApplication.mRTCInit = false;
+        }
     }
 
     /**
@@ -297,9 +302,14 @@ public class AudioEffectsMixingActivity extends AppCompatActivity {
             // 创建音效混音控制器，仅需创建一次即可
             mAudioEffectMixer = mMicrophoneAudioTrack.createAudioEffectMixer(new QNAudioEffectMixerListener() {
                 @Override
-                public void onFinished(int effectID) {
+                public void onEffectFinished(int effectID) {
                     ToastUtils.showShortToast(getApplicationContext(), "音效混音完成 : " + effectID);
                     audioEffectAdapter.audioEffectMixFinished(effectID);
+                }
+
+                @Override
+                public void onEffectError(int effectID, int errCode, String errorMessage) {
+                    ToastUtils.showShortToast(getApplicationContext(), "音效 " + effectID + " 混音出错 : " + errCode + " " + errorMessage);
                 }
 
                 @Override

@@ -90,7 +90,7 @@ import com.qiniu.droid.rtc.demo.utils.TrackWindowManager;
 import com.qiniu.droid.rtc.demo.utils.Utils;
 import com.qiniu.droid.rtc.model.QNAudioDevice;
 
-import org.webrtc.Size;
+import org.qnwebrtc.Size;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -409,10 +409,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
         boolean isHwCodec = preferences.getInt(Config.CODEC_MODE, Config.SW) == Config.HW;
 
         /**
-         * 如果您的使用场景需要双讲，建议 QNRTCSetting#setAEC3Enabled 为 true 以防止出现对讲回声
-         */
-        boolean isAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, true);
-        /**
          * 设置音频场景，不同的音频场景，系统音量模式是不一样的
          */
         int audioScenePos = preferences.getInt(Config.AUDIO_SCENE, Config.DEFAULT_AUDIO_SCENE);
@@ -428,7 +424,6 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
 
         QNRTCSetting setting = new QNRTCSetting();
         setting.setHWCodecEnabled(isHwCodec)
-                .setAEC3Enabled(isAec3Enabled)
                 .setAudioScene(audioScene);
         QNRTC.init(this, setting, mRTCEventListener);
         mClient = QNRTC.createClient(mClientEventListener);

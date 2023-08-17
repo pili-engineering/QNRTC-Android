@@ -33,6 +33,7 @@ import com.qiniu.droid.rtc.QNSurfaceView;
 import com.qiniu.droid.rtc.QNTranscodingLiveStreamingTrack;
 import com.qiniu.droid.rtc.QNVideoCaptureConfigPreset;
 import com.qiniu.droid.rtc.QNVideoEncoderConfig;
+import com.qiniu.droid.rtc.api.examples.APIApplication;
 import com.qiniu.droid.rtc.api.examples.R;
 import com.qiniu.droid.rtc.api.examples.utils.Config;
 import com.qiniu.droid.rtc.api.examples.utils.ToastUtils;
@@ -97,6 +98,7 @@ public class DefaultTranscodingLiveStreamingActivity extends AppCompatActivity {
         initView();
         // 2. 初始化 RTC
         QNRTC.init(this, mRTCEventListener);
+        APIApplication.mRTCInit = true;
         // 3. 创建 QNRTCClient 对象
         mClient = QNRTC.createClient(mClientEventListener);
         // 4. 设置 CDN 转推事件监听器
@@ -150,8 +152,11 @@ public class DefaultTranscodingLiveStreamingActivity extends AppCompatActivity {
             mClient = null;
         }
         destroyLocalTracks();
-        // 11. 反初始化 RTC 释放资源
-        QNRTC.deinit();
+        if (APIApplication.mRTCInit) {
+            // 11. 反初始化 RTC 释放资源
+            QNRTC.deinit();
+            APIApplication.mRTCInit = false;
+        }
     }
 
     /**

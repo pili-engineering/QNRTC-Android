@@ -48,7 +48,6 @@ public class SettingActivity extends AppCompatActivity {
     private int mEncodeMode = 0;
     private int mSampleRatePos = 0;
     private int mAudioScenePos = 0;
-    private boolean mIsAec3Enabled = false;
     private final List<String> mVideoDefaultConfiguration = new ArrayList<>();
     private ArrayAdapter<String> mVideoConfigAdapter;
     private SpinnerPopupWindow mVideoConfigPopupWindow;
@@ -85,8 +84,6 @@ public class SettingActivity extends AppCompatActivity {
         RadioButton soundEqualizeAudioSceneBtn = findViewById(R.id.sound_equalize_audio_scene);
 
         mAppIdEditText = findViewById(R.id.app_id_edit_text);
-        SwitchCompat aec3Switch = findViewById(R.id.webrtc_aec3_enable_btn);
-        aec3Switch.setOnCheckedChangeListener((buttonView, isChecked) -> mIsAec3Enabled = isChecked);
 
         versionCodeTextView.setText(String.format(getString(R.string.version_code), getVersionDescription(), getBuildTimeDescription(), getSdkVersion()));
 
@@ -134,9 +131,6 @@ public class SettingActivity extends AppCompatActivity {
         } else {
             soundEqualizeAudioSceneBtn.setChecked(true);
         }
-
-        mIsAec3Enabled = preferences.getBoolean(Config.AEC3_ENABLE, true);
-        aec3Switch.setChecked(mIsAec3Enabled);
 
         mVideoConfigPopupWindow = new SpinnerPopupWindow(this);
         mVideoConfigPopupWindow.setOnSpinnerItemClickListener(pos -> {
@@ -207,7 +201,6 @@ public class SettingActivity extends AppCompatActivity {
         editor.putInt(Config.CODEC_MODE, mEncodeMode);
         editor.putInt(Config.SAMPLE_RATE, mSampleRatePos);
         editor.putInt(Config.AUDIO_SCENE, mAudioScenePos);
-        editor.putBoolean(Config.AEC3_ENABLE, mIsAec3Enabled);
 
         editor.putInt(Config.WIDTH, Config.DEFAULT_RESOLUTION[mVideoConfigSelectPos][0]);
         editor.putInt(Config.HEIGHT, Config.DEFAULT_RESOLUTION[mVideoConfigSelectPos][1]);

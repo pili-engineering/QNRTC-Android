@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.qiniu.droid.rtc.api.examples.APIApplication;
 import com.qiniu.droid.rtc.api.examples.BuildConfig;
 import com.qiniu.droid.rtc.api.examples.R;
 import com.qiniu.droid.rtc.api.examples.utils.Config;
@@ -106,6 +107,10 @@ public class MainActivity extends AppCompatActivity {
         }
         if (Utils.parseRoomToken(Config.ROOM_TOKEN) == null) {
             ToastUtils.showShortToast(this, getString(R.string.invalid_token_toast));
+            return;
+        }
+        if (APIApplication.mRTCInit) {
+            ToastUtils.showShortToast(getApplicationContext(), getString(R.string.toast_rtc_already_init));
             return;
         }
         Intent intent = null;
