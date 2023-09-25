@@ -1237,6 +1237,11 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
         public void onError(int errorCode, String description) {
 
         }
+
+        @Override
+        public void onPushImageError(int errorCode, String errorMessage) {
+
+        }
     };
 
     private final QNPublishResultCallback mPublishResultCallback = new QNPublishResultCallback() {
