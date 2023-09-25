@@ -378,6 +378,11 @@ public class MediaRelayActivity extends AppCompatActivity {
             public void onError(int i, String s) {
                 Log.i(TAG, "onError [" + i + ", " + s + "]");
             }
+
+            @Override
+            public void onPushImageError(int i, String s) {
+                Log.i(TAG, "onPushImageError [" + i + ", " + s + "]");
+            }
         });
 
         // 创建麦克风采集 Track
