@@ -35,6 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
 import com.qiniu.droid.rtc.QNAudioScene;
+import com.qiniu.droid.rtc.QNAudioVolumeInfo;
 import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCameraEventListener;
 import com.qiniu.droid.rtc.QNCameraFacing;
@@ -1181,8 +1182,24 @@ public class RoomActivity extends FragmentActivity implements ControlFragment.On
             }
         }
 
+        /**
+         * 跨房媒体转发状态改变时会回调此方法
+         *
+         * @param relayRoom 媒体转发的房间名
+         * @param state 媒体转发的状态
+         */
         @Override
         public void onMediaRelayStateChanged(String relayRoom, QNMediaRelayState state) {
+
+        }
+
+        /**
+         * 用户音量提示回调，本地远端一起回调，本地 user id 为空
+         *
+         * @param userVolumeList 用户音量信息，按音量由高到低排序，静音用户不在此列表中体现。
+         */
+        @Override
+        public void onUserVolumeIndication(List<QNAudioVolumeInfo> userVolumeList) {
 
         }
     };

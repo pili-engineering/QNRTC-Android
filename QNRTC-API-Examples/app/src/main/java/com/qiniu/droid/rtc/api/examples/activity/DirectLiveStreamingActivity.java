@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
+import com.qiniu.droid.rtc.QNAudioVolumeInfo;
 import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCameraEventListener;
 import com.qiniu.droid.rtc.QNCameraFacing;
@@ -537,6 +538,16 @@ public class DirectLiveStreamingActivity extends AppCompatActivity {
          */
         @Override
         public void onMediaRelayStateChanged(String relayRoom, QNMediaRelayState state) {
+
+        }
+
+        /**
+         * 用户音量提示回调，本地远端一起回调，本地 user id 为空
+         *
+         * @param list 用户音量信息，按音量由高到低排序，静音用户不在此列表中体现。
+         */
+        @Override
+        public void onUserVolumeIndication(List<QNAudioVolumeInfo> list) {
 
         }
     };

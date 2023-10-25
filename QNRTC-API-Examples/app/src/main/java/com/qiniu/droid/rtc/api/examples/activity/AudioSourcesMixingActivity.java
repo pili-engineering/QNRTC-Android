@@ -27,6 +27,7 @@ import com.qiniu.droid.rtc.QNAudioQualityPreset;
 import com.qiniu.droid.rtc.QNAudioSource;
 import com.qiniu.droid.rtc.QNAudioSourceMixer;
 import com.qiniu.droid.rtc.QNAudioSourceMixerListener;
+import com.qiniu.droid.rtc.QNAudioVolumeInfo;
 import com.qiniu.droid.rtc.QNClientEventListener;
 import com.qiniu.droid.rtc.QNConnectionDisconnectedInfo;
 import com.qiniu.droid.rtc.QNConnectionState;
@@ -308,12 +309,13 @@ public class AudioSourcesMixingActivity extends AppCompatActivity {
         mAdapter = new AudioSourceAdapter();
         if (mAudioSourceMixer == null && mMicrophoneAudioTrack != null) {
             // 创建音源混音控制器，仅需创建一次即可
-            mAudioSourceMixer = mMicrophoneAudioTrack.createAudioSourceMixer(new QNAudioSourceMixerListener() {
+            mAudioSourceMixer = QNRTC.createAudioSourceMixer(new QNAudioSourceMixerListener() {
                 @Override
                 public void onError(int errorCode, String errorMessage) {
                     ToastUtils.showShortToast(getApplicationContext(), "音源混音出错 : " + errorCode + " " + errorMessage);
                 }
             });
+            mMicrophoneAudioTrack.addAudioFilter(mAudioSourceMixer);
         }
 
         List<AudioSource> audioSources = new ArrayList<>();
@@ -517,6 +519,16 @@ public class AudioSourcesMixingActivity extends AppCompatActivity {
          */
         @Override
         public void onMediaRelayStateChanged(String relayRoom, QNMediaRelayState state) {
+
+        }
+
+        /**
+         * 用户音量提示回调，本地远端一起回调，本地 user id 为空
+         *
+         * @param list 用户音量信息，按音量由高到低排序，静音用户不在此列表中体现。
+         */
+        @Override
+        public void onUserVolumeIndication(List<QNAudioVolumeInfo> list) {
 
         }
     };

@@ -2,7 +2,8 @@
 
 QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频 SDK，提供了包括音视频通话、美颜、滤镜、水印等多种功能，提供灵活的接口，支持高度定制以及二次开发。
 
-> - **QNDroidRTC 4.x 版本是在 3.x 版本的基础上进行了 API 的重构和优化**，从而使使用者能够更加高效的接入，由于**接口不向下兼容**，所以新接入的用户推荐使用最新版本的 SDK。
+> - 5.x 版本是基于 4.x 版本开发的重构版本，SDK 使用了统一的 C++ RTC 内核, 保证了 QRTC 在各个端上处理逻辑的一致性，同时接口和 4.x 完全兼容。
+> - 4.x 版本是在 3.x 版本的基础上进行了 API 的重构和优化，从而使使用者能够更加高效的接入，由于**接口不向下兼容**，所以新接入的用户推荐使用最新版本的 SDK。
 > - 老用户也可以继续使用 [QNDroidRTC 3.x](https://github.com/pili-engineering/QNRTC-Android/tree/v3.x) 版本，我们也会持续在此版本上进行问题修复和版本更迭，但是后续的一些新功能有可能并不会在 3.x 版本上提供。若您决定继续使用 3.x 版本 SDK，则可参考 [3.x 及之前版本的相关文档](https://doc.qnsdk.com/rtn/android/)。
 > - 使用 3.x 或者更低版本的用户若想升级至 4.x 版本，可参考 [4.x 版本迁移指南](https://developer.qiniu.com/rtc/9394/migration-guide-android) 进行升级。
 
@@ -12,14 +13,15 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 - 支持内置音视频采集，带闪光灯、摄像头切换、自动/手动对焦等常见功能
 - 内置美颜功能
 - 支持三方美颜、滤镜、面部特效
-- 支持静音功能
-- 支持帧率配置
-- 支持视频码率的配置
-- 支持视频尺寸配置
-- 支持自动重连
-- 支持丰富的消息回调
-- 支持纯音频互动
-- 支持视频的大小窗口切换
+- 支持踢人功能 
+- 支持静音功能 
+- 支持帧率配置 
+- 支持视频码率的配置 
+- 支持视频尺寸配置 
+- 支持自动重连 
+- 支持丰富的消息回调 
+- 支持纯音频互动 
+- 支持视频的大小窗口切换 
 - 支持获取连麦房间统计信息（帧率、码率等）
 - 支持回调本地/远端音频数据
 - 支持回调本地/远端视频数据
@@ -46,6 +48,8 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 - 支持设置图片连麦
 - 支持视频添加 SEI
 - 支持多重混音，支持同时混音背景音乐和音效
+- 支持语音激励功能
+- 支持自定义音频处理功能
 
 # 3 方案介绍
 
@@ -71,7 +75,7 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
   
 ### 3.2 交互流程
 
-![](https://docs.qnsdk.com/qnrtc-interactive.png)
+![](http://docs.qnsdk.com/qnrtc-interactive.png)
 
 实时通话交互流程如上图所示，因此，App 服务端需要开发的工作如下：
 
@@ -79,11 +83,11 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 - 计算加入房间的 roomToken 并提供给 App，该 roomToken 是结合 userId、roomName 等信息使用七牛的 AccessKey 和 SecretKey 按照一定的规则生成
 - 提供通话的业务逻辑，如：通话请求/应答业务逻辑、服务端房间管理和踢人等
 
-关于 roomToken 的计算方法请查阅[《七牛实时音视频云服务端 API 接口规范》](https://doc.qnsdk.com/rtn/docs/server_overview#1)，另外，我们也提供了多种开发语言的 SDK  [服务端开发手册及 SDK 下载](https://doc.qnsdk.com/rtn/docs/server_sdk)。
+关于 roomToken 的计算方法请查阅[《roomToken 签发服务》](https://developer.qiniu.com/rtc/8813/roomToken)，另外，我们也提供了多种开发语言的 SDK  [服务端开发手册及 SDK 下载](https://developer.qiniu.com/rtc/8812/serversdk)。
 
 ### 3.3 房间管理
 
-关于音视频通话房间的 API 主要分为两个部分，一部分在客户端，另一部分在服务端。在客户端 SDK 中，只有加入/离开连麦房间的接口。我们把创建/销毁连麦房间的功能放到了服务端，由 App Server 向七牛的服务器发送请求来完成。关于服务端 API 的详细内容，请查阅[《七牛实时音视频云服务端 API 接口规范》](https://doc.qnsdk.com/rtn/docs/server_overview)。
+关于音视频通话房间的 API 主要分为两个部分，一部分在客户端，另一部分在服务端。在客户端 SDK 中，只有加入/离开连麦房间的接口。服务端可通过 HTTP 请求的方式进行房间列表的获取等工作。关于服务端房间管理相关的接口，请查阅[《七牛实时音视频云服务端房间管理指南》](https://developer.qiniu.com/rtc/8815/api-room)。
 
 # 4 方案优势
 
@@ -138,10 +142,7 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 - 提供云端存储空间及海量数据的处理能力，提供的高可用的技术和高稳定的平台
 
 # 6 开发文档
-
-- 可通过 [开发准备](https://developer.qiniu.com/rtc/8765/prepare-android-development) 和 [实现视频通话](https://developer.qiniu.com/rtc/8766/quick-start-android) 了解如何快速搭建音视频通话应用
-- 可通过 [QNDroidRTC 使用指南](https://developer.qiniu.com/rtc/8727/initialization-android) 了解不同场景的实现方式
-- 可通过 [QNDroidRTC API 概览](https://developer.qiniu.com/rtc/8773/API%20%E6%A6%82%E8%A7%88) 了解 SDK 的接口设计及使用姿势
+请参考开发文档：[QNDroidRTC 开发文档](https://developer.qiniu.com/rtc/8802/pd-overview)
 
 # 7 反馈及意见
 
@@ -166,4 +167,5 @@ QNDroidRTC 是七牛云推出的一款适用于 Android 平台的实时音视频
 
 ## 8.4 是否有服务端的 SDK 或者 demo 代码可以参考？
 
-有的，请参考： [QNRTC-Server](https://doc.qnsdk.com/rtn/docs/server_sdk)
+有的，请参考： [QNRTC-Server-SDK](https://developer.qiniu.com/rtc/8812/serversdk)
+
