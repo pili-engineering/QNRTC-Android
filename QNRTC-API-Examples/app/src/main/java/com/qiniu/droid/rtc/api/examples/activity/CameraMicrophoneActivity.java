@@ -8,6 +8,7 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
+import com.qiniu.droid.rtc.QNAudioVolumeInfo;
 import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCameraEventListener;
 import com.qiniu.droid.rtc.QNCameraFacing;
@@ -447,6 +448,11 @@ public class CameraMicrophoneActivity extends AppCompatActivity {
          */
         @Override
         public void onMediaRelayStateChanged(String relayRoom, QNMediaRelayState state) {
+
+        }
+
+        @Override
+        public void onUserVolumeIndication(List<QNAudioVolumeInfo> list) {
 
         }
     };

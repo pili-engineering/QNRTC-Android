@@ -20,6 +20,7 @@ import com.qiniu.droid.rtc.QNAudioMusicMixer;
 import com.qiniu.droid.rtc.QNAudioMusicMixerListener;
 import com.qiniu.droid.rtc.QNAudioMusicMixerState;
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
+import com.qiniu.droid.rtc.QNAudioVolumeInfo;
 import com.qiniu.droid.rtc.QNClientEventListener;
 import com.qiniu.droid.rtc.QNConnectionDisconnectedInfo;
 import com.qiniu.droid.rtc.QNConnectionState;
@@ -360,7 +361,7 @@ public class AudioMixerActivity extends AppCompatActivity {
             // 创建混音管理器 QNAudioMusicMixer 实例
             // 当前仅支持同一时间混一路背景音乐，若需要切换混音的背景音乐，可通过重新调用 MicrophoneAudioTrack.createAudioMusicMixer
             // 创建 QNAudioMusicMixer 的方式实现。
-            mAudioMusicMixer = mMicrophoneAudioTrack.createAudioMusicMixer(filePath, new QNAudioMusicMixerListener() {
+            mAudioMusicMixer = QNRTC.createAudioMusicMixer(filePath, new QNAudioMusicMixerListener() {
                 /**
                  * 混音状态改变时触发
                  *
@@ -411,6 +412,7 @@ public class AudioMixerActivity extends AppCompatActivity {
                             String.format(getString(R.string.audio_mix_error), errorCode, errorMessage));
                 }
             });
+            mMicrophoneAudioTrack.addAudioFilter(mAudioMusicMixer);
             // QNAudioMusicMixer.getDuration 接口为同步方法，在获取在线音乐时长时可能存在耗时，因此，可根据实际需求决定是否要放到子线程执行
             mMusicDurationMs = QNAudioMusicMixer.getDuration(filePath);
             durationProgress.setMax((int) mMusicDurationMs);
@@ -619,6 +621,16 @@ public class AudioMixerActivity extends AppCompatActivity {
          */
         @Override
         public void onMediaRelayStateChanged(String relayRoom, QNMediaRelayState state) {
+
+        }
+
+        /**
+         * 用户音量提示回调，本地远端一起回调，本地 user id 为空
+         *
+         * @param list 用户音量信息，按音量由高到低排序，静音用户不在此列表中体现。
+         */
+        @Override
+        public void onUserVolumeIndication(List<QNAudioVolumeInfo> list) {
 
         }
     };
