@@ -53,6 +53,10 @@ public class PermissionChecker {
         if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO)) {
             permissionsNeeded.add("MICROPHONE");
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && !addPermission(permissionsList, Manifest.permission.BLUETOOTH_CONNECT)) {
+            permissionsNeeded.add("BLUETOOTH_CONNECT");
+        }
         if (permissionsNeeded.size() > 0) {
             // Need Rationale
             String message = "You need to grant access to " + permissionsNeeded.get(0);
