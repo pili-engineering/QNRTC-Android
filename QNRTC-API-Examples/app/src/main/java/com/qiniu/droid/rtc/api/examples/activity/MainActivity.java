@@ -105,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
         if (v.getId() != R.id.screen_microphone && !isPermissionOK()) {
             return;
         }
-        if (Utils.parseRoomToken(Config.ROOM_TOKEN) == null) {
+        if (Utils.parseRoomToken(Config.ROOM_TOKEN) == null
+                && v.getId() != R.id.title_cdn_direct_streaming) {
             ToastUtils.showShortToast(this, getString(R.string.invalid_token_toast));
             return;
         }
@@ -142,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
             intent = new Intent(this, DefaultTranscodingLiveStreamingActivity.class);
         } else if (v.getId() == R.id.custom_transcoding_streaming) {
             intent = new Intent(this, CustomTranscodingLiveStreamingActivity.class);
+        } else if (v.getId() == R.id.title_cdn_direct_streaming) {
+            intent = new Intent(this, CDNStreamingActivity.class);
         } else if (v.getId() == R.id.media_relay) {
             intent = new Intent(this, MediaRelayActivity.class);
         }
