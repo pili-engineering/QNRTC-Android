@@ -2,7 +2,7 @@
     <string name="app_name">QNRTC-API-Examples</string>
     <string name="type_video_audio">视频通话相关</string>
     <string name="type_audio_only">纯音频通话相关</string>
-    <string name="type_CDN_streaming">CDN 转推相关</string>
+    <string name="type_CDN_streaming">CDN 直播相关</string>
     <string name="type_others">其他功能</string>
     <string name="camera_microphone_scene">摄像头采集音视频通话</string>
     <string name="custom_video_audio_scene">自定义采集音视频通话</string>
@@ -12,6 +12,7 @@
     <string name="direct_streaming_scene">CDN 单人转推</string>
     <string name="default_transcoding_streaming_scene">CDN 合流转推（默认合流任务）</string>
     <string name="custom_transcoding_streaming_scene">CDN 合流转推（自定义合流任务）</string>
+    <string name="cdn_direct_streaming">CDN 直推</string>
     <string name="audio_mixing_scene">音乐文件混音</string>
     <string name="audio_effect_mixing_scene">音效文件混音</string>
     <string name="audio_source_mixing_scene">音源文件混音</string>
@@ -59,7 +60,13 @@
     <string name="start_live_streaming_success">%1$s 开始转推成功</string>
     <string name="stop_live_streaming_success">%1$s 停止转推成功</string>
     <string name="live_streaming_error">%1$s转推出错: %2$d</string>
-    <string name="direct_live_streaming_tips">Tips：本示例仅展示一对一场景下本地或远端音视频 Track 的单路转推功能，使用转推功能需要在七牛后台开启对应 AppId 的转推功能开关。</string>
+    <string name="direct_live_streaming_tips">Tips：本示例仅展示一对一场景下本地或远端音视频 Track 的单路转推功能，该转推经由 RTC 服务端转推实现，使用转推功能需要在七牛后台开启对应 AppId 的转推功能开关。</string>
+    <string name="start_cdn_streaming">开始直播</string>
+    <string name="stop_cdn_streaming">停止直播</string>
+    <string name="cdn_publish_url">直播地址：</string>
+    <string name="already_exist_cdn_streaming_toast">请先停止直播</string>
+    <string name="streaming_stats">音频码率:%1$d\n视频码率:%2$d\n视频帧率:%3$d\n丢帧数:%4$d</string>
+    <string name="cdn_streaming_tips">Tips：本示例仅展示 CDN 直推的功能，与单路转推不同，单路转推需经由 RTC 服务端的转发，而 CDN 直推则不需要。</string>
     <string name="custom_message_scene_tips">Tips：本示例仅展示一对一场景下消息的发送和接收功能。</string>
     <string name="custom_message">消息文本</string>
     <string name="custom_message_tips">请输入自定义信息</string>
@@ -126,7 +133,7 @@
     <string name="invalid_loop_times_toast">非法循环次数</string>
     <string name="prepare_music_tips">准备资源中…</string>
     <string name="audio_mix_error">混音错误: %1$d, %2$s</string>
-    <string name="default_transcoding_live_streaming_scene_tips">Tips：\n1. 本示例仅展示一对一场景下使用默认合流配置创建合流任务的功能。\n2. 使用转推功能需要在七牛后台开启对应 AppId 的转推功能开关。\n3. 默认合流任务使用七牛控制台下该 AppId 的合流配置，无需客户端创建。\n4. 添加布局即可触发合流转推，可以到 AppId 绑定的直播空间下查看活跃流。</string>
+    <string name="default_transcoding_live_streaming_scene_tips">Tips：\n1. 本示例仅展示一对一场景下使用默认合流配置创建合流任务的功能，该转推经由 RTC 服务端转推实现。\n2. 使用转推功能需要在七牛后台开启对应 AppId 的转推功能开关。\n3. 默认合流任务使用七牛控制台下该 AppId 的合流配置，无需客户端创建。\n4. 添加布局即可触发合流转推，可以到 AppId 绑定的直播空间下查看活跃流。</string>
     <string name="px">px</string>
     <string name="transcoding_track_layout">合流布局设置:</string>
     <string name="role_select_text">待添加到合流布局的角色:</string>
@@ -144,7 +151,7 @@
     <string name="invalid_parameters_toast">非法参数</string>
     <string name="live_streaming_not_idle_toast">合流任务已存在</string>
     <string name="transcoding_layout_updated_toast">合流布局已更新</string>
-    <string name="custom_transcoding_live_streaming_scene_tips">Tips：\n1. 本示例仅展示一对一场景下使用自定义合流配置创建合流任务的功能。\n2. 使用转推功能需要在七牛后台开启对应 AppId 的转推功能开关。\n3. 开启转推后即可用转推地址对应的拉流地址观看合流效果。</string>
+    <string name="custom_transcoding_live_streaming_scene_tips">Tips：\n1. 本示例仅展示一对一场景下使用自定义合流配置创建合流任务的功能，该转推经由 RTC 服务端转推实现。\n2. 使用转推功能需要在七牛后台开启对应 AppId 的转推功能开关。\n3. 开启转推后即可用转推地址对应的拉流地址观看合流效果。</string>
     <string name="custom_transcoding_track_layout">自定义合流配置:</string>
     <string name="publish_url">转推地址:</string>
     <string name="transcoding_config_fps">帧率:</string>
