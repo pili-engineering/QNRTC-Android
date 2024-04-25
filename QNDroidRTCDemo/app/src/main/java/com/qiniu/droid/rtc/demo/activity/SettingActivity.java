@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import static com.qiniu.droid.rtc.demo.BuildConfig.VERSION_NAME;
+
 public class SettingActivity extends AppCompatActivity {
 
     private EditText mUserNameEditText;
@@ -258,7 +260,7 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     protected String getSdkVersion() {
-        return com.qiniu.droid.rtc.BuildConfig.VERSION_NAME + "-" + com.qiniu.droid.rtc.BuildConfig.GIT_HASH;
+        return VERSION_NAME + "-" + com.qiniu.droid.rtc.BuildConfig.GIT_HASH;
     }
 
     private boolean isTestMode() {

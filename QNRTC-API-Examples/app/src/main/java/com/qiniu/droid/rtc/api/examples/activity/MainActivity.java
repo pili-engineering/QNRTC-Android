@@ -29,6 +29,8 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import static com.qiniu.droid.rtc.api.examples.BuildConfig.VERSION_NAME;
+
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_SCAN_TOKEN = 1000;
 
@@ -168,6 +170,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getSdkVersion() {
-        return com.qiniu.droid.rtc.BuildConfig.VERSION_NAME + "-" + com.qiniu.droid.rtc.BuildConfig.GIT_HASH;
+        return VERSION_NAME + "-" + com.qiniu.droid.rtc.BuildConfig.GIT_HASH;
     }
 }
