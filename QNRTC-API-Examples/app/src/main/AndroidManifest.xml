@@ -75,6 +75,8 @@
             android:screenOrientation="portrait" />
         <activity android:name=".activity.CDNStreamingActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".activity.MediaRecorderActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

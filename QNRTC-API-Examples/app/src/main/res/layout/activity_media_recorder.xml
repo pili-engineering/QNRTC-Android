@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/camera_microphone_layout"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.qiniu.droid.rtc.QNSurfaceView
+        android:id="@+id/local_render_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/local_render_view_tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/local_window_tips"
+        app:layout_constraintBottom_toBottomOf="@+id/local_render_view"
+        app:layout_constraintEnd_toEndOf="@+id/local_render_view"
+        app:layout_constraintStart_toStartOf="@+id/local_render_view"
+        app:layout_constraintTop_toTopOf="@+id/local_render_view" />
+
+    <com.qiniu.droid.rtc.QNSurfaceView
+        android:id="@+id/remote_render_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:background="@color/light_grey"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/remote_render_view_tips"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/light_grey"
+        android:gravity="center"
+        android:text="@string/remote_window_tips"
+        app:layout_constraintBottom_toBottomOf="@+id/remote_render_view"
+        app:layout_constraintEnd_toEndOf="@id/remote_render_view"
+        app:layout_constraintStart_toStartOf="@+id/remote_render_view"
+        app:layout_constraintTop_toTopOf="@+id/remote_render_view" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.33" />
+
+    <View
+        android:id="@+id/control_view_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/grey_round_rect_background"
+        app:layout_constraintBottom_toTopOf="@+id/media_recorder_tips"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline3">
+
+    </View>
+
+    <Button
+        android:id="@+id/start_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/operation_start"
+        app:layout_constraintStart_toStartOf="@+id/control_view_background"
+        app:layout_constraintTop_toTopOf="@+id/control_view_background" />
+
+    <TextView
+        android:id="@+id/recording_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/start_button"
+        app:layout_constraintStart_toEndOf="@+id/start_button"
+        app:layout_constraintTop_toTopOf="@+id/start_button" />
+
+    <TextView
+        android:id="@+id/recording_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/media_recorder_type"
+        app:layout_constraintStart_toStartOf="@+id/start_button"
+        app:layout_constraintTop_toBottomOf="@+id/start_button" />
+
+    <RadioGroup
+        android:id="@+id/recording_type_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@+id/recording_type"
+        app:layout_constraintStart_toEndOf="@+id/recording_type"
+        app:layout_constraintTop_toTopOf="@+id/recording_type">
+
+        <RadioButton
+            android:id="@+id/type_wav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/type_wav" />
+
+        <RadioButton
+            android:id="@+id/type_aac"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/type_aac" />
+
+        <RadioButton
+            android:id="@+id/type_mp4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:checked="true"
+            android:text="@string/type_mp4" />
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/record_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintStart_toStartOf="@+id/recording_type"
+        app:layout_constraintTop_toBottomOf="@+id/recording_type" />
+
+    <TextView
+        android:id="@+id/media_recorder_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/media_recorder_tips"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

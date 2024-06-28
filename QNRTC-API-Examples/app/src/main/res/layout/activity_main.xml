@@ -297,6 +297,21 @@
             tools:ignore="TouchTargetSizeCheck" />
 
         <TextView
+            android:id="@+id/media_recorder"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:onClick="onClickScenes"
+            android:paddingStart="16dp"
+            android:text="@string/media_recorder_scene"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/media_relay"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
             android:id="@+id/app_info"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -308,6 +323,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/media_relay" />
+            app:layout_constraintTop_toBottomOf="@+id/media_recorder" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

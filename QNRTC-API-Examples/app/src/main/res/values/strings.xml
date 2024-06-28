@@ -20,6 +20,7 @@
     <string name="multi_profile_scene">大小流</string>
     <string name="media_statistics_scene">通话质量统计</string>
     <string name="media_relay_scene">跨房媒体转发</string>
+    <string name="media_recorder_scene">音视频本地录制</string>
     <string name="app_info">appID：%1$s\n用户名：%2$s\n房间号：%3$s\nSDK 版本：%4$s\n编译时间：%5$s</string>
     <string name="invalid_token_toast">非法 token</string>
     <string name="beauty_on">美颜开关</string>
@@ -181,4 +182,17 @@
     <string name="media_relay_state_changed">房间 %1$s 媒体转发状态变更：%2$s</string>
     <string name="media_relay_tips">Tips：\n1. 跨房媒体转发功能仅支持直播场景(QNClientMode.LIVE)，且 QNClientRole 为主播(BROADCASTER)的场景下使用。\n2. 更新跨房媒体转发(updateMediaRelay)功能为全量配置接口，使用时需注意调用姿势</string>
     <string name="toast_rtc_already_init">RTC 未释放完成，请稍候重试！</string>
+    <string name="operation_start">Start</string>
+    <string name="operation_stop">Stop</string>
+    <string name="media_recorder_recording">录制中</string>
+    <string name="media_recorder_stopped">录制停止</string>
+    <string name="media_recorder_error">录制异常: %1$d</string>
+    <string name="media_recorder_type">录制类型：</string>
+    <string name="type_wav">wav</string>
+    <string name="type_aac">aac</string>
+    <string name="type_mp4">mp4</string>
+    <string name="media_record_file_path">%1$s/recording_%2$d.%3$s</string>
+    <string name="media_recorder_result">保存文件: %1$s, %2$dKB, %3$s\n</string>
+    <string name="toast_start_recording_failed">开始录制失败：%1$d</string>
+    <string name="media_recorder_tips">Tips：\n1. 本示例仅展示一对一场景下，本地麦克风摄像头连麦时，音视频本地录制的功能。\n2. 使用音视频本地录制功能，需要通过 QNRTC 创建 QNMediaRecorder 对象。\n3. 开始录制前，应保证音频流或视频流已经发布，注意调用姿势。</string>
 </resources>

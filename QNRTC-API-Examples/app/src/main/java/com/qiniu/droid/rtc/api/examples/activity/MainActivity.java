@@ -29,7 +29,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import static com.qiniu.droid.rtc.api.examples.BuildConfig.VERSION_NAME;
+import static com.qiniu.droid.rtc.BuildConfig.VERSION_NAME;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_SCAN_TOKEN = 1000;
@@ -149,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
             intent = new Intent(this, CDNStreamingActivity.class);
         } else if (v.getId() == R.id.media_relay) {
             intent = new Intent(this, MediaRelayActivity.class);
+        } else if (v.getId() == R.id.media_recorder) {
+            intent = new Intent(this, MediaRecorderActivity.class);
         }
         if (intent != null) {
             startActivity(intent);
