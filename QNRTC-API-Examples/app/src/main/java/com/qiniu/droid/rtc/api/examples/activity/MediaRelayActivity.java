@@ -214,7 +214,12 @@ public class MediaRelayActivity extends AppCompatActivity {
                 ToastUtils.showShortToast(this, "token 为空！");
                 return;
             }
-            String roomName = Utils.parseRoomToken(roomToken).optString(Config.KEY_ROOM_NAME);
+            JSONObject parseResult = Utils.parseRoomToken(roomToken);
+            if (parseResult == null) {
+                ToastUtils.showShortToast(this, "token 解析失败，请检查合法性！");
+                return;
+            }
+            String roomName = parseResult.optString(Config.KEY_ROOM_NAME);
             if (TextUtils.isEmpty(roomName)) {
                 ToastUtils.showShortToast(this, "非法 token！");
                 return;
