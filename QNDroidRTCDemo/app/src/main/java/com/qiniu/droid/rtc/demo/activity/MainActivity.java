@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
@@ -13,12 +12,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.text.Html;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import com.bugsnag.android.Bugsnag;
 import com.qiniu.droid.rtc.QNScreenVideoTrack;
 import com.qiniu.droid.rtc.demo.R;
 import com.qiniu.droid.rtc.demo.model.ProgressEvent;
@@ -49,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bugsnag.init(this);
         EventBus.getDefault().registerSticky(this);
         SharedPreferences preferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
         mUserName = preferences.getString(Config.USER_NAME, "");

@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 import com.qiniu.droid.rtc.QNAudioQualityPreset;
 import com.qiniu.droid.rtc.QNBeautySetting;
 import com.qiniu.droid.rtc.QNCDNStreamingClient;
@@ -34,13 +36,12 @@ import com.qiniu.droid.rtc.api.examples.R;
 import com.qiniu.droid.rtc.api.examples.utils.Config;
 import com.qiniu.droid.rtc.api.examples.utils.ToastUtils;
 import com.qiniu.droid.rtc.model.QNAudioDevice;
-import com.uuzuche.lib_zxing.activity.CaptureActivity;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import org.qnwebrtc.Size;
 
 import java.util.List;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -74,6 +75,17 @@ public class CDNStreamingActivity extends AppCompatActivity {
     private TextView mConnectionStateText;
     private TextView mStreamingStatsText;
     private boolean mNeedScannerStart;
+
+    ActivityResultLauncher<ScanOptions> mBarcodeLauncher = registerForActivityResult(new ScanContract(),
+            result -> {
+                if (result.getContents() != null) {
+                    Config.PUBLISH_URL = result.getContents();
+                    mPublishUrlEditText.setText(Config.PUBLISH_URL);
+                } else {
+                    Toast.makeText(CDNStreamingActivity.this,
+                            "解析二维码失败", Toast.LENGTH_LONG).show();
+                }
+            });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -116,27 +128,6 @@ public class CDNStreamingActivity extends AppCompatActivity {
             // 9. 反初始化 RTC 释放资源
             QNRTC.deinit();
             APIApplication.mRTCInit = false;
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_SCAN_PUBLISH_URL) {
-            //处理扫描结果（在界面上显示）
-            if (null != data) {
-                Bundle bundle = data.getExtras();
-                if (bundle == null) {
-                    return;
-                }
-                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
-                    Config.PUBLISH_URL = bundle.getString(CodeUtils.RESULT_STRING);
-                    mPublishUrlEditText.setText(Config.PUBLISH_URL);
-                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
-                    Toast.makeText(CDNStreamingActivity.this,
-                            "解析二维码失败", Toast.LENGTH_LONG).show();
-                }
-            }
         }
     }
 
@@ -229,8 +220,11 @@ public class CDNStreamingActivity extends AppCompatActivity {
                 Log.i(TAG, "onCaptureStopped");
                 if (mNeedScannerStart) {
                     mNeedScannerStart = false;
-                    Intent intent = new Intent(CDNStreamingActivity.this, CaptureActivity.class);
-                    startActivityForResult(intent, REQUEST_CODE_SCAN_PUBLISH_URL);
+                    ScanOptions options = new ScanOptions();
+                    options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
+                    options.setPrompt("请对准二维码");
+                    options.setCameraId(0);
+                    mBarcodeLauncher.launch(options);
                 }
             }
 

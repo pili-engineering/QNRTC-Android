@@ -1,5 +1,6 @@
 package com.qiniu.droid.rtc.api.examples.activity;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 import com.qiniu.droid.rtc.api.examples.APIApplication;
 import com.qiniu.droid.rtc.api.examples.BuildConfig;
 import com.qiniu.droid.rtc.api.examples.R;
@@ -21,8 +24,6 @@ import com.qiniu.droid.rtc.api.examples.utils.Config;
 import com.qiniu.droid.rtc.api.examples.utils.PermissionChecker;
 import com.qiniu.droid.rtc.api.examples.utils.ToastUtils;
 import com.qiniu.droid.rtc.api.examples.utils.Utils;
-import com.uuzuche.lib_zxing.activity.CaptureActivity;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import org.json.JSONObject;
 
@@ -36,6 +37,26 @@ public class MainActivity extends AppCompatActivity {
 
     private PermissionChecker mChecker;
     private TextView mAppInfoText;
+
+    ActivityResultLauncher<ScanOptions> mBarcodeLauncher = registerForActivityResult(new ScanContract(),
+            result -> {
+                if (result.getContents() != null) {
+                    Config.ROOM_TOKEN = result.getContents();
+                    JSONObject roomInfo = Utils.parseRoomToken(Config.ROOM_TOKEN);
+                    if (roomInfo == null) {
+                        Toast.makeText(MainActivity.this,
+                                "解析二维码失败", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    String appID = roomInfo.optString(Config.KEY_APP_ID);
+                    String userID = roomInfo.optString(Config.KEY_USER_ID);
+                    String roomName = roomInfo.optString(Config.KEY_ROOM_NAME);
+                    mAppInfoText.setText(String.format(getString(R.string.app_info),
+                            appID, userID, roomName, getSdkVersion(), getBuildTimeDescription()));
+                } else {
+                    Toast.makeText(MainActivity.this, "解析二维码失败", Toast.LENGTH_LONG).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,37 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_SCAN_TOKEN) {
-            //处理扫描结果（在界面上显示）
-            if (null != data) {
-                Bundle bundle = data.getExtras();
-                if (bundle == null) {
-                    return;
-                }
-                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
-                    Config.ROOM_TOKEN = bundle.getString(CodeUtils.RESULT_STRING);
-                    JSONObject roomInfo = Utils.parseRoomToken(Config.ROOM_TOKEN);
-                    if (roomInfo == null) {
-                        Toast.makeText(MainActivity.this,
-                                "解析二维码失败", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    String appID = roomInfo.optString(Config.KEY_APP_ID);
-                    String userID = roomInfo.optString(Config.KEY_USER_ID);
-                    String roomName = roomInfo.optString(Config.KEY_ROOM_NAME);
-                    mAppInfoText.setText(String.format(getString(R.string.app_info),
-                            appID, userID, roomName, getSdkVersion(), getBuildTimeDescription()));
-                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
-                    Toast.makeText(MainActivity.this,
-                            "解析二维码失败", Toast.LENGTH_LONG).show();
-                }
-            }
         }
     }
 
@@ -158,8 +148,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getRoomToken() {
-        Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
-        startActivityForResult(intent, REQUEST_CODE_SCAN_TOKEN);
+        ScanOptions options = new ScanOptions();
+        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
+        options.setPrompt("请对准二维码");
+        options.setCameraId(0);
+        mBarcodeLauncher.launch(options);
     }
 
     private boolean isPermissionOK() {
