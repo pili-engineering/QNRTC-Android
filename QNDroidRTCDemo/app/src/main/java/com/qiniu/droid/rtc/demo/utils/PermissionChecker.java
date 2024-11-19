@@ -57,7 +57,7 @@ public class PermissionChecker {
                 && !addPermission(permissionsList, Manifest.permission.BLUETOOTH_CONNECT)) {
             permissionsNeeded.add("BLUETOOTH_CONNECT");
         }
-        if (permissionsNeeded.size() > 0) {
+        if (!permissionsNeeded.isEmpty()) {
             // Need Rationale
             String message = "You need to grant access to " + permissionsNeeded.get(0);
             for (int i = 1; i < permissionsNeeded.size(); i++) {

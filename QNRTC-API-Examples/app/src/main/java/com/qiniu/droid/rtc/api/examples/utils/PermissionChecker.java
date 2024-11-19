@@ -53,11 +53,17 @@ public class PermissionChecker {
         if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO)) {
             permissionsNeeded.add("MICROPHONE");
         }
-        if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            permissionsNeeded.add("Write external storage");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (!addPermission(permissionsList, Manifest.permission.READ_MEDIA_AUDIO)) {
+                permissionsNeeded.add("Read media audio");
+            }
+        } else {
+            if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                permissionsNeeded.add("Write external storage");
+            }
         }
 
-        if (permissionsNeeded.size() > 0) {
+        if (!permissionsNeeded.isEmpty()) {
             // Need Rationale
             String message = "You need to grant access to " + permissionsNeeded.get(0);
             for (int i = 1; i < permissionsNeeded.size(); i++) {
